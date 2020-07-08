@@ -1,11 +1,9 @@
 package ahodanenok.di;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-// todo: BindingLookup (exact)
 // todo: singleton and default scopes
 
 /**
@@ -16,29 +14,29 @@ import java.util.stream.Collectors;
 public final class DIContainer {
 
     // todo: is it necessary to keep track of injection locations
-    private Set<DependencyValue> suppliers;
+    private DependencyValueLookup dependencies;
 
     public DIContainer(DependencyValue<?>... suppliers) {
-        this.suppliers = Arrays.stream(suppliers).collect(Collectors.toSet());
+        this.dependencies = new DependencyValueExactLookup(Arrays.stream(suppliers).collect(Collectors.toSet()));
     }
 
     // todo: BindingLookup (exact type or subtypes)
     // todo: map suppliers by identifier to avoid searching through all of them
-    public <T> Supplier<T> supplier(Class<? extends T> type) {
-        for (DependencyValue<?> supplier : suppliers) {
-            if (supplier.getType() == type) {
-                // todo: research what can be done not to generate warnings
-                return (Supplier<T>) supplier.supplier(this);
-            }
+    public <T> Supplier<? extends T> supplier(Class<T> type) {
+        DependencyValue<? extends T> value = dependencies.lookup(type);
+        if (value != null) {
+            return value.supplier(this);
+        } else {
+            // todo: error
+            throw new RuntimeException("no supplier");
         }
-
-        return null;
     }
 
     // todo: lookup by identifier
-    public <T> T instance(Class<? extends T> type) {
-        Supplier<T> supplier = supplier(type);
+    public <T> T instance(Class<T> type) {
+        Supplier<? extends T> supplier = supplier(type);
         if (supplier == null) {
+            // todo: error
             throw new RuntimeException("no instance");
         }
 

@@ -1,6 +1,8 @@
 package ahodanenok.di;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -13,19 +15,32 @@ import java.util.stream.Collectors;
 // todo: identifier for suppliers (type + ?)
 public final class DIContainer {
 
+    private Map<String, Scope> scopes;
+
     // todo: is it necessary to keep track of injection locations
     private DependencyValueLookup dependencies;
 
     public DIContainer(DependencyValue<?>... suppliers) {
         this.dependencies = new DependencyValueExactLookup(Arrays.stream(suppliers).collect(Collectors.toSet()));
+        this.scopes = new HashMap<>();
+        this.scopes.put("default", new DefaultScope());
+        this.scopes.put("singleton", new SingletonScope());
     }
 
-    // todo: BindingLookup (exact type or subtypes)
-    // todo: map suppliers by identifier to avoid searching through all of them
+    private Scope lookupScope(String name) {
+        Scope scope = scopes.get(name);
+        if (scope != null) {
+            return scope;
+        } else {
+            throw new RuntimeException("no scope");
+        }
+    }
+
     public <T> Supplier<? extends T> supplier(Class<T> type) {
-        DependencyValue<? extends T> value = dependencies.lookup(type);
+        DependencyValue<T> value = dependencies.lookup(type);
         if (value != null) {
-            return value.supplier(this);
+            Scope scope = lookupScope(value.scope());
+            return () -> scope.get(value.type(), value.supplier(this));
         } else {
             // todo: error
             throw new RuntimeException("no supplier");

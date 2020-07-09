@@ -6,9 +6,11 @@ import java.util.function.Supplier;
 // todo: must have some sort of identifier by which it will be picked for providing dependency
 public interface DependencyValue<T> {
 
-    Class<? super T> getType();
+    Class<T> type();
 
-    Supplier<T> supplier(DIContainer container);
+    String scope();
+
+    Supplier<? extends T> supplier(DIContainer container);
 
 //    public static <T> DIBindingSupplier<T>.Builder bind(Class<T> forType) {
 //        DIBindingSupplier<T> binding = new DIBindingSupplier<>();

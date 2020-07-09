@@ -2,13 +2,24 @@ package ahodanenok.di;
 
 public abstract class AbstractDependencyValue<T> implements DependencyValue<T> {
 
-    private Class<? super T> type;
+    private Class<T> type;
+    private String scope = "default";
 
-    public AbstractDependencyValue(Class<? super T> type) {
+    public AbstractDependencyValue(Class<T> type) {
         this.type = type;
     }
 
-    public Class<? super T> getType() {
+    public Class<T> type() {
         return type;
+    }
+
+    // todo: use builder
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    @Override
+    public String scope() {
+        return scope;
     }
 }

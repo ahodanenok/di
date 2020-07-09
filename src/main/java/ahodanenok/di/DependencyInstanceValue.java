@@ -6,13 +6,13 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
     private T instance;
 
-    public DependencyInstanceValue(Class<? super T> type, T instance) {
+    public DependencyInstanceValue(Class<T> type, T instance) {
         super(type);
         this.instance = instance;
     }
 
     @Override
-    public Supplier<T> supplier(DIContainer container) {
+    public Supplier<? extends T> supplier(DIContainer container) {
         return () -> instance;
     }
 }

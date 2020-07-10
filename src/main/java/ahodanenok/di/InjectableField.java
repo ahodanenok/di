@@ -18,6 +18,12 @@ public class InjectableField implements Injectable<Object> {
         // todo: handle generics
         // todo: set accessible
 
+        // todo: conform to spec
+        // Injectable fields:
+        // are annotated with @Inject.
+        // are not final.
+        // may have any otherwise valid name.
+
         if (Modifier.isFinal(field.getModifiers())) {
             throw new RuntimeException("can't set final field");
         }

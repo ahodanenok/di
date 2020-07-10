@@ -34,11 +34,18 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     }
 
     private Constructor<? extends T> resolveConstructor() {
+        // todo: conform to spec
+        // Injectable constructors are annotated with @Inject and accept zero or more dependencies as arguments.
+        // @Inject can apply to at most one constructor per class.
+        // @Inject is optional for public, no-argument constructors when no other constructors are present.
+        // This enables injectors to invoke default constructors.
+
         Set<Constructor<?>> constructors = Arrays.stream(instanceClass.getDeclaredConstructors())
                 .filter(c -> c.isAnnotationPresent(Inject.class))
                 .collect(Collectors.toSet());
 
         // todo: errors
+
 
         if (constructors.size() > 1) {
             throw new RuntimeException("multiple injection points");
@@ -48,6 +55,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         if (!constructors.isEmpty()) {
             constructor = constructors.iterator().next();
         } else {
+            // todo: check that there are no other constructors except default, in that case some constructor must be annotated with @Inject
             try {
                 constructor = instanceClass.getDeclaredConstructor();
             } catch (NoSuchMethodException e) {

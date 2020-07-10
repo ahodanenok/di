@@ -72,6 +72,7 @@ public final class DIContainer {
             throw new IllegalArgumentException("instance is null");
         }
 
+        // todo: Fields and methods in superclasses are injected before those in subclasses.
         // todo: check circular references
 
         reflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
@@ -79,7 +80,9 @@ public final class DIContainer {
             new InjectableField(this, f).inject(instance);
         });
 
-
+        // todo: conform to spec
+        // A method annotated with @Inject that overrides another method annotated with @Inject will only be injected once per injection request per instance.
+        // A method with no @Inject annotation that overrides a method annotated with @Inject will not be injected.
         reflectionAssistant.methods(instance.getClass()).filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
             new InjectableMethod(this, m).inject(instance);

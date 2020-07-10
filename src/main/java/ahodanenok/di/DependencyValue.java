@@ -1,8 +1,7 @@
 package ahodanenok.di;
 
-import java.util.function.Supplier;
+import javax.inject.Provider;
 
-// todo: come up with a better name (atleast without supplier in it)
 // todo: must have some sort of identifier by which it will be picked for providing dependency
 public interface DependencyValue<T> {
 
@@ -10,7 +9,8 @@ public interface DependencyValue<T> {
 
     String scope();
 
-    Supplier<? extends T> supplier(DIContainer container);
+    // todo: refactor to make this method without parameters
+    Provider<? extends T> provider(DIContainer container);
 
 //    public static <T> DIBindingSupplier<T>.Builder bind(Class<T> forType) {
 //        DIBindingSupplier<T> binding = new DIBindingSupplier<>();

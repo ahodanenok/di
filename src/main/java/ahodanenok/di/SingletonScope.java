@@ -1,8 +1,8 @@
 package ahodanenok.di;
 
+import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class SingletonScope implements Scope {
 
@@ -13,10 +13,10 @@ public class SingletonScope implements Scope {
     }
 
     @Override
-    public <T> T get(Class<T> type, Supplier<? extends T> supplier) {
+    public <T> T get(Class<T> type, Provider<? extends T> provider) {
         T instance = (T) instances.get(type);
         if (instance == null) {
-            instance = supplier.get();
+            instance = provider.get();
             instances.put(type, instance);
         }
 

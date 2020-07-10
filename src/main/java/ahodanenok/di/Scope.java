@@ -1,8 +1,8 @@
 package ahodanenok.di;
 
-import java.util.function.Supplier;
+import javax.inject.Provider;
 
 public interface Scope {
 
-    <T> T get(Class<T> type, Supplier<? extends T> supplier);
+    <T> T get(Class<T> type, Provider<? extends T> provider);
 }

@@ -1,6 +1,6 @@
 package ahodanenok.di;
 
-import java.util.function.Supplier;
+import javax.inject.Provider;
 
 public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
@@ -12,7 +12,7 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
     }
 
     @Override
-    public Supplier<? extends T> supplier(DIContainer container) {
+    public Provider<? extends T> provider(DIContainer container) {
         return () -> instance;
     }
 }

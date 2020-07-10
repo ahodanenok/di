@@ -1,11 +1,11 @@
 package ahodanenok.di;
 
-import java.util.function.Supplier;
+import javax.inject.Provider;
 
 public class DefaultScope implements Scope {
 
     @Override
-    public <T> T get(Class<T> type, Supplier<? extends T> supplier) {
-        return supplier.get();
+    public <T> T get(Class<T> type, Provider<? extends T> provider) {
+        return provider.get();
     }
 }

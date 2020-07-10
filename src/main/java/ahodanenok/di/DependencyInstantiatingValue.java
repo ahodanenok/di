@@ -1,10 +1,10 @@
 package ahodanenok.di;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> {
@@ -20,7 +20,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     }
 
     @Override
-    public Supplier<? extends T> supplier(DIContainer container) {
+    public Provider<? extends T> provider(DIContainer container) {
         return () -> {
                 if (targetConstructor == null) {
                     Constructor<? extends T> constructor = resolveConstructor();

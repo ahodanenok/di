@@ -1,13 +1,12 @@
 package ahodanenok.di;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-// todo: use javax.inject.Provider instead of suppliers
 // todo: support javax.inject.Scope
 // todo: handle javax.inject.Singleton
 // todo: handle javax.inject.Named
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 // todo: logging
 
 /**
- * Container is a coordinator between suppliers
+ * Container is a coordinator between providers
  * Each of them manages some dependency which can be injected in other objects.
  */
 // todo: identifier for suppliers (type + ?)
@@ -27,9 +26,9 @@ public final class DIContainer {
     // todo: is it necessary to keep track of injection locations
     private DependencyValueLookup dependencies;
 
-    public DIContainer(DependencyValue<?>... suppliers) {
+    public DIContainer(DependencyValue<?>... values) {
         this.reflectionAssistant = new ReflectionAssistant();
-        this.dependencies = new DependencyValueExactLookup(Arrays.stream(suppliers).collect(Collectors.toSet()));
+        this.dependencies = new DependencyValueExactLookup(Arrays.stream(values).collect(Collectors.toSet()));
         this.scopes = new HashMap<>();
         // todo: what can be used as a key for scopes, maybe annotation class?
         this.scopes.put("default", new DefaultScope());
@@ -45,11 +44,11 @@ public final class DIContainer {
         }
     }
 
-    public <T> Supplier<? extends T> supplier(Class<T> type) {
+    public <T> Provider<? extends T> provider(Class<T> type) {
         DependencyValue<T> value = dependencies.lookup(type);
         if (value != null) {
             Scope scope = lookupScope(value.scope());
-            return () -> scope.get(value.type(), value.supplier(this));
+            return () -> scope.get(value.type(), value.provider(this));
         } else {
             // todo: error
             throw new RuntimeException("no supplier");
@@ -58,13 +57,13 @@ public final class DIContainer {
 
     // todo: lookup by identifier
     public <T> T instance(Class<T> type) {
-        Supplier<? extends T> supplier = supplier(type);
-        if (supplier == null) {
+        Provider<? extends T> provider = provider(type);
+        if (provider == null) {
             // todo: error
             throw new RuntimeException("no instance");
         }
 
-        return supplier.get();
+        return provider.get();
     }
 
     public void inject(Object instance) {

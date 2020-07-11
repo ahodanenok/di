@@ -1,7 +1,9 @@
 package ahodanenok.di;
 
 import ahodanenok.di.annotation.DefaultScope;
+import ahodanenok.di.scope.AnnotatedScopeResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.scope.ScopeResolution;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -18,10 +20,12 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     private Class<? extends T> instanceClass;
     private ScopeIdentifier scope;
     private InjectableConstructor<? extends T> targetConstructor;
+    private ScopeResolution scopeResolution;
 
     public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
         super(type);
         this.instanceClass = instanceClass;
+        this.scopeResolution = new AnnotatedScopeResolution();
     }
 
     @Override
@@ -41,12 +45,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     @Override
     public ScopeIdentifier scope() {
         if (scope == null) {
-            Annotation scopeAnnotation = resolveScope(instanceClass);
-            if (scopeAnnotation != null) {
-                scope = ScopeIdentifier.of(scopeAnnotation);
-            } else {
-                scope = ScopeIdentifier.of(DefaultScope.class);
-            }
+            scope = scopeResolution.resolve(instanceClass, ScopeIdentifier.of(DefaultScope.class));
         }
 
         return scope;

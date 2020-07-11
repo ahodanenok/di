@@ -1,21 +1,22 @@
 package ahodanenok.di;
 
 import ahodanenok.di.annotation.DefaultScope;
+import ahodanenok.di.scope.AnnotatedScopeResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.scope.ScopeResolution;
 
 import javax.inject.Provider;
-import java.lang.annotation.Annotation;
 
 public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
 
-    private ReflectionAssistant reflectionAssistant;
     private Provider<? extends T> provider;
     private ScopeIdentifier scope;
+    private ScopeResolution scopeResolution;
 
     public DependencyProviderValue(Class<T> type, Provider<? extends T> provider) {
         super(type);
         this.provider = provider;
-        this.reflectionAssistant = new ReflectionAssistant();
+        this.scopeResolution = new AnnotatedScopeResolution();
     }
 
     @Override
@@ -26,13 +27,7 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     @Override
     public ScopeIdentifier scope() {
         if (scope == null) {
-            Annotation scopeAnnotation = resolveScope(provider.getClass());
-            if (scopeAnnotation != null) {
-                scope = ScopeIdentifier.of(scopeAnnotation.annotationType());
-            } else {
-                scope = ScopeIdentifier.of(DefaultScope.class);
-            }
-
+            scope = scopeResolution.resolve(provider.getClass(), ScopeIdentifier.of(DefaultScope.class));
         }
 
         return scope;

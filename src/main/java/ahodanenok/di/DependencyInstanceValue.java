@@ -8,10 +8,11 @@ import javax.inject.Singleton;
 public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
     private T instance;
-    private ScopeIdentifier scope = ScopeIdentifier.of(Singleton.class);
+    private ScopeIdentifier scope;
 
     public <V extends T> DependencyInstanceValue(Class<T> type, V instance) {
         super(type);
+        this.scope = ScopeIdentifier.of(Singleton.class);
         this.instance = instance;
     }
 

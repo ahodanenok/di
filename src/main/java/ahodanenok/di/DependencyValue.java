@@ -7,7 +7,7 @@ import javax.inject.Provider;
 // todo: must have some sort of identifier by which it will be picked for providing dependency
 public interface DependencyValue<T> {
 
-    Class<T> type();
+    DependencyIdentifier<T> id();
 
     ScopeIdentifier scope();
 

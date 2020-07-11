@@ -29,7 +29,8 @@ public class InjectableField implements Injectable<Object> {
         }
 
         Class<?> fieldType = field.getType();
-        Object value = container.instance(fieldType);
+        // todo: qualifier
+        Object value = container.instance(DependencyIdentifier.of(fieldType));
         try {
             field.set(instance, value);
         } catch (IllegalAccessException e) {

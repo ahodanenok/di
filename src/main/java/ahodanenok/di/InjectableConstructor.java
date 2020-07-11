@@ -24,7 +24,8 @@ public class InjectableConstructor<T> implements Injectable<T> {
             int i = 0;
             Object[] args = new Object[constructor.getParameterCount()];
             for (Class<?> type : constructor.getParameterTypes()) {
-                args[i++] = container.instance(type);
+                // todo: qualifier
+                args[i++] = container.instance(DependencyIdentifier.of(type));
             }
 
             return constructor.newInstance(args);

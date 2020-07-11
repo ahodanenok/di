@@ -30,7 +30,8 @@ public class InjectableMethod implements Injectable<Object> {
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
-            args[i++] = container.instance(type);
+            // todo: qualifier
+            args[i++] = container.instance(DependencyIdentifier.of(type));
         }
 
         try {

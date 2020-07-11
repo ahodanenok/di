@@ -10,8 +10,8 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
     private T instance;
     private ScopeIdentifier scope;
 
-    public <V extends T> DependencyInstanceValue(Class<T> type, V instance) {
-        super(type);
+    public <V extends T> DependencyInstanceValue(DependencyIdentifier<T> id, V instance) {
+        super(id);
         this.scope = ScopeIdentifier.of(Singleton.class);
         this.instance = instance;
     }

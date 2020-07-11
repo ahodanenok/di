@@ -1,5 +1,7 @@
 package ahodanenok.di.scope;
 
+import ahodanenok.di.DependencyIdentifier;
+
 import javax.inject.Provider;
 
 // todo: name clashes with @DefaultScope
@@ -13,7 +15,7 @@ public class DefaultScope implements Scope {
     }
 
     @Override
-    public <T> T get(Class<T> type, Provider<? extends T> provider) {
+    public <T> T get(DependencyIdentifier<T> id, Provider<? extends T> provider) {
         return provider.get();
     }
 }

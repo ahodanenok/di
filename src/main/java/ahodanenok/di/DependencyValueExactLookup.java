@@ -1,6 +1,5 @@
 package ahodanenok.di;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class DependencyValueExactLookup implements DependencyValueLookup {
@@ -9,18 +8,14 @@ public class DependencyValueExactLookup implements DependencyValueLookup {
 
     private Set<DependencyValue<?>> values;
 
-    public DependencyValueExactLookup() {
-        this(new HashSet<>());
-    }
-
     public DependencyValueExactLookup(Set<DependencyValue<?>> values) {
         this.values = values;
     }
 
     @Override
-    public <T> DependencyValue<T> lookup(Class<T> dependencyType) {
+    public <T> DependencyValue<T> lookup(DependencyIdentifier<T> id) {
         for (DependencyValue<?> value : values) {
-            if (value.type() == dependencyType) {
+            if (id.equals(value.id())) {
                 // todo: research what can be done not to generate warnings
                 return (DependencyValue<T>) value;
             }

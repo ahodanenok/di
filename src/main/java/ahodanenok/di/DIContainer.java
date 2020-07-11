@@ -51,11 +51,11 @@ public final class DIContainer {
         }
     }
 
-    public <T> Provider<? extends T> provider(Class<T> type) {
-        DependencyValue<T> value = dependencies.lookup(type);
+    public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
+        DependencyValue<T> value = dependencies.lookup(id);
         if (value != null) {
             Scope scope = lookupScope(value.scope().get());
-            return () -> scope.get(value.type(), value.provider(this));
+            return () -> scope.get(value.id(), value.provider(this));
         } else {
             // todo: error
             throw new RuntimeException("no supplier");
@@ -63,8 +63,8 @@ public final class DIContainer {
     }
 
     // todo: lookup by identifier
-    public <T> T instance(Class<T> type) {
-        Provider<? extends T> provider = provider(type);
+    public <T> T instance(DependencyIdentifier<T> id) {
+        Provider<? extends T> provider = provider(id);
         if (provider == null) {
             // todo: error
             throw new RuntimeException("no instance");

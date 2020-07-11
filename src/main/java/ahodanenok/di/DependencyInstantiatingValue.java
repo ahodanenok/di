@@ -22,8 +22,8 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     private InjectableConstructor<? extends T> targetConstructor;
     private ScopeResolution scopeResolution;
 
-    public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
-        super(type);
+    public DependencyInstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
+        super(id);
         this.instanceClass = instanceClass;
         this.scopeResolution = new AnnotatedScopeResolution();
     }

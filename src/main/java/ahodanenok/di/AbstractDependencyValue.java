@@ -2,13 +2,13 @@ package ahodanenok.di;
 
 public abstract class AbstractDependencyValue<T> implements DependencyValue<T> {
 
-    private Class<T> type;
+    private DependencyIdentifier<T> id;
 
-    public AbstractDependencyValue(Class<T> type) {
-        this.type = type;
+    public AbstractDependencyValue(DependencyIdentifier<T> id) {
+        this.id = id;
     }
 
-    public Class<T> type() {
-        return type;
+    public DependencyIdentifier<T> id() {
+        return id;
     }
 }

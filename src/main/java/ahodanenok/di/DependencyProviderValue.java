@@ -13,8 +13,8 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     private ScopeIdentifier scope;
     private ScopeResolution scopeResolution;
 
-    public DependencyProviderValue(Class<T> type, Provider<? extends T> provider) {
-        super(type);
+    public DependencyProviderValue(DependencyIdentifier<T> id, Provider<? extends T> provider) {
+        super(id);
         this.provider = provider;
         this.scopeResolution = new AnnotatedScopeResolution();
     }

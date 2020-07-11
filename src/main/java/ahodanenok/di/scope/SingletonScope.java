@@ -11,7 +11,7 @@ public class SingletonScope implements Scope {
     private Map<Class, Object> instances;
 
     public SingletonScope() {
-        this.id = new ScopeIdentifier(Singleton.class);
+        this.id = ScopeIdentifier.of(Singleton.class);
         this.instances = new HashMap<>();
     }
 

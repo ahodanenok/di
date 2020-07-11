@@ -28,9 +28,9 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
         if (scope == null) {
             Annotation scopeAnnotation = resolveScope(provider.getClass());
             if (scopeAnnotation != null) {
-                scope = new ScopeIdentifier(scopeAnnotation.annotationType());
+                scope = ScopeIdentifier.of(scopeAnnotation.annotationType());
             } else {
-                scope = new ScopeIdentifier(DefaultScope.class);
+                scope = ScopeIdentifier.of(DefaultScope.class);
             }
 
         }

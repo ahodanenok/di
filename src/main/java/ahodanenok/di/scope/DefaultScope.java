@@ -5,7 +5,7 @@ import javax.inject.Provider;
 // todo: name clashes with @DefaultScope
 public class DefaultScope implements Scope {
 
-    private ScopeIdentifier id = new ScopeIdentifier(ahodanenok.di.annotation.DefaultScope.class);
+    private ScopeIdentifier id = ScopeIdentifier.of(ahodanenok.di.annotation.DefaultScope.class);
 
     @Override
     public ScopeIdentifier id() {

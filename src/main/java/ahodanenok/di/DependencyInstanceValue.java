@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
     private T instance;
+    private ScopeIdentifier scope = ScopeIdentifier.of(Singleton.class);
 
     public <V extends T> DependencyInstanceValue(Class<T> type, V instance) {
         super(type);
@@ -21,6 +22,6 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
     @Override
     public ScopeIdentifier scope() {
-        return new ScopeIdentifier(Singleton.class);
+        return scope;
     }
 }

@@ -9,8 +9,6 @@ import javax.inject.Provider;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: support javax.inject.Scope
-// todo: handle javax.inject.Singleton
 // todo: handle javax.inject.Named
 // todo: handle javax.inject.Qualifier
 // todo: logging

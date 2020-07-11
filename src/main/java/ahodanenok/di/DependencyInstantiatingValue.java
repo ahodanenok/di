@@ -43,9 +43,9 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         if (scope == null) {
             Annotation scopeAnnotation = resolveScope(instanceClass);
             if (scopeAnnotation != null) {
-                scope = new ScopeIdentifier(scopeAnnotation.annotationType());
+                scope = ScopeIdentifier.of(scopeAnnotation);
             } else {
-                scope = new ScopeIdentifier(DefaultScope.class);
+                scope = ScopeIdentifier.of(DefaultScope.class);
             }
         }
 

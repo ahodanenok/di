@@ -1,12 +1,21 @@
 package ahodanenok.di.scope;
 
 import javax.inject.Scope;
+import java.lang.annotation.Annotation;
 
-public class ScopeIdentifier {
+public final class ScopeIdentifier {
+
+    public static ScopeIdentifier of(Annotation annotation) {
+        return new ScopeIdentifier(annotation.annotationType());
+    }
+
+    public static ScopeIdentifier of(Class<?> annotationClass) {
+        return new ScopeIdentifier(annotationClass);
+    }
 
     private Class<?> annotationClass;
 
-    public ScopeIdentifier(Class<?> annotationClass) {
+    private ScopeIdentifier(Class<?> annotationClass) {
         if (annotationClass == null) {
             throw new IllegalArgumentException("Annotation class is null");
         }

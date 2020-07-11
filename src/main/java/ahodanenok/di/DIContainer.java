@@ -1,10 +1,12 @@
 package ahodanenok.di;
 
+import ahodanenok.di.scope.DefaultScope;
+import ahodanenok.di.scope.Scope;
+import ahodanenok.di.scope.SingletonScope;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 // todo: support javax.inject.Scope
@@ -30,9 +32,16 @@ public final class DIContainer {
         this.reflectionAssistant = new ReflectionAssistant();
         this.dependencies = new DependencyValueExactLookup(Arrays.stream(values).collect(Collectors.toSet()));
         this.scopes = new HashMap<>();
-        // todo: what can be used as a key for scopes, maybe annotation class?
-        this.scopes.put("default", new DefaultScope());
-        this.scopes.put("singleton", new SingletonScope());
+
+        // custom scopes with the same identifier override built-in scopes
+        Set<Scope> scopes = new HashSet<>();
+        scopes.add(new DefaultScope());
+        scopes.add(new SingletonScope());
+        // todo: load custom scopes
+
+        for (Scope scope : scopes) {
+            this.scopes.put(scope.id().get(), scope);
+        }
     }
 
     private Scope lookupScope(String name) {
@@ -47,7 +56,7 @@ public final class DIContainer {
     public <T> Provider<? extends T> provider(Class<T> type) {
         DependencyValue<T> value = dependencies.lookup(type);
         if (value != null) {
-            Scope scope = lookupScope(value.scope());
+            Scope scope = lookupScope(value.scope().get());
             return () -> scope.get(value.type(), value.provider(this));
         } else {
             // todo: error

@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.scope.ScopeIdentifier;
+
 import javax.inject.Provider;
 
 // todo: must have some sort of identifier by which it will be picked for providing dependency
@@ -7,7 +9,7 @@ public interface DependencyValue<T> {
 
     Class<T> type();
 
-    String scope();
+    ScopeIdentifier scope();
 
     // todo: refactor to make this method without parameters
     Provider<? extends T> provider(DIContainer container);

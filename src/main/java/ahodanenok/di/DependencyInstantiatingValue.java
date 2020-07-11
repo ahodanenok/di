@@ -1,7 +1,11 @@
 package ahodanenok.di;
 
+import ahodanenok.di.annotation.DefaultScope;
+import ahodanenok.di.scope.ScopeIdentifier;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Set;
@@ -12,6 +16,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     // todo: check that class is really an instantiable class
 
     private Class<? extends T> instanceClass;
+    private ScopeIdentifier scope;
     private InjectableConstructor<? extends T> targetConstructor;
 
     public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
@@ -31,6 +36,20 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
                 container.inject(instance);
                 return instance;
         };
+    }
+
+    @Override
+    public ScopeIdentifier scope() {
+        if (scope == null) {
+            Annotation scopeAnnotation = resolveScope(instanceClass);
+            if (scopeAnnotation != null) {
+                scope = new ScopeIdentifier(scopeAnnotation.annotationType());
+            } else {
+                scope = new ScopeIdentifier(DefaultScope.class);
+            }
+        }
+
+        return scope;
     }
 
     private Constructor<? extends T> resolveConstructor() {

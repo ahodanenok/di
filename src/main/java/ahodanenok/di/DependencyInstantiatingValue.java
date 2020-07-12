@@ -13,19 +13,35 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> {
+public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
     // todo: check that class is really an instantiable class
 
+    private DependencyIdentifier<T> id;
+    private Class<T> type;
     private Class<? extends T> instanceClass;
     private ScopeIdentifier scope;
     private InjectableConstructor<? extends T> targetConstructor;
     private ScopeResolution scopeResolution;
+    private QualifierResolution qualifierResolution;
 
-    public DependencyInstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
-        super(id);
+    public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
+        this.type = type;
         this.instanceClass = instanceClass;
+        // todo: get ScopeResolution from container
         this.scopeResolution = new AnnotatedScopeResolution();
+        // todo : get QualifierResolution from container
+        this.qualifierResolution = new AnnotatedQualifierResolution();
+    }
+
+    @Override
+    public DependencyIdentifier<T> id() {
+        if (id == null) {
+            Annotation qualifier = qualifierResolution.resolve(instanceClass);
+            id = DependencyIdentifier.of(type, qualifier);
+        }
+
+        return id;
     }
 
     @Override

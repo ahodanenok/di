@@ -30,6 +30,11 @@ public final class DependencyIdentifier<T> {
     }
 
     @Override
+    public String toString() {
+        return String.format("DepID(%s, %s)", type.getName(), qualifier);
+    }
+
+    @Override
     public int hashCode() {
         if (qualifier != null) {
             return 31 * type.hashCode() + qualifier.hashCode();

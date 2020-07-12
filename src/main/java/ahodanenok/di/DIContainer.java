@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 // todo: handle javax.inject.Named
-// todo: handle javax.inject.Qualifier
 // todo: logging
 
 /**
@@ -58,7 +57,7 @@ public final class DIContainer {
             return () -> scope.get(value.id(), value.provider(this));
         } else {
             // todo: error
-            throw new RuntimeException("no supplier");
+            throw new RuntimeException("no provider for " + id);
         }
     }
 
@@ -67,7 +66,7 @@ public final class DIContainer {
         Provider<? extends T> provider = provider(id);
         if (provider == null) {
             // todo: error
-            throw new RuntimeException("no instance");
+            throw new RuntimeException("no instance for " + id);
         }
 
         return provider.get();

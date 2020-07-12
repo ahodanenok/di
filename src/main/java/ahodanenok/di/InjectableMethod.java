@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -7,10 +8,13 @@ public class InjectableMethod implements Injectable<Object> {
 
     private DIContainer container;
     private Method method;
+    private QualifierResolution qualifierResolution;
 
     public InjectableMethod(DIContainer container, Method method) {
         this.container = container;
         this.method = method;
+        // todo: get QualifierResolution from container
+        this.qualifierResolution = new AnnotatedQualifierResolution();
     }
 
     @Override
@@ -30,8 +34,8 @@ public class InjectableMethod implements Injectable<Object> {
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
-            // todo: qualifier
-            args[i++] = container.instance(DependencyIdentifier.of(type));
+            Annotation qualifier = qualifierResolution.resolve(method, i);
+            args[i++] = container.instance(DependencyIdentifier.of(type, qualifier));
         }
 
         try {

@@ -16,6 +16,7 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     public DependencyProviderValue(DependencyIdentifier<T> id, Provider<? extends T> provider) {
         super(id);
         this.provider = provider;
+        // todo: get ScopeResolution from container
         this.scopeResolution = new AnnotatedScopeResolution();
     }
 

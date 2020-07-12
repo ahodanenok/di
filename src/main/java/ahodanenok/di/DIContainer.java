@@ -9,7 +9,6 @@ import javax.inject.Provider;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: handle javax.inject.Named
 // todo: logging
 
 /**

@@ -25,6 +25,11 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
     private ScopeResolution scopeResolution;
     private QualifierResolution qualifierResolution;
 
+    public DependencyInstantiatingValue(Class<T> instanceClass) {
+        this(instanceClass, instanceClass);
+    }
+
+    // todo: alternative way to pass qualifier
     public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
         this.type = type;
         this.instanceClass = instanceClass;

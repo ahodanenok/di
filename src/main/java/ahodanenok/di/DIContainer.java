@@ -9,13 +9,13 @@ import javax.inject.Provider;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318)
 // todo: logging
 
 /**
  * Container is a coordinator between providers
  * Each of them manages some dependency which can be injected in other objects.
  */
-// todo: identifier for suppliers (type + ?)
 public final class DIContainer {
 
     private Map<String, Scope> scopes;
@@ -36,6 +36,7 @@ public final class DIContainer {
         // todo: load custom scopes
 
         for (Scope scope : scopes) {
+            // todo: maybe use id as key?
             this.scopes.put(scope.id().get(), scope);
         }
     }

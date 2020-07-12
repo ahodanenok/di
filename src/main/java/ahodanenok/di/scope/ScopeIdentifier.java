@@ -34,4 +34,7 @@ public final class ScopeIdentifier {
     public String get() {
         return annotationClass.getName();
     }
+
+    // todo: toString
+    // todo: hashCode, equals
 }

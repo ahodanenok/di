@@ -1,6 +1,6 @@
 package ahodanenok.di;
 
-import ahodanenok.di.annotation.DefaultScope;
+import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.AnnotatedScopeResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
@@ -28,7 +28,7 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     @Override
     public ScopeIdentifier scope() {
         if (scope == null) {
-            scope = scopeResolution.resolve(provider.getClass(), ScopeIdentifier.of(DefaultScope.class));
+            scope = scopeResolution.resolve(provider.getClass(), ScopeIdentifier.of(NotScoped.class));
         }
 
         return scope;

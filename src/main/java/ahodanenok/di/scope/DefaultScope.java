@@ -4,10 +4,9 @@ import ahodanenok.di.DependencyIdentifier;
 
 import javax.inject.Provider;
 
-// todo: name clashes with @DefaultScope
 public class DefaultScope implements Scope {
 
-    private ScopeIdentifier id = ScopeIdentifier.of(ahodanenok.di.annotation.DefaultScope.class);
+    private ScopeIdentifier id = ScopeIdentifier.of(NotScoped.class);
 
     @Override
     public ScopeIdentifier id() {

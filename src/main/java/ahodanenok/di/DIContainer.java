@@ -46,30 +46,38 @@ public final class DIContainer {
         if (scope != null) {
             return scope;
         } else {
+            // todo: error
             throw new RuntimeException("no scope");
         }
     }
 
+    public <T> Provider<? extends T> provider(Class<T> type) {
+        return provider(DependencyIdentifier.of(type));
+    }
+
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        DependencyValue<T> value = dependencies.lookup(id);
-        if (value != null) {
-            Scope scope = lookupScope(value.scope().get());
-            return () -> scope.get(value.id(), value.provider(this));
-        } else {
+        Set<DependencyValue<T>> values = dependencies.lookup(id);
+        if (values.isEmpty()) {
             // todo: error
             throw new RuntimeException("no provider for " + id);
         }
-    }
 
-    // todo: lookup by identifier
-    public <T> T instance(DependencyIdentifier<T> id) {
-        Provider<? extends T> provider = provider(id);
-        if (provider == null) {
+        if (values.size() > 2) {
             // todo: error
-            throw new RuntimeException("no instance for " + id);
+            throw new RuntimeException("multiple providers for " + id);
         }
 
-        return provider.get();
+        DependencyValue<T> value = values.iterator().next();
+        Scope scope = lookupScope(value.scope().get());
+        return () -> scope.get(value.id(), value.provider(this));
+    }
+
+    public <T> T instance(Class<T> type) {
+        return provider(DependencyIdentifier.of(type)).get();
+    }
+
+    public <T> T instance(DependencyIdentifier<T> id) {
+        return provider(id).get();
     }
 
     public void inject(Object instance) {

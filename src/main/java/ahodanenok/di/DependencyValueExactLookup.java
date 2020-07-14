@@ -18,8 +18,9 @@ public class DependencyValueExactLookup implements DependencyValueLookup {
         Set<DependencyValue<T>> matching = new HashSet<>();
         for (DependencyValue<?> v : values) {
             if (id.equals(v.id())) {
-                // todo: research what can be done not to generate warnings
-                matching.add((DependencyValue<T>) v);
+                @SuppressWarnings("unchecked") // if ids are equals, type is T
+                DependencyValue<T> matched = (DependencyValue<T>) v;
+                matching.add(matched);
             }
         }
 

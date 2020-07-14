@@ -24,6 +24,7 @@ public class SingletonScope implements Scope {
 
     @Override
     public <T> T get(DependencyIdentifier<T> id, Provider<? extends T> provider) {
+        @SuppressWarnings("unchecked") // provider for id returns some subtype of T or T itself
         T instance = (T) instances.get(id);
         if (instance == null) {
             instance = provider.get();

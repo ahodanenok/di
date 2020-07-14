@@ -3,6 +3,12 @@ package ahodanenok.di;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
 
+// todo: create annotation instance based on definition like in Annotation.toString (@com.acme.util.Name(first=Alfred, middle=E., last=Neuman))
+// DependencyIdentifier.of(String.class, "@javax.inject.Named(value=Test)");
+
+// todo: type + string, which is a name: @Named(name)
+// DependencyIdentifier.of(String.class, "test"); -> DependencyIdentifier.of(String.class, @Named("test"));
+
 public final class DependencyIdentifier<T> {
 
     public static <T> DependencyIdentifier<T> of (Class<T> type) {

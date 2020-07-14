@@ -7,9 +7,10 @@ import javax.inject.Singleton;
 
 public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
-    private T instance;
+    private Provider<? extends T> instance;
     private ScopeIdentifier scope;
 
+    @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> DependencyInstanceValue(V instance) {
         this(DependencyIdentifier.of((Class<T>) instance.getClass()), instance);
     }
@@ -19,12 +20,12 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
     public <V extends T> DependencyInstanceValue(DependencyIdentifier<T> id, V instance) {
         super(id);
         this.scope = ScopeIdentifier.of(Singleton.class);
-        this.instance = instance;
+        this.instance = () -> instance;
     }
 
     @Override
     public Provider<? extends T> provider(DIContainer container) {
-        return () -> instance;
+        return instance;
     }
 
     @Override

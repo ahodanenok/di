@@ -6,11 +6,11 @@ import java.lang.reflect.Field;
 
 public interface QualifierResolution {
 
-    <T extends Annotation> T resolve(Class<?> clazz);
+    Annotation resolve(Class<?> clazz);
 
-    <T extends Annotation> T resolve(Field field);
+    Annotation resolve(Field field);
 
-    <T extends Annotation> T resolve(Executable method);
+    Annotation resolve(Executable method);
 
-    <T extends Annotation> T resolve(Executable method, int paramNum);
+    Annotation resolve(Executable method, int paramNum);
 }

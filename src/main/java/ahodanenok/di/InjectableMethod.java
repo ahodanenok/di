@@ -39,13 +39,11 @@ public class InjectableMethod implements Injectable<Object> {
         }
 
         try {
-            method.invoke(instance, args);
+            return method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
 
             // todo: errors
             throw new RuntimeException(e);
         }
-
-        return instance;
     }
 }

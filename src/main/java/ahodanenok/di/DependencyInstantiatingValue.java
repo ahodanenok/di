@@ -90,9 +90,11 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
             throw new RuntimeException("multiple injection points");
         }
 
-        Constructor<?> constructor = null;
+        Constructor<? extends T> constructor = null;
         if (!constructors.isEmpty()) {
-            constructor = constructors.iterator().next();
+            @SuppressWarnings("unchecked") // constructor comes from instanceClass, which is T or its subclass
+            Constructor<? extends T> c = (Constructor<? extends T>) constructors.iterator().next();
+            constructor = c;
         } else {
             // todo: check that there are no other constructors except default, in that case some constructor must be annotated with @Inject
             try {
@@ -106,6 +108,7 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
             throw new RuntimeException("no constructor");
         }
 
-        return (Constructor<? extends T>) constructor;
+
+        return constructor;
     }
 }

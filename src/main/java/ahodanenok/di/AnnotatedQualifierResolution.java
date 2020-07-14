@@ -11,26 +11,27 @@ import java.util.stream.Stream;
 public class AnnotatedQualifierResolution implements QualifierResolution {
 
     @Override
-    public <T extends Annotation> T resolve(Class<?> clazz) {
+    public Annotation resolve(Class<?> clazz) {
         return resolveImpl(Arrays.stream(clazz.getDeclaredAnnotations()));
     }
 
     @Override
-    public <T extends Annotation> T resolve(Field field) {
+    public Annotation resolve(Field field) {
         return resolveImpl(Arrays.stream(field.getDeclaredAnnotations()));
     }
 
     @Override
-    public <T extends Annotation> T resolve(Executable executable) {
+    public Annotation resolve(Executable executable) {
         return resolveImpl(Arrays.stream(executable.getDeclaredAnnotations()));
     }
 
     @Override
-    public <T extends Annotation> T resolve(Executable executable, int paramNum) {
+    public Annotation resolve(Executable executable, int paramNum) {
+        // todo: check parameter exists
         return resolveImpl(Arrays.stream(executable.getParameterAnnotations()[paramNum]));
     }
 
-    private <T extends Annotation> T resolveImpl(Stream<Annotation> annotations) {
+    private Annotation resolveImpl(Stream<Annotation> annotations) {
         Set<Annotation> qualifiers = annotations
                 .filter(a -> a.annotationType().isAnnotationPresent(Qualifier.class))
                 .collect(Collectors.toSet());
@@ -43,7 +44,7 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
         }
 
         if (qualifiers.size() == 1) {
-            return (T) qualifiers.iterator().next();
+            return qualifiers.iterator().next();
         } else {
             return null;
         }

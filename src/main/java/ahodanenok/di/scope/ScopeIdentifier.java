@@ -35,6 +35,29 @@ public final class ScopeIdentifier {
         return annotationClass.getName();
     }
 
-    // todo: toString
-    // todo: hashCode, equals
+    @Override
+    public String toString() {
+        return String.format("ScopeID(%s)", get());
+    }
+
+    public int hashCode() {
+        return annotationClass.hashCode();
+    }
+
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+
+        if (this == object) {
+            return true;
+        }
+
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+
+        ScopeIdentifier other = (ScopeIdentifier) object;
+        return annotationClass.equals(other.annotationClass);
+    }
 }

@@ -5,7 +5,6 @@ import ahodanenok.di.scope.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.*;
-import java.util.stream.Collectors;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318)
 // todo: logging
@@ -16,37 +15,19 @@ import java.util.stream.Collectors;
  */
 public final class DIContainer {
 
-    private Map<String, Scope> scopes;
+    private Map<ScopeIdentifier, Scope> scopes;
     private ReflectionAssistant reflectionAssistant;
     private ScopeResolution scopeResolution;
     private QualifierResolution qualifierResolution;
 
     // todo: is it necessary to keep track of injection locations
-    private DependencyValueLookup dependencies;
+    private Set<DependencyValue<?>> values;
+    private DependencyValueLookup valueLookup;
 
-    public DIContainer(DependencyValue<?>... values) {
-        this.reflectionAssistant = new ReflectionAssistant();
-        // todo: support custom scope resolution
-        this.scopeResolution = new AnnotatedScopeResolution();
-        // todo: support custom qualifier resolution
-        this.qualifierResolution = new AnnotatedQualifierResolution();
-        this.dependencies = new DependencyValueExactLookup(Arrays.stream(values).collect(Collectors.toSet()));
+    private DIContainer() {
+        this.values = new HashSet<>();
         this.scopes = new HashMap<>();
-
-        // custom scopes with the same identifier override built-in scopes
-        Set<Scope> scopes = new HashSet<>();
-        scopes.add(new DefaultScope());
-        scopes.add(new SingletonScope());
-        // todo: load custom scopes
-
-        for (Scope scope : scopes) {
-            // todo: maybe use id as key?
-            this.scopes.put(scope.id().get(), scope);
-        }
-
-        for (DependencyValue<?> value : values) {
-            value.bind(this);
-        }
+        this.reflectionAssistant = new ReflectionAssistant();
     }
 
     public ScopeResolution scopeResolution() {
@@ -57,8 +38,8 @@ public final class DIContainer {
         return qualifierResolution;
     }
 
-    private Scope lookupScope(String name) {
-        Scope scope = scopes.get(name);
+    private Scope lookupScope(ScopeIdentifier id) {
+        Scope scope = scopes.get(id);
         if (scope != null) {
             return scope;
         } else {
@@ -67,24 +48,31 @@ public final class DIContainer {
         }
     }
 
+    private <T> DependencyValue<T> lookupValue(DependencyIdentifier<T> id) {
+        Set<DependencyValue<T>> result = valueLookup.lookup(values, id);
+
+        if (result.isEmpty()) {
+            // todo: error
+            throw new RuntimeException("no provider for " + id);
+        }
+
+        if (result.size() > 2) {
+            // todo: error
+            throw new RuntimeException("multiple providers for " + id);
+        }
+
+        DependencyValue<T> value = result.iterator().next();
+        // todo: cache looked up values
+        return value;
+    }
+
     public <T> Provider<? extends T> provider(Class<T> type) {
         return provider(DependencyIdentifier.of(type));
     }
 
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        Set<DependencyValue<T>> values = dependencies.lookup(id);
-        if (values.isEmpty()) {
-            // todo: error
-            throw new RuntimeException("no provider for " + id);
-        }
-
-        if (values.size() > 2) {
-            // todo: error
-            throw new RuntimeException("multiple providers for " + id);
-        }
-
-        DependencyValue<T> value = values.iterator().next();
-        Scope scope = lookupScope(value.scope().get());
+        DependencyValue<T> value = lookupValue(id);
+        Scope scope = lookupScope(value.scope());
         return () -> scope.get(value.id(), value.provider());
     }
 
@@ -116,5 +104,69 @@ public final class DIContainer {
             // todo: cache
             new InjectableMethod(this, m).inject(instance);
         });
+    }
+
+    public static Builder builder() {
+        DIContainer container = new DIContainer();
+        return container.new Builder();
+    }
+
+    public class Builder {
+
+        public Builder addValue(DependencyValue<?> value) {
+            DIContainer.this.values.add(value);
+            return this;
+        }
+
+        public Builder addScope(Scope scope) {
+            DIContainer.this.scopes.put(scope.id(), scope);
+            return this;
+        }
+
+        public Builder withValuesLookup(DependencyValueLookup valueLookup) {
+            DIContainer.this.valueLookup = valueLookup;
+            return this;
+        }
+
+        public Builder withScopeResolution(ScopeResolution scopeResolution) {
+            DIContainer.this.scopeResolution = scopeResolution;
+            return this;
+        }
+
+        public Builder withQualifierResolution(QualifierResolution qualifierResolution) {
+            DIContainer.this.qualifierResolution = qualifierResolution;
+            return this;
+        }
+
+        public DIContainer build() {
+            DIContainer container = DIContainer.this;
+
+            // custom scopes with the same identifier override built-in scopes
+            Set<Scope> scopes = new HashSet<>();
+            scopes.add(new DefaultScope());
+            scopes.add(new SingletonScope());
+            // todo: load custom scopes
+            for (Scope scope : scopes) {
+                container.scopes.putIfAbsent(scope.id(), scope);
+            }
+
+            if (container.scopeResolution == null) {
+                container.scopeResolution = new AnnotatedScopeResolution();
+            }
+
+            if (container.qualifierResolution == null) {
+                container.qualifierResolution = new AnnotatedQualifierResolution();
+            }
+
+            if (container.valueLookup == null) {
+                container.valueLookup = new DependencyValueExactLookup();
+            }
+
+            for (DependencyValue<?> value : container.values) {
+                value.bind(container);
+            }
+
+            return container;
+        }
     }
 }

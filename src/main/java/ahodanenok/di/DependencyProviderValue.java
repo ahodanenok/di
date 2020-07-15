@@ -21,11 +21,13 @@ public class DependencyProviderValue<T> implements DependencyValue<T> {
     }
 
     @Override
-    public DependencyIdentifier<T> id() {
-        if (id == null) {
-            id = DependencyIdentifier.of(type, providerValue.id().qualifier());
-        }
+    public void bind(DIContainer container) {
+        providerValue.bind(container);
+        id = DependencyIdentifier.of(type, providerValue.id().qualifier());
+    }
 
+    @Override
+    public DependencyIdentifier<T> id() {
         return id;
     }
 
@@ -35,7 +37,7 @@ public class DependencyProviderValue<T> implements DependencyValue<T> {
     }
 
     @Override
-    public Provider<? extends T> provider(DIContainer container) {
-        return providerValue.provider(container).get();
+    public Provider<? extends T> provider() {
+        return providerValue.provider().get();
     }
 }

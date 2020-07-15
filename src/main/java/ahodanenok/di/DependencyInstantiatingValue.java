@@ -17,13 +17,15 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
     // todo: check that class is really an instantiable class
 
+    private DIContainer container;
+
     private DependencyIdentifier<T> id;
     private Class<T> type;
-    private Class<? extends T> instanceClass;
+
     private ScopeIdentifier scope;
+
+    private Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;
-    private ScopeResolution scopeResolution;
-    private QualifierResolution qualifierResolution;
 
     public DependencyInstantiatingValue(Class<T> instanceClass) {
         this(instanceClass, instanceClass);
@@ -33,24 +35,25 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
     public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
         this.type = type;
         this.instanceClass = instanceClass;
-        // todo: get ScopeResolution from container
-        this.scopeResolution = new AnnotatedScopeResolution();
-        // todo : get QualifierResolution from container
-        this.qualifierResolution = new AnnotatedQualifierResolution();
+    }
+
+    @Override
+    public void bind(DIContainer container) {
+        this.container = container;
+
+        Annotation qualifier = container.qualifierResolution().resolve(instanceClass);
+        id = DependencyIdentifier.of(type, qualifier);
+
+        scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
     }
 
     @Override
     public DependencyIdentifier<T> id() {
-        if (id == null) {
-            Annotation qualifier = qualifierResolution.resolve(instanceClass);
-            id = DependencyIdentifier.of(type, qualifier);
-        }
-
         return id;
     }
 
     @Override
-    public Provider<? extends T> provider(DIContainer container) {
+    public Provider<? extends T> provider() {
         return () -> {
                 if (targetConstructor == null) {
                     Constructor<? extends T> constructor = resolveConstructor();
@@ -65,10 +68,6 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
     @Override
     public ScopeIdentifier scope() {
-        if (scope == null) {
-            scope = scopeResolution.resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
-        }
-
         return scope;
     }
 

@@ -5,8 +5,9 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
+public class DependencyInstanceValue<T> implements DependencyValue<T> {
 
+    private DependencyIdentifier<T> id;
     private Provider<? extends T> instance;
     private ScopeIdentifier scope;
 
@@ -18,13 +19,18 @@ public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
     // todo: read qualifiers from instance class?
 
     public <V extends T> DependencyInstanceValue(DependencyIdentifier<T> id, V instance) {
-        super(id);
+        this.id = id;
         this.scope = ScopeIdentifier.of(Singleton.class);
         this.instance = () -> instance;
     }
 
     @Override
-    public Provider<? extends T> provider(DIContainer container) {
+    public DependencyIdentifier<T> id() {
+        return id;
+    }
+
+    @Override
+    public Provider<? extends T> provider() {
         return instance;
     }
 

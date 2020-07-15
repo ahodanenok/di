@@ -1,8 +1,6 @@
 package ahodanenok.di;
 
-import ahodanenok.di.scope.DefaultScope;
-import ahodanenok.di.scope.Scope;
-import ahodanenok.di.scope.SingletonScope;
+import ahodanenok.di.scope.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -20,12 +18,18 @@ public final class DIContainer {
 
     private Map<String, Scope> scopes;
     private ReflectionAssistant reflectionAssistant;
+    private ScopeResolution scopeResolution;
+    private QualifierResolution qualifierResolution;
 
     // todo: is it necessary to keep track of injection locations
     private DependencyValueLookup dependencies;
 
     public DIContainer(DependencyValue<?>... values) {
         this.reflectionAssistant = new ReflectionAssistant();
+        // todo: support custom scope resolution
+        this.scopeResolution = new AnnotatedScopeResolution();
+        // todo: support custom qualifier resolution
+        this.qualifierResolution = new AnnotatedQualifierResolution();
         this.dependencies = new DependencyValueExactLookup(Arrays.stream(values).collect(Collectors.toSet()));
         this.scopes = new HashMap<>();
 
@@ -39,6 +43,18 @@ public final class DIContainer {
             // todo: maybe use id as key?
             this.scopes.put(scope.id().get(), scope);
         }
+
+        for (DependencyValue<?> value : values) {
+            value.bind(this);
+        }
+    }
+
+    public ScopeResolution scopeResolution() {
+        return scopeResolution;
+    }
+
+    public QualifierResolution qualifierResolution() {
+        return qualifierResolution;
     }
 
     private Scope lookupScope(String name) {
@@ -69,7 +85,7 @@ public final class DIContainer {
 
         DependencyValue<T> value = values.iterator().next();
         Scope scope = lookupScope(value.scope().get());
-        return () -> scope.get(value.id(), value.provider(this));
+        return () -> scope.get(value.id(), value.provider());
     }
 
     public <T> T instance(Class<T> type) {

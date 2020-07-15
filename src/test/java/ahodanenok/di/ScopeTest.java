@@ -107,8 +107,8 @@ public class ScopeTest {
         }
 
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class.getMethod("method")));
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class.getMethod("method"), ScopeIdentifier.of(NotScoped.class)));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class.getDeclaredMethod("method"), ScopeIdentifier.of(NotScoped.class)));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ScopeTest {
         }
 
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getMethod("method")));
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getMethod("method"), ScopeIdentifier.of(Singleton.class)));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getDeclaredMethod("method"), ScopeIdentifier.of(Singleton.class)));
     }
 }

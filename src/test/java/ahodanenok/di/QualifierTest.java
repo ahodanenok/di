@@ -85,7 +85,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_7() throws Exception {
-        Field field = TestClass.class.getField("field");
+        Field field = TestClass.class.getDeclaredField("field");
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertEquals(field.getAnnotation(FieldQualifier.class), resolution.resolve(field));
@@ -94,7 +94,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_8() throws Exception {
-        Method method = TestClass.class.getMethod("method");
+        Method method = TestClass.class.getDeclaredMethod("method", String.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertEquals(method.getAnnotation(MethodQualifier.class), resolution.resolve(method));
@@ -102,7 +102,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_9() throws Exception {
-        Method method = TestClass.class.getMethod("method");
+        Method method = TestClass.class.getDeclaredMethod("method", String.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertEquals(method.getParameterAnnotations()[0][0], resolution.resolve(method, 0));
@@ -110,7 +110,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_10() throws Exception {
-        Method method = TestClass.class.getMethod("method");
+        Method method = TestClass.class.getDeclaredMethod("method", String.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertThrows(IllegalArgumentException.class, () -> resolution.resolve(method, 1));
@@ -118,7 +118,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_11() throws Exception {
-        Method method = TestClass.class.getMethod("method");
+        Method method = TestClass.class.getDeclaredMethod("method", String.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertThrows(IllegalArgumentException.class, () -> resolution.resolve(method, -1));

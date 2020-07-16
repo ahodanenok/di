@@ -52,8 +52,8 @@ public final class DIContainer {
         Set<DependencyValue<T>> result = valueLookup.lookup(values, id);
 
         if (result.isEmpty()) {
-            // todo: error
-            throw new RuntimeException("no provider for " + id);
+            //throw new RuntimeException("no provider for " + id);
+            return null;
         }
 
         if (result.size() > 2) {
@@ -72,6 +72,10 @@ public final class DIContainer {
 
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
         DependencyValue<T> value = lookupValue(id);
+        if (value == null) {
+            return () -> null;
+        }
+
         Scope scope = lookupScope(value.scope());
         return () -> scope.get(value.id(), value.provider());
     }

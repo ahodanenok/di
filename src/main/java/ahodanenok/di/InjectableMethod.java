@@ -31,11 +31,30 @@ public class InjectableMethod implements Injectable<Object> {
         // may have any otherwise valid name.
         // accept zero or more dependencies as arguments.
 
+        // todo: cache
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        boolean[] optional = new boolean[method.getParameterCount()];
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                if (parameterAnnotations[i][j].annotationType().equals(OptionalDependency.class)) {
+                    optional[i] = true;
+                    break;
+                }
+            }
+        }
+
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
             Annotation qualifier = qualifierResolution.resolve(method, i);
-            args[i++] = container.instance(DependencyIdentifier.of(type, qualifier));
+
+            DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
+            Object arg = container.instance(id);
+            if (arg == null && !optional[i]) {
+                throw new RuntimeException("no instance for " + id);
+            }
+
+            args[i++] = arg;
         }
 
         try {

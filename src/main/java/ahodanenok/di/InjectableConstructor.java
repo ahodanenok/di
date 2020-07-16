@@ -25,11 +25,29 @@ public class InjectableConstructor<T> implements Injectable<T> {
             // todo: handle generic types
             // todo: common code here and in InjectableMethod
 
+            // todo: cache
+            Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+            boolean[] optional = new boolean[constructor.getParameterCount()];
+            for (int i = 0; i < parameterAnnotations.length; i++) {
+                for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                    if (parameterAnnotations[i][j].annotationType().equals(OptionalDependency.class)) {
+                        optional[i] = true;
+                        break;
+                    }
+                }
+            }
+
             int i = 0;
             Object[] args = new Object[constructor.getParameterCount()];
             for (Class<?> type : constructor.getParameterTypes()) {
                 Annotation qualifier = qualifierResolution.resolve(constructor, i);
-                args[i++] = container.instance(DependencyIdentifier.of(type, qualifier));
+                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
+                Object arg = container.instance(id);
+                if (arg == null && !optional[i]) {
+                    throw new RuntimeException("no instance for " + id);
+                }
+
+                args[i++] = arg;
             }
 
             return constructor.newInstance(args);

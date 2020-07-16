@@ -32,9 +32,13 @@ public class InjectableField implements Injectable<Object> {
             throw new RuntimeException("can't set final field");
         }
 
-        Class<?> fieldType = field.getType();
         Annotation qualifier = qualifierResolution.resolve(field);
-        Object value = container.instance(DependencyIdentifier.of(fieldType, qualifier));
+        DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifier);
+        Object value = container.instance(id);
+        if (value == null && !field.isAnnotationPresent(OptionalDependency.class)) {
+            throw new RuntimeException("no instance for " + id);
+        }
+
         try {
             field.set(instance, value);
         } catch (IllegalAccessException e) {

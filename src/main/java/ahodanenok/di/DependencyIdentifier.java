@@ -23,6 +23,10 @@ public final class DependencyIdentifier<T> {
     private Annotation qualifier;
 
     public DependencyIdentifier(Class<T> type, Annotation qualifier) {
+        if (type == null) {
+            throw new IllegalArgumentException("type is null");
+        }
+
         this.type = type;
         this.qualifier = qualifier;
     }

@@ -27,7 +27,11 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
 
     @Override
     public Annotation resolve(Executable executable, int paramNum) {
-        // todo: check parameter exists
+        if (paramNum < 0 || paramNum >= executable.getParameterCount()) {
+            throw new IllegalArgumentException(
+                    String.format("executable has %d parameter(s), given parameter index: %d", executable.getParameterCount(), paramNum));
+        }
+
         return resolveImpl(Arrays.stream(executable.getParameterAnnotations()[paramNum]));
     }
 

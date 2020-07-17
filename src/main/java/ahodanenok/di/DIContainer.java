@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.ScopeResolveException;
+import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.scope.*;
 
 import javax.inject.Inject;
@@ -43,8 +45,7 @@ public final class DIContainer {
         if (scope != null) {
             return scope;
         } else {
-            // todo: error
-            throw new RuntimeException("no scope");
+            throw new ScopeResolveException(id, "no scope");
         }
     }
 
@@ -52,13 +53,11 @@ public final class DIContainer {
         Set<DependencyValue<T>> result = valueLookup.lookup(values, id);
 
         if (result.isEmpty()) {
-            //throw new RuntimeException("no provider for " + id);
             return null;
         }
 
         if (result.size() > 2) {
-            // todo: error
-            throw new RuntimeException("multiple providers for " + id);
+            throw new UnsatisfiedDependencyException(id, "multiple providers");
         }
 
         DependencyValue<T> value = result.iterator().next();

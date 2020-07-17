@@ -1,5 +1,8 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.InjectionFailedException;
+import ahodanenok.di.exception.UnsatisfiedDependencyException;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +47,7 @@ public class InjectableConstructor<T> implements Injectable<T> {
                 DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
                 Object arg = container.instance(id);
                 if (arg == null && !optional[i]) {
-                    throw new RuntimeException("no instance for " + id);
+                    throw new UnsatisfiedDependencyException(this, id, "not found");
                 }
 
                 args[i++] = arg;
@@ -52,8 +55,12 @@ public class InjectableConstructor<T> implements Injectable<T> {
 
             return constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            // todo: errors
-            throw new RuntimeException(e);
+            throw new InjectionFailedException(constructor, e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "injectable(" + constructor + ")";
     }
 }

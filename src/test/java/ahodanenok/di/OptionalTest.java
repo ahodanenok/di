@@ -16,7 +16,7 @@ public class OptionalTest {
         }
 
         DIContainer container = DIContainer.builder().build();
-        assertThrows(RuntimeException.class, () -> new InjectableMethodTest(container, M.class.getDeclaredMethod("method", int.class)).inject(new M()));
+        assertThrows(RuntimeException.class, () -> new InjectableMethod(container, M.class.getDeclaredMethod("method", int.class)).inject(new M()));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class OptionalTest {
 
         DIContainer container = DIContainer.builder().build();
         M obj = new M();
-        new InjectableMethodTest(container, M.class.getDeclaredMethod("method", Integer.class)).inject(obj);
+        new InjectableMethod(container, M.class.getDeclaredMethod("method", Integer.class)).inject(obj);
         assertNull(obj.f);
     }
 
@@ -51,7 +51,7 @@ public class OptionalTest {
 
         DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>("check")).build();
         M obj = new M();
-        new InjectableMethodTest(container, M.class.getDeclaredMethod("method", String.class, Integer.class)).inject(obj);
+        new InjectableMethod(container, M.class.getDeclaredMethod("method", String.class, Integer.class)).inject(obj);
         assertEquals("check", obj.s);
         assertNull(obj.f);
     }

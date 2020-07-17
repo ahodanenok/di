@@ -17,7 +17,7 @@ public class InjectableFieldTest {
                 container, AccessTest.class.getDeclaredField("privateField")).inject(new AccessTest());
         assertEquals("private", test.getPrivateField());
         assertNull(test.getPublicField());
-        assertNull(test.getDefaultField());
+        assertNull(test.getPackageField());
         assertNull(test.getProtectedField());
     }
 
@@ -31,7 +31,7 @@ public class InjectableFieldTest {
                 container, AccessTest.class.getDeclaredField("publicField")).inject(new AccessTest());
         assertEquals("public", test.getPublicField());
         assertNull(test.getPrivateField());
-        assertNull(test.getDefaultField());
+        assertNull(test.getPackageField());
         assertNull(test.getProtectedField());
     }
 
@@ -43,7 +43,7 @@ public class InjectableFieldTest {
 
         AccessTest test = (AccessTest) new InjectableField(
                 container, AccessTest.class.getDeclaredField("defaultField")).inject(new AccessTest());
-        assertEquals("default", test.getDefaultField());
+        assertEquals("default", test.getPackageField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
         assertNull(test.getProtectedField());
@@ -60,7 +60,7 @@ public class InjectableFieldTest {
         assertEquals("protected", test.getProtectedField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
-        assertNull(test.getDefaultField());
+        assertNull(test.getPackageField());
     }
 
     @Test

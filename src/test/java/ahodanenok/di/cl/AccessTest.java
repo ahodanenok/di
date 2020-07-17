@@ -1,22 +1,15 @@
 package ahodanenok.di.cl;
 
-import javax.inject.Inject;
-
 public class AccessTest {
 
-    @Inject
     private String privateField;
 
-    @Inject
     protected String protectedField;
 
-    @Inject
     public String publicField;
 
-    @Inject
-    String defaultField;
+    String packageField;
 
-    @Inject
     final String finalField = "final";
 
     static String staticField;
@@ -37,7 +30,23 @@ public class AccessTest {
         return publicField;
     }
 
-    public String getDefaultField() {
-        return defaultField;
+    public String getPackageField() {
+        return packageField;
+    }
+
+    private String privateMethod() {
+        return "private";
+    }
+
+    protected String protectedMethod() {
+        return "protected";
+    }
+
+    String packageMethod() {
+        return "package";
+    }
+
+    String publicMethod() {
+        return "public";
     }
 }

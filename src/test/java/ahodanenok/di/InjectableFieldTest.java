@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.cl.AccessTest;
+import ahodanenok.di.exception.InjectionFailedException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +43,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("defaultField")).inject(new AccessTest());
+                container, AccessTest.class.getDeclaredField("packageField")).inject(new AccessTest());
         assertEquals("default", test.getPackageField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
@@ -56,7 +57,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("defaultField")).inject(new AccessTest());
+                container, AccessTest.class.getDeclaredField("protectedField")).inject(new AccessTest());
         assertEquals("protected", test.getProtectedField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
@@ -69,8 +70,7 @@ public class InjectableFieldTest {
                 .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "final"))
                 .build();
 
-        // todo: exception
-        assertThrows(RuntimeException.class, () ->
+        assertThrows(InjectionFailedException.class, () ->
                 new InjectableField(container, AccessTest.class.getDeclaredField("finalField"))
                         .inject(new AccessTest()));
     }
@@ -82,9 +82,9 @@ public class InjectableFieldTest {
                 .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "static"))
                 .build();
 
-        AccessTest test = (AccessTest) new InjectableField(
+        new InjectableField(
                 container, AccessTest.class.getDeclaredField("staticField")).inject(null);
-        assertEquals("test", AccessTest.getStaticField());
+        assertEquals("static", AccessTest.getStaticField());
     }
 }
 

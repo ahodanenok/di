@@ -6,6 +6,7 @@ import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 
 public class InjectableConstructor<T> implements Injectable<T> {
 
@@ -29,20 +30,20 @@ public class InjectableConstructor<T> implements Injectable<T> {
             // todo: common code here and in InjectableMethod
 
             // todo: cache
-            Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
             boolean[] optional = new boolean[constructor.getParameterCount()];
-            for (int i = 0; i < parameterAnnotations.length; i++) {
-                for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                    if (parameterAnnotations[i][j].annotationType().equals(OptionalDependency.class)) {
-                        optional[i] = true;
-                        break;
-                    }
-                }
+            for (int i = 0; i < constructor.getParameterCount(); i++) {
+                optional[i] = ReflectionAssistant.parameterAnnotations(constructor, i)
+                        .anyMatch(a -> a.annotationType().equals(OptionalDependency.class));
             }
 
-            int i = 0;
             Object[] args = new Object[constructor.getParameterCount()];
-            for (Class<?> type : constructor.getParameterTypes()) {
+            Class<?>[] types = constructor.getParameterTypes();
+
+            int i = 0;
+            int paramCount = constructor.getParameterCount();
+            while (i < paramCount) {
+                Class<?> type = types[i];
+
                 Annotation qualifier = qualifierResolution.resolve(constructor, i);
                 DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
                 Object arg = container.instance(id);
@@ -53,7 +54,13 @@ public class InjectableConstructor<T> implements Injectable<T> {
                 args[i++] = arg;
             }
 
-            return constructor.newInstance(args);
+            boolean accessible = constructor.isAccessible();
+            try {
+                constructor.setAccessible(true);
+                return constructor.newInstance(args);
+            } finally {
+                constructor.setAccessible(accessible);
+            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new InjectionFailedException(constructor, e);
         }

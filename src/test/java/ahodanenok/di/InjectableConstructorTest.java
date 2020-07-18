@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.cl.*;
+import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,8 +51,11 @@ public class InjectableConstructorTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>(10)).build();
-        TestClass t = new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class)).inject();
+        DIContainer container = DIContainer.builder()
+                .addValue(new DependencyInstanceValue<>(this))
+                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(int.class), 10))
+                .build();
+        TestClass t = new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, int.class)).inject();
         assertEquals(10, t.n);
     }
 
@@ -63,7 +67,7 @@ public class InjectableConstructorTest {
         }
 
         DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>(10)).build();
-        assertThrows(RuntimeException.class, () ->
-                new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class)).inject());
+        assertThrows(UnsatisfiedDependencyException.class, () ->
+                new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, String.class)).inject());
     }
 }

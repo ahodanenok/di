@@ -12,27 +12,42 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
 
     @Override
     public Annotation resolve(Class<?> clazz) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("clazz is null");
+        }
+
         return resolveImpl(Arrays.stream(clazz.getDeclaredAnnotations()));
     }
 
     @Override
     public Annotation resolve(Field field) {
+        if (field == null) {
+            throw new IllegalArgumentException("field is null");
+        }
+
         return resolveImpl(Arrays.stream(field.getDeclaredAnnotations()));
     }
 
     @Override
     public Annotation resolve(Executable executable) {
+        if (executable == null) {
+            throw new IllegalArgumentException("executable is null");
+        }
+
         return resolveImpl(Arrays.stream(executable.getDeclaredAnnotations()));
     }
 
     @Override
     public Annotation resolve(Executable executable, int paramNum) {
-        if (paramNum < 0 || paramNum >= executable.getParameterCount()) {
-            throw new IllegalArgumentException(
-                    String.format("executable has %d parameter(s), given parameter index: %d", executable.getParameterCount(), paramNum));
+        if (executable == null) {
+            throw new IllegalArgumentException("executable is null");
         }
 
-        return resolveImpl(Arrays.stream(executable.getParameterAnnotations()[paramNum]));
+//        System.out.println("pCount=" + executable.getParameterCount());
+//        System.out.println(Arrays.toString(executable.getParameters()));
+//        System.out.println(Arrays.toString(executable.getParameterAnnotations()));
+
+        return resolveImpl(ReflectionAssistant.parameterAnnotations(executable, paramNum));
     }
 
     private Annotation resolveImpl(Stream<Annotation> annotations) {

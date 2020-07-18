@@ -64,7 +64,7 @@ public class OptionalTest {
             M(@OptionalDependency int a) { }
         }
 
-        DIContainer container = DIContainer.builder().build();
+        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<>(this)).build();
         assertThrows(RuntimeException.class, () -> new InjectableConstructor<>(container, M.class.getDeclaredConstructor(OptionalTest.class, int.class)).inject());
     }
 
@@ -79,7 +79,7 @@ public class OptionalTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().build();
+        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<>(this)).build();
         M obj = new InjectableConstructor<>(container, M.class.getDeclaredConstructor(OptionalTest.class, Integer.class)).inject();
         assertNull(obj.f);
     }
@@ -97,7 +97,10 @@ public class OptionalTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>("check")).build();
+        DIContainer container = DIContainer.builder()
+                .addValue(new DependencyInstanceValue<>(this))
+                .addValue(new DependencyInstanceValue<>("check"))
+                .build();
         M obj = new InjectableConstructor<>(container, M.class.getDeclaredConstructor(OptionalTest.class, String.class, Integer.class)).inject();
         assertEquals("check", obj.s);
         assertNull(obj.f);

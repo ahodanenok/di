@@ -42,10 +42,14 @@ public class InjectableField implements Injectable<Object> {
             throw new UnsatisfiedDependencyException(this, id, "not found");
         }
 
+        boolean accessible = field.isAccessible();
         try {
+            field.setAccessible(true);
             field.set(instance, value);
         } catch (IllegalAccessException e) {
             throw new InjectionFailedException(field, e);
+        } finally {
+            field.setAccessible(accessible);
         }
 
         return instance;

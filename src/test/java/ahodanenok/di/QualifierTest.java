@@ -50,31 +50,33 @@ public class QualifierTest {
     @Test
     public void testQualifierResolution_1() {
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
-        resolution.resolve((Class<?>) null);
+        assertThrows(IllegalArgumentException.class, () -> resolution.resolve((Class<?>) null));
     }
 
     @Test
     public void testQualifierResolution_2() {
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
-        resolution.resolve((Method) null);
+        assertThrows(IllegalArgumentException.class, () -> resolution.resolve((Method) null));
     }
 
     @Test
     public void testQualifierResolution_3() {
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
-        resolution.resolve((Field) null);
+        assertThrows(IllegalArgumentException.class, () -> resolution.resolve((Field) null));
     }
 
     @Test
     public void testQualifierResolution_4() {
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
-        resolution.resolve((Constructor) null);
+        assertThrows(IllegalArgumentException.class, () -> resolution.resolve((Constructor) null));
     }
 
     @Test
     public void testQualifierResolution_5() {
+        class NoQualifier { }
+
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
-        assertNull(resolution.resolve(TestClass.class));
+        assertNull(resolution.resolve(NoQualifier.class));
     }
 
     @Test
@@ -126,7 +128,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_12() throws Exception {
-        Constructor<TestClass> constructor = TestClass.class.getConstructor();
+        Constructor<TestClass> constructor = TestClass.class.getDeclaredConstructor(int.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertEquals(constructor.getAnnotation(ConstructorQualifier.class), resolution.resolve(constructor));
@@ -134,7 +136,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_13() throws Exception {
-        Constructor<?> constructor = TestClass.class.getConstructor();
+        Constructor<?> constructor = TestClass.class.getDeclaredConstructor(int.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertEquals(constructor.getParameterAnnotations()[0][0], resolution.resolve(constructor, 0));
@@ -142,7 +144,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_14() throws Exception {
-        Constructor<?> constructor = TestClass.class.getConstructor();
+        Constructor<?> constructor = TestClass.class.getDeclaredConstructor(int.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertThrows(IllegalArgumentException.class, () -> resolution.resolve(constructor, 1));
@@ -150,7 +152,7 @@ public class QualifierTest {
 
     @Test
     public void testQualifierResolution_15() throws Exception {
-        Constructor<?> constructor = TestClass.class.getConstructor();
+        Constructor<?> constructor = TestClass.class.getDeclaredConstructor(int.class);
 
         AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
         assertThrows(IllegalArgumentException.class, () -> resolution.resolve(constructor, -1));

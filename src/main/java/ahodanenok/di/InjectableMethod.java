@@ -60,10 +60,14 @@ public class InjectableMethod implements Injectable<Object> {
             args[i++] = arg;
         }
 
+        boolean accessible = method.isAccessible();
         try {
+            method.setAccessible(true);
             return method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new InjectionFailedException(method, e);
+        } finally {
+            method.setAccessible(accessible);
         }
     }
 

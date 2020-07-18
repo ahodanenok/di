@@ -1,11 +1,15 @@
 package ahodanenok.di;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class ReflectionAssistant {
@@ -53,5 +57,26 @@ public final class ReflectionAssistant {
         }
 
         return Arrays.stream(executable.getParameterAnnotations()[index]);
+    }
+
+    private static Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
+    static {
+        PRIMITIVE_WRAPPERS.put(byte.class, Byte.class);
+        PRIMITIVE_WRAPPERS.put(short.class, Short.class);
+        PRIMITIVE_WRAPPERS.put(int.class, Integer.class);
+        PRIMITIVE_WRAPPERS.put(long.class, Long.class);
+        PRIMITIVE_WRAPPERS.put(float.class, Float.class);
+        PRIMITIVE_WRAPPERS.put(double.class, Double.class);
+        PRIMITIVE_WRAPPERS.put(boolean.class, Boolean.class);
+        PRIMITIVE_WRAPPERS.put(char.class, Character.class);
+    }
+
+    public static Class<?> primitiveWrapperClass(Class<?> clazz) {
+        Class<?> wrapper = PRIMITIVE_WRAPPERS.get(clazz);
+        if (wrapper == null) {
+            throw new IllegalArgumentException("wrapper not found for class " + clazz.getName());
+        }
+
+        return wrapper;
     }
 }

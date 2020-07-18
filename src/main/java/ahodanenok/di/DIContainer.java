@@ -48,7 +48,7 @@ public final class DIContainer {
     }
 
     private <T> DependencyValue<T> lookupValue(DependencyIdentifier<T> id) {
-        Set<DependencyValue<T>> result = valueLookup.lookup(values, id);
+        Set<DependencyValue<T>> result = valueLookup.execute(values, id);
 
         if (result.isEmpty()) {
             return null;

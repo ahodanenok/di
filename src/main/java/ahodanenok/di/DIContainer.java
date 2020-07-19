@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
-import ahodanenok.di.exception.ScopeResolveException;
+import ahodanenok.di.exception.ScopeResolutionException;
+import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.scope.*;
 
@@ -43,7 +44,7 @@ public final class DIContainer {
         if (scope != null) {
             return scope;
         } else {
-            throw new ScopeResolveException(id, "no scope");
+            throw new UnknownScopeException(id);
         }
     }
 

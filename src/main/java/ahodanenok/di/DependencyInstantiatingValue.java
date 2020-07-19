@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.DependencyInstantiatingException;
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
@@ -99,11 +100,8 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
                 .filter(c -> c.isAnnotationPresent(Inject.class))
                 .collect(Collectors.toSet());
 
-        // todo: errors
-
-
         if (constructors.size() > 1) {
-            throw new InjectionFailedException("multiple injection points: " + constructors);
+            throw new DependencyInstantiatingException(id, "multiple injection points: " + constructors);
         }
 
         Constructor<? extends T> constructor = null;
@@ -116,12 +114,12 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
             try {
                 constructor = instanceClass.getDeclaredConstructor();
             } catch (NoSuchMethodException e) {
-                throw new InjectionFailedException("no constructor");
+                throw new DependencyInstantiatingException(id, "no default constructor");
             }
         }
 
         if (constructor == null) {
-            throw new InjectionFailedException("no constructor");
+            throw new DependencyInstantiatingException(id, "no applicable constructor for injection");
         }
 
 

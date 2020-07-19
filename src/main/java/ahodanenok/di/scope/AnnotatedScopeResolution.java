@@ -1,6 +1,6 @@
 package ahodanenok.di.scope;
 
-import ahodanenok.di.exception.ScopeResolveException;
+import ahodanenok.di.exception.ScopeResolutionException;
 
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
@@ -13,9 +13,9 @@ public class AnnotatedScopeResolution implements ScopeResolution{
 
     @Override
     public ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope) {
-        Set<Annotation> scopes = collect(clazz.getDeclaredAnnotations(), defaultScope);
+        Set<Annotation> scopes = collect(clazz.getDeclaredAnnotations());
         if (scopes.size() > 1) {
-            throw new ScopeResolveException(clazz, "more than 1 scope, found scopes are " + scopes);
+            throw new ScopeResolutionException(clazz, "more than 1 scope, found scopes are " + scopes);
         }
 
         if (scopes.size() == 1) {
@@ -27,9 +27,9 @@ public class AnnotatedScopeResolution implements ScopeResolution{
 
     @Override
     public ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope) {
-        Set<Annotation> scopes = collect(method.getDeclaredAnnotations(), defaultScope);
+        Set<Annotation> scopes = collect(method.getDeclaredAnnotations());
         if (scopes.size() > 1) {
-            throw new ScopeResolveException(method, "more than 1 scope, found scopes are " + scopes);
+            throw new ScopeResolutionException(method, "more than 1 scope, found scopes are " + scopes);
         }
 
         if (scopes.size() == 1) {
@@ -39,7 +39,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         }
     }
 
-    private Set<Annotation> collect(Annotation[] annotations, ScopeIdentifier defaultScope) {
+    private Set<Annotation> collect(Annotation[] annotations) {
         return Arrays.stream(annotations)
                 .filter(a -> a.annotationType().isAnnotationPresent(Scope.class))
                 .collect(Collectors.toSet());

@@ -13,14 +13,20 @@ public class DependencyInstanceValue<T> implements DependencyValue<T> {
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> DependencyInstanceValue(V instance) {
-        this.id = DependencyIdentifier.of((Class<T>) instance.getClass());
-        this.scope = ScopeIdentifier.of(Singleton.class);
-        this.instance = () -> instance;
+        this(instance != null ? DependencyIdentifier.of((Class<T>) instance.getClass()) : null, instance);
     }
 
     // todo: read qualifiers from instance class?
 
     public <V extends T> DependencyInstanceValue(DependencyIdentifier<T> id, V instance) {
+        if (id == null) {
+            throw new IllegalArgumentException("id is null");
+        }
+
+        if (instance == null) {
+            throw new IllegalArgumentException("instance is null");
+        }
+
         this.id = id;
         this.scope = ScopeIdentifier.of(Singleton.class);
         this.instance = () -> instance;

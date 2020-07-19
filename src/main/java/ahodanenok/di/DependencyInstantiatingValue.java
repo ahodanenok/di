@@ -1,9 +1,8 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.scope.NotScoped;
-import ahodanenok.di.scope.AnnotatedScopeResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
-import ahodanenok.di.scope.ScopeResolution;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -31,18 +30,36 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
         this(instanceClass, instanceClass);
     }
 
-    // todo: alternative way to pass qualifier
     public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
+        if (!ReflectionAssistant.isInstantiable(instanceClass)) {
+            throw new IllegalArgumentException("Can't create an instance of a class: " +  instanceClass.getName());
+        }
+
         this.type = type;
         this.instanceClass = instanceClass;
+    }
+
+    /**
+     *
+     * Note that qualifiers on instanceClass will be ignore,
+     * as it is assumed that all necessary qualifiers present in id
+     *
+     * @param id
+     * @param instanceClass
+     */
+    public DependencyInstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
+        this(id.type(), instanceClass);
+        this.id = id;
     }
 
     @Override
     public void bind(DIContainer container) {
         this.container = container;
 
-        Annotation qualifier = container.qualifierResolution().resolve(instanceClass);
-        id = DependencyIdentifier.of(type, qualifier);
+        if (id == null) {
+            Annotation qualifier = container.qualifierResolution().resolve(instanceClass);
+            id = DependencyIdentifier.of(type, qualifier);
+        }
 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
     }
@@ -86,7 +103,7 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
 
         if (constructors.size() > 1) {
-            throw new RuntimeException("multiple injection points");
+            throw new InjectionFailedException("multiple injection points: " + constructors);
         }
 
         Constructor<? extends T> constructor = null;
@@ -99,12 +116,12 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
             try {
                 constructor = instanceClass.getDeclaredConstructor();
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException("no constructor");
+                throw new InjectionFailedException("no constructor");
             }
         }
 
         if (constructor == null) {
-            throw new RuntimeException("no constructor");
+            throw new InjectionFailedException("no constructor");
         }
 
 

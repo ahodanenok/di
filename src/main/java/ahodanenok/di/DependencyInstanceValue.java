@@ -13,7 +13,9 @@ public class DependencyInstanceValue<T> implements DependencyValue<T> {
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> DependencyInstanceValue(V instance) {
-        this(DependencyIdentifier.of((Class<T>) instance.getClass()), instance);
+        this.id = DependencyIdentifier.of((Class<T>) instance.getClass());
+        this.scope = ScopeIdentifier.of(Singleton.class);
+        this.instance = () -> instance;
     }
 
     // todo: read qualifiers from instance class?

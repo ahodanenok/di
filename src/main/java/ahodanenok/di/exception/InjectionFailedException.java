@@ -16,4 +16,8 @@ public class InjectionFailedException extends DependencyInjectionException {
     public InjectionFailedException(Field field, String cause) {
         super("Injection failed on " + field.toGenericString() + ": " + cause);
     }
+
+    public InjectionFailedException(String message) {
+        super(message);
+    }
 }

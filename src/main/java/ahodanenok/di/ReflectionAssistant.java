@@ -79,4 +79,30 @@ public final class ReflectionAssistant {
 
         return wrapper;
     }
+
+    public static boolean isInstantiable(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            return false;
+        }
+
+        if (clazz.isInterface()) {
+            return false;
+        }
+
+        if (clazz.isAnnotation()) {
+            return false;
+        }
+
+        if (clazz.isEnum()) {
+            return false;
+        }
+
+        if (clazz.isArray()) {
+            return false;
+        }
+
+        // todo: synthetic, anonymous
+
+        return true;
+    }
 }

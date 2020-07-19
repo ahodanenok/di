@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.QualifierResolutionException;
+
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -16,7 +18,16 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("clazz is null");
         }
 
-        return resolveImpl(Arrays.stream(clazz.getDeclaredAnnotations()));
+        Set<Annotation> q = qualifiers(Arrays.stream(clazz.getDeclaredAnnotations()));
+        if (q.size() > 1) {
+            throw new QualifierResolutionException(clazz, "multiple qualifiers");
+        }
+
+        if (q.size() == 1) {
+            return q.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -25,7 +36,16 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("field is null");
         }
 
-        return resolveImpl(Arrays.stream(field.getDeclaredAnnotations()));
+        Set<Annotation> q = qualifiers(Arrays.stream(field.getDeclaredAnnotations()));
+        if (q.size() > 1) {
+            throw new QualifierResolutionException(field, "multiple qualifiers");
+        }
+
+        if (q.size() == 1) {
+            return q.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -34,7 +54,16 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("executable is null");
         }
 
-        return resolveImpl(Arrays.stream(executable.getDeclaredAnnotations()));
+        Set<Annotation> q = qualifiers(Arrays.stream(executable.getDeclaredAnnotations()));
+        if (q.size() > 1) {
+            throw new QualifierResolutionException(executable, "multiple qualifiers");
+        }
+
+        if (q.size() == 1) {
+            return q.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -43,29 +72,21 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("executable is null");
         }
 
-//        System.out.println("pCount=" + executable.getParameterCount());
-//        System.out.println(Arrays.toString(executable.getParameters()));
-//        System.out.println(Arrays.toString(executable.getParameterAnnotations()));
-
-        return resolveImpl(ReflectionAssistant.parameterAnnotations(executable, paramNum));
-    }
-
-    private Annotation resolveImpl(Stream<Annotation> annotations) {
-        Set<Annotation> qualifiers = annotations
-                .filter(a -> a.annotationType().isAnnotationPresent(Qualifier.class))
-                .collect(Collectors.toSet());
-
-        // todo: errors
-
-        if (qualifiers.size() > 1) {
-            // todo: allow > 1?
-            throw new RuntimeException("more than 1 qualifier");
+        Set<Annotation> q = qualifiers(ReflectionAssistant.parameterAnnotations(executable, paramNum));
+        if (q.size() > 1) {
+            throw new QualifierResolutionException(executable, paramNum, "multiple qualifiers");
         }
 
-        if (qualifiers.size() == 1) {
-            return qualifiers.iterator().next();
+        if (q.size() == 1) {
+            return q.iterator().next();
         } else {
             return null;
         }
+    }
+
+    private Set<Annotation> qualifiers(Stream<Annotation> annotations) {
+        return annotations
+                .filter(a -> a.annotationType().isAnnotationPresent(Qualifier.class))
+                .collect(Collectors.toSet());
     }
 }

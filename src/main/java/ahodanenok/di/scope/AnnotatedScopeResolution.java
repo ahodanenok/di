@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Resolves element scope by inspecting its annotations.
+ * Annotation marked with meta-annotation {@link Scope} is the scope of an element.
+ */
 public class AnnotatedScopeResolution implements ScopeResolution{
 
     @Override

@@ -134,6 +134,10 @@ public final class DIContainer {
             return this;
         }
 
+        /**
+         * Provide a custom implementation of scope resolution.
+         * Default implementation is {@link AnnotatedScopeResolution}
+         */
         public Builder withScopeResolution(ScopeResolution scopeResolution) {
             DIContainer.this.scopeResolution = scopeResolution;
             return this;

@@ -4,6 +4,12 @@ import ahodanenok.di.DependencyIdentifier;
 
 import javax.inject.Provider;
 
+/**
+ * Rules for reusing instances of dependencies.
+ *
+ * @see NotScoped
+ * @see javax.inject.Singleton
+ */
 public interface Scope {
 
     ScopeIdentifier id();

@@ -7,6 +7,9 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @see Singleton
+ */
 public class SingletonScope implements Scope {
 
     private ScopeIdentifier id;

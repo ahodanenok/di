@@ -4,6 +4,9 @@ import ahodanenok.di.DependencyIdentifier;
 
 import javax.inject.Provider;
 
+/**
+ * @see NotScoped
+ */
 public class DefaultScope implements Scope {
 
     private ScopeIdentifier id = ScopeIdentifier.of(NotScoped.class);

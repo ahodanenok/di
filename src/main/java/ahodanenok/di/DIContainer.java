@@ -125,6 +125,10 @@ public final class DIContainer {
             return this;
         }
 
+        /**
+         * Provide a custom implementation of dependencies lookup.
+         * Default implementation is {@link DependencyValueExactLookup}
+         */
         public Builder withValuesLookup(DependencyValueLookup valueLookup) {
             DIContainer.this.valueLookup = valueLookup;
             return this;

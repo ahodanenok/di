@@ -4,6 +4,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.
+ * Primitives and corresponding wrappers are considered equal.
+ */
 public class DependencyValueExactLookup implements DependencyValueLookup {
 
     @Override

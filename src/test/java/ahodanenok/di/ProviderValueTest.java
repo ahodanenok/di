@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ProviderValueTest {
@@ -32,6 +34,9 @@ public class ProviderValueTest {
 }
 
 class TestProvider implements Provider<String> {
+
+    public TestProvider() { }
+
     @Override
     public String get() {
         return "provider";

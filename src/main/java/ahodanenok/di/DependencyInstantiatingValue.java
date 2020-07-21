@@ -91,17 +91,22 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
     private Constructor<? extends T> resolveConstructor() {
         // todo: conform to spec
-        // Injectable constructors are annotated with @Inject and accept zero or more dependencies as arguments.
-        // @Inject can apply to at most one constructor per class.
+        // +Injectable constructors are annotated with @Inject and accept zero or more dependencies as arguments.
+        // +@Inject can apply to at most one constructor per class.
         // @Inject is optional for public, no-argument constructors when no other constructors are present.
         // This enables injectors to invoke default constructors.
 
+        // Injectable constructors are annotated with @Inject
         Set<Constructor<?>> constructors = Arrays.stream(instanceClass.getDeclaredConstructors())
                 .filter(c -> c.isAnnotationPresent(Inject.class))
                 .collect(Collectors.toSet());
 
+        // @Inject can apply to at most one constructor per class.
         if (constructors.size() > 1) {
-            throw new DependencyInstantiatingException(id, "multiple injection points: " + constructors);
+            throw new DependencyInstantiatingException(id, instanceClass,
+                    "multiple constructors are marked with @Inject," +
+                    " to make this class available for dependency injection leave only such constructor," +
+                    " constructors: " + constructors);
         }
 
         Constructor<? extends T> constructor = null;
@@ -110,16 +115,25 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
             Constructor<? extends T> c = (Constructor<? extends T>) constructors.iterator().next();
             constructor = c;
         } else {
-            // todo: check that there are no other constructors except default, in that case some constructor must be annotated with @Inject
             try {
-                constructor = instanceClass.getDeclaredConstructor();
+                // @Inject is optional for public, no-argument constructors
+                constructor = instanceClass.getConstructor();
             } catch (NoSuchMethodException e) {
-                throw new DependencyInstantiatingException(id, "no default constructor");
+                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
+                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+            }
+
+            // @Inject is optional for public, no-argument constructors when no other constructors are present.
+            if (instanceClass.getDeclaredConstructors().length > 1) {
+                throw new DependencyInstantiatingException(id, instanceClass, "multiple constructors are found, mark appropriate constructor with @Inject" +
+                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
             }
         }
 
+
         if (constructor == null) {
-            throw new DependencyInstantiatingException(id, "no applicable constructor for injection");
+            throw new DependencyInstantiatingException(id, instanceClass,
+                    "no applicable constructor found, either leave only one constructor without parameters or mark some constructor with @Inject");
         }
 
 

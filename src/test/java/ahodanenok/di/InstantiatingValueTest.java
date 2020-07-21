@@ -1,10 +1,10 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.DependencyInjectionException;
+import ahodanenok.di.exception.DependencyInstantiatingException;
 import ahodanenok.di.exception.InjectionFailedException;
-import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -113,11 +113,30 @@ public class InstantiatingValueTest {
     }
 
     @Test
-    public void testInject_1() {
-        DependencyInstantiatingValue<TestInterface> v =
-                new DependencyInstantiatingValue<>(TestInterface.class, TestInject.class);
+    public void testDefaultConstructor_1() {
+        DependencyInstantiatingValue<TestClass_Default> v =
+                new DependencyInstantiatingValue<>(TestClass_Default.class);
         v.bind(container);
-        assertEquals(10, ((TestInject) v.provider().get()).n);
+
+        assertNotNull(v.provider().get());
+    }
+
+    @Test
+    public void testDefaultConstructor_2() {
+        DependencyInstantiatingValue<TestClass_Default_NotPublic> v =
+                new DependencyInstantiatingValue<>(TestClass_Default_NotPublic.class);
+        v.bind(container);
+
+        assertThrows(DependencyInjectionException.class, () -> v.provider().get());
+    }
+
+    @Test
+    public void testDefaultConstructor_3() {
+        DependencyInstantiatingValue<TestClass_Default_NotSingle> v =
+                new DependencyInstantiatingValue<>(TestClass_Default_NotSingle.class);
+        v.bind(container);
+
+        assertThrows(DependencyInjectionException.class, () -> v.provider().get());
     }
 
     @Test
@@ -126,14 +145,14 @@ public class InstantiatingValueTest {
                 new DependencyInstantiatingValue<>(TestClass_Multiple.class);
         v.bind(container);
 
-        assertThrows(InjectionFailedException.class, () -> v.provider().get());
+        assertThrows(DependencyInstantiatingException.class, () -> v.provider().get());
     }
 
 
     @Test
     public void testMultipleConstructors_2() {
-        DependencyInstantiatingValue<TestInject_Single> v =
-                new DependencyInstantiatingValue<>(TestInject_Single.class);
+        DependencyInstantiatingValue<TestInject_MultipleInject> v =
+                new DependencyInstantiatingValue<>(TestInject_MultipleInject.class);
         v.bind(container);
 
        assertEquals(10, v.provider().get().n);
@@ -157,22 +176,28 @@ class TestInstanceScope implements TestInterface { }
 @TestQualifier_Class
 class TestInstance implements TestInterface { }
 
-class TestInject implements TestInterface {
-    @Inject int n;
+class TestClass_Default {
+    public TestClass_Default() { }
 }
+
+class TestClass_Default_NotPublic {
+    TestClass_Default_NotPublic() { }
+}
+class TestClass_Default_NotSingle{
+    public TestClass_Default_NotSingle() { }
+    public TestClass_Default_NotSingle(int a) { }
+}
+
 
 class TestClass_Multiple {
-    TestClass_Multiple(String n) { }
-    TestClass_Multiple(int a) { }
+    public TestClass_Multiple(String n) { }
+    public TestClass_Multiple(int a) { }
 }
-
-class TestInject_Single {
+class TestInject_MultipleInject {
     int n;
 
-    TestInject_Single(String n) { }
-    @Inject TestInject_Single(int a) {
+    TestInject_MultipleInject(String n) { }
+    @Inject TestInject_MultipleInject(int a) {
         this.n = a;
     }
 }
-
-

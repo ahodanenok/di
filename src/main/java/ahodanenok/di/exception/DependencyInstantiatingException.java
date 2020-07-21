@@ -6,8 +6,8 @@ public class DependencyInstantiatingException extends DependencyInjectionExcepti
 
     private DependencyIdentifier<?> id;
 
-    public DependencyInstantiatingException(DependencyIdentifier<?> id, String reason) {
-        super(String.format("Dependency '%s' can't be instantiated: %s", id, reason));
+    public DependencyInstantiatingException(DependencyIdentifier<?> id, Class<?> instanceClass, String reason) {
+        super(String.format("Class '%s' bound to '%s' can't be instantiated: %s", instanceClass.getName(), id, reason));
         this.id = id;
     }
 

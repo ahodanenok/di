@@ -117,7 +117,11 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
         } else {
             try {
                 // @Inject is optional for public, no-argument constructors
-                constructor = instanceClass.getConstructor();
+                if (instanceClass.isMemberClass() || instanceClass.isLocalClass() || instanceClass.isAnonymousClass()) {
+                    constructor = instanceClass.getConstructor(instanceClass.getEnclosingClass());
+                } else {
+                    constructor = instanceClass.getConstructor();
+                }
             } catch (NoSuchMethodException e) {
                 throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
                         " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));

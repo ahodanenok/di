@@ -6,6 +6,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 // todo: @Disposes method for created instance
 public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
@@ -39,8 +40,8 @@ public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
     public void bind(DIContainer container) {
         this.container = container;
 
-        Annotation qualifier = container.qualifierResolution().resolve(method);
-        id = DependencyIdentifier.of(type, qualifier);
+        Set<Annotation> qualifiers = container.qualifierResolution().resolve(method);
+        id = DependencyIdentifier.of(type, qualifiers);
 
         // todo: maybe use scope of method owner class as a default
         scope = container.scopeResolution().resolve(method, ScopeIdentifier.of(NotScoped.class));

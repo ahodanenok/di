@@ -58,8 +58,8 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
         this.container = container;
 
         if (id == null) {
-            Annotation qualifier = container.qualifierResolution().resolve(instanceClass);
-            id = DependencyIdentifier.of(type, qualifier);
+            Set<Annotation> qualifiers = container.qualifierResolution().resolve(instanceClass);
+            id = DependencyIdentifier.of(type, qualifiers);
         }
 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));

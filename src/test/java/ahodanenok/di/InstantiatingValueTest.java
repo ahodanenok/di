@@ -2,7 +2,6 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.DependencyInstantiatingException;
-import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,8 +62,8 @@ public class InstantiatingValueTest {
         DependencyInstantiatingValue<TestInstance> v =
                 new DependencyInstantiatingValue<>(TestInstance.class);
         v.bind(container);
-        assertNotNull(v.id().qualifier());
-        assertEquals(TestQualifier_Class.class, v.id().qualifier().annotationType());
+        assertEquals(1, v.id().qualifiers().size());
+        assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());
         assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
     }
 
@@ -74,8 +73,8 @@ public class InstantiatingValueTest {
                 new DependencyInstantiatingValue<>(TestInterface.class, TestInstance.class);
         System.out.println(container.scopeResolution());
         v.bind(container);
-        assertNotNull(v.id().qualifier());
-        assertEquals(TestQualifier_Class.class, v.id().qualifier().annotationType());
+        assertEquals(1, v.id().qualifiers().size());
+        assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());
         assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
     }
 
@@ -84,7 +83,7 @@ public class InstantiatingValueTest {
         DependencyInstantiatingValue<TestInstance> v =
                 new DependencyInstantiatingValue<>(DependencyIdentifier.of(TestInstance.class), TestInstance.class);
         v.bind(container);
-        assertNull(v.id().qualifier());
+        assertTrue(v.id().qualifiers().isEmpty());
         assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
     }
 

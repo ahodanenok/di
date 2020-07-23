@@ -1,7 +1,7 @@
 package ahodanenok.di;
 
 import java.lang.annotation.Annotation;
-import java.util.Objects;
+import java.util.*;
 
 // todo: create annotation instance based on definition like in Annotation.toString (@com.acme.util.Name(first=Alfred, middle=E., last=Neuman))
 // DependencyIdentifier.of(String.class, "@javax.inject.Named(value=Test)");
@@ -13,42 +13,46 @@ import java.util.Objects;
 public final class DependencyIdentifier<T> {
 
     public static <T> DependencyIdentifier<T> of (Class<T> type) {
-        return of(type, null);
+        return of(type, Collections.emptySet());
     }
 
-    public static <T> DependencyIdentifier<T> of (Class<T> type, Annotation qualifier) {
-        return new DependencyIdentifier<>(type, qualifier);
+    public static <T> DependencyIdentifier<T> of (Class<T> type, Set<Annotation> qualifiers) {
+        return new DependencyIdentifier<>(type, qualifiers != null ? new LinkedHashSet<>(qualifiers) : Collections.emptySet());
+    }
+
+    public static <T> DependencyIdentifier<T> of (Class<T> type, Annotation... qualifiers) {
+        return of(type, new LinkedHashSet<>(Arrays.asList(qualifiers)));
     }
 
     private Class<T> type;
-    private Annotation qualifier;
+    private Set<Annotation> qualifiers;
 
-    public DependencyIdentifier(Class<T> type, Annotation qualifier) {
+    public DependencyIdentifier(Class<T> type, Set<Annotation> qualifiers) {
         if (type == null) {
             throw new IllegalArgumentException("type is null");
         }
 
         this.type = type;
-        this.qualifier = qualifier;
+        this.qualifiers = qualifiers;
     }
 
     public Class<T> type() {
         return type;
     }
 
-    public Annotation qualifier() {
-        return qualifier;
+    public Set<Annotation> qualifiers() {
+        return Collections.unmodifiableSet(qualifiers);
     }
 
     @Override
     public String toString() {
-        return String.format("DepID(%s, %s)", type.getName(), qualifier);
+        return String.format("DependencyID(%s, %s)", type.getName(), qualifiers);
     }
 
     @Override
     public int hashCode() {
-        if (qualifier != null) {
-            return 31 * type.hashCode() + qualifier.hashCode();
+        if (qualifiers != null) {
+            return 31 * type.hashCode() + qualifiers.hashCode();
         } else {
             return type.hashCode();
         }
@@ -65,7 +69,7 @@ public final class DependencyIdentifier<T> {
             return false;
         }
 
-        if (!Objects.equals(qualifier, other.qualifier)) {
+        if (!Objects.equals(qualifiers, other.qualifiers)) {
             return false;
         }
 

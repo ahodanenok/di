@@ -6,6 +6,7 @@ import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 public class InjectableField implements Injectable<Object> {
 
@@ -35,8 +36,8 @@ public class InjectableField implements Injectable<Object> {
             throw new InjectionFailedException(field, "field is final");
         }
 
-        Annotation qualifier = qualifierResolution.resolve(field);
-        DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifier);
+        Set<Annotation> qualifiers = qualifierResolution.resolve(field);
+        DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifiers);
         Object value = container.instance(id);
         if (value == null && !field.isAnnotationPresent(OptionalDependency.class)) {
             throw new UnsatisfiedDependencyException(this, id, "not found");

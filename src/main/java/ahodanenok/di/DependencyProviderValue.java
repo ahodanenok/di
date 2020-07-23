@@ -23,7 +23,7 @@ public class DependencyProviderValue<T> implements DependencyValue<T> {
     @Override
     public void bind(DIContainer container) {
         providerValue.bind(container);
-        id = DependencyIdentifier.of(type, providerValue.id().qualifier());
+        id = DependencyIdentifier.of(type, providerValue.id().qualifiers());
     }
 
     @Override

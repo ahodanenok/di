@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
 public class InjectableConstructor<T> implements Injectable<T> {
 
@@ -47,8 +48,8 @@ public class InjectableConstructor<T> implements Injectable<T> {
             while (i < paramCount) {
                 Class<?> type = types[i];
 
-                Annotation qualifier = qualifierResolution.resolve(constructor, i);
-                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
+                Set<Annotation> qualifiers = qualifierResolution.resolve(constructor, i);
+                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
                 Object arg = container.instance(id);
                 if (arg == null && !optional[i]) {
                     throw new UnsatisfiedDependencyException(this, id, "not found");

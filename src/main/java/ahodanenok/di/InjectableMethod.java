@@ -6,6 +6,7 @@ import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 public class InjectableMethod implements Injectable<Object> {
 
@@ -49,9 +50,8 @@ public class InjectableMethod implements Injectable<Object> {
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
-            Annotation qualifier = qualifierResolution.resolve(method, i);
-
-            DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifier);
+            Set<Annotation> qualifiers = qualifierResolution.resolve(method, i);
+            DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
             Object arg = container.instance(id);
             if (arg == null && !optional[i]) {
                 throw new UnsatisfiedDependencyException(this, id, "not found");

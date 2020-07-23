@@ -3,15 +3,15 @@ package ahodanenok.di;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.util.Set;
 
-// todo: allow multiple qualifiers
 public interface QualifierResolution {
 
-    Annotation resolve(Class<?> clazz);
+    Set<Annotation> resolve(Class<?> clazz);
 
-    Annotation resolve(Field field);
+    Set<Annotation> resolve(Field field);
 
-    Annotation resolve(Executable method);
+    Set<Annotation> resolve(Executable method);
 
-    Annotation resolve(Executable method, int paramNum);
+    Set<Annotation> resolve(Executable method, int paramNum);
 }

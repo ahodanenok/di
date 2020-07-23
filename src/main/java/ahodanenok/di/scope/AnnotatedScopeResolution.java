@@ -19,6 +19,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
     public ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope) {
         Set<Annotation> scopes = collect(clazz.getDeclaredAnnotations());
         if (scopes.size() > 1) {
+            // todo: error message
             throw new ScopeResolutionException(clazz, "more than 1 scope, found scopes are " + scopes);
         }
 
@@ -33,6 +34,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
     public ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope) {
         Set<Annotation> scopes = collect(method.getDeclaredAnnotations());
         if (scopes.size() > 1) {
+            // todo: error message
             throw new ScopeResolutionException(method, "more than 1 scope, found scopes are " + scopes);
         }
 

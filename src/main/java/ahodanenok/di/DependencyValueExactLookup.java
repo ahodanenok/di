@@ -6,7 +6,8 @@ import java.util.Set;
 
 /**
  * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.
- * Primitives and corresponding wrappers are considered equal.
+ * Primitives and corresponding wrappers are considered identical.
+ * Arrays are considered identical if element types are identical.
  */
 public class DependencyValueExactLookup implements DependencyValueLookup {
 

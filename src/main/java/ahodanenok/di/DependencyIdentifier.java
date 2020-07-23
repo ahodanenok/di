@@ -9,6 +9,7 @@ import java.util.Objects;
 // todo: type + string, which is a name: @Named(name)
 // DependencyIdentifier.of(String.class, "test"); -> DependencyIdentifier.of(String.class, @Named("test"));
 
+// todo: type with wildcard type parameter is not valid
 public final class DependencyIdentifier<T> {
 
     public static <T> DependencyIdentifier<T> of (Class<T> type) {

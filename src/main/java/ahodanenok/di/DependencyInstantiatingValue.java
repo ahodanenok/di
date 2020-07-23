@@ -80,6 +80,7 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
                 T instance = targetConstructor.inject();
                 container.inject(instance);
+                // todo: post create
                 return instance;
         };
     }

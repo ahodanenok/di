@@ -15,4 +15,6 @@ public interface Scope {
     ScopeIdentifier id();
 
     <T> T get(DependencyIdentifier<T> id, Provider<? extends T> provider);
+
+    // todo: when scope is over, destroy it and its bindings
 }

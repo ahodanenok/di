@@ -39,6 +39,9 @@ public class InjectableConstructor<T> implements Injectable<T> {
             Object[] args = new Object[constructor.getParameterCount()];
             Class<?>[] types = constructor.getParameterTypes();
 
+            // todo: research if local and anonymous classes could be injected and used
+            // todo: if container doesn't have instances for enclosing class, create them for current member class only
+
             int i = 0;
             int paramCount = constructor.getParameterCount();
             while (i < paramCount) {
@@ -57,6 +60,7 @@ public class InjectableConstructor<T> implements Injectable<T> {
             boolean accessible = constructor.isAccessible();
             try {
                 constructor.setAccessible(true);
+                // todo: expose creating as an object, so clients could do something before and after creating an instance
                 return constructor.newInstance(args);
             } finally {
                 constructor.setAccessible(accessible);

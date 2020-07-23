@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 
+// todo: allow multiple qualifiers
 public interface QualifierResolution {
 
     Annotation resolve(Class<?> clazz);

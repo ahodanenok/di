@@ -63,6 +63,7 @@ public class InjectableMethod implements Injectable<Object> {
         boolean accessible = method.isAccessible();
         try {
             method.setAccessible(true);
+            // todo: expose invocation as an object, so clients could do something before and after invocation
             return method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new InjectionFailedException(method, e);

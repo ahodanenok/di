@@ -9,8 +9,21 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.*;
 
-// todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318)
+// todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
+// todo: implement decorators
+// todo: default values, which are injected when no others are found (@Default)
+// todo: JSR-250
 // todo: logging
+// todo: events (like in cdi)
+// todo: qualifiers @Any, @Default
+// todo: provider field (static and instance)
+// todo: allow multiple qualifiers
+// todo: allow repeated qualifiers
+// todo: stereotypes
+// todo: injection points (could be injected)
+// todo: eager singleton initialization
+// todo: alternatives
+// todo: annotation inheritance
 
 /**
  * Container is a coordinator between providers
@@ -22,7 +35,6 @@ public final class DIContainer {
     private ScopeResolution scopeResolution;
     private QualifierResolution qualifierResolution;
 
-    // todo: is it necessary to keep track of injection locations
     private Set<DependencyValue<?>> values;
     private DependencyValueLookup valueLookup;
 
@@ -119,6 +131,11 @@ public final class DIContainer {
             DIContainer.this.values.add(value);
             return this;
         }
+
+        // todo: how to discover provider methods
+//        public Builder scan(Class<?> clazz) {
+//
+//        }
 
         public Builder addScope(Scope scope) {
             DIContainer.this.scopes.put(scope.id(), scope);

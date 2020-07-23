@@ -7,6 +7,7 @@ import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+// todo: @Disposes method for created instance
 public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
 
     private DIContainer container;
@@ -23,6 +24,7 @@ public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
         this(type, null, method);
     }
 
+    // todo: don't need explicit id for declaring class, id can be created from it
     public DependencyMethodProviderValue(Class<T> type, DependencyIdentifier<?> methodInstanceId, Method method) {
         this.type = type;
 
@@ -52,6 +54,10 @@ public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
     @Override
     public Provider<? extends T> provider() {
         return () -> {
+            // todo: allow specifying provider method in supeclass or interface, concrete implementation will provide it
+            // todo: check for conflicts on annotations on provider method from interface and its implementation
+            // todo: how to register instance of declaring class in container if method is not static
+
             Object instance = methodInstanceId != null ? container.instance(methodInstanceId) : null;
             // todo: suppress warnings when type is checked in constructor
             return (T) new InjectableMethod(container, method).inject(instance);

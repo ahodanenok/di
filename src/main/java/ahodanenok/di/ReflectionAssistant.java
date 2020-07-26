@@ -4,11 +4,13 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -57,6 +59,35 @@ public final class ReflectionAssistant {
         }
 
         return Arrays.stream(executable.getParameterAnnotations()[index]);
+    }
+
+    public enum AnnotationPresence {
+        DIRECTLY,
+        INDIRECTLY,
+        PRESENT,
+        ASSOCIATED
+    }
+
+    @SafeVarargs
+    public static Stream<? extends Annotation> annotations(AnnotatedElement annotatedElement, AnnotationPresence presence, Class<? extends Annotation>... annotationTypes) {
+        Stream<Annotation> stream = Stream.empty();
+        if (presence == AnnotationPresence.DIRECTLY) {
+            List<Class<?>> types = Arrays.asList(annotationTypes);
+            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotations())).filter(a -> types.contains(a.annotationType()));
+        } else if (presence == AnnotationPresence.PRESENT) {
+            List<Class<?>> types = Arrays.asList(annotationTypes);
+            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotations())).filter(a -> types.contains(a.annotationType()));
+        } else if (presence == AnnotationPresence.INDIRECTLY) {
+            for (Class<? extends Annotation> type : annotationTypes) {
+                stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotationsByType(type)));
+            }
+        } else if (presence == AnnotationPresence.ASSOCIATED) {
+            for (Class<? extends Annotation> type : annotationTypes) {
+                stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotationsByType(type)));
+            }
+        }
+
+        return stream;
     }
 
     private static Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();

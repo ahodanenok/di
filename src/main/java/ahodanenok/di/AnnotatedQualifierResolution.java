@@ -16,7 +16,7 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("clazz is null");
         }
 
-        return qualifiers(Arrays.stream(clazz.getDeclaredAnnotations()));
+        return qualifiers(ReflectionAssistant.annotations(clazz, ReflectionAssistant.AnnotationPresence.ASSOCIATED));
     }
 
     @Override
@@ -25,7 +25,7 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("field is null");
         }
 
-        return qualifiers(Arrays.stream(field.getDeclaredAnnotations()));
+        return qualifiers(ReflectionAssistant.annotations(field, ReflectionAssistant.AnnotationPresence.ASSOCIATED));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("executable is null");
         }
 
-        return qualifiers(Arrays.stream(executable.getDeclaredAnnotations()));
+        return qualifiers(ReflectionAssistant.annotations(executable, ReflectionAssistant.AnnotationPresence.ASSOCIATED));
     }
 
     @Override
@@ -43,10 +43,10 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("executable is null");
         }
 
-        return qualifiers(ReflectionAssistant.parameterAnnotations(executable, paramNum));
+        return qualifiers(ReflectionAssistant.parameterAnnotations(executable, paramNum, ReflectionAssistant.AnnotationPresence.INDIRECTLY));
     }
 
-    private Set<Annotation> qualifiers(Stream<Annotation> annotations) {
+    private Set<Annotation> qualifiers(Stream<? extends Annotation> annotations) {
         return annotations
                 .filter(a -> a.annotationType().isAnnotationPresent(Qualifier.class))
                 .collect(Collectors.toSet());

@@ -1,14 +1,45 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.ScopeResolutionException;
 import ahodanenok.di.scope.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Provider;
+import javax.inject.Scope;
 import javax.inject.Singleton;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class ScopeTest {
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Inherited
+    @Scope
+    @interface S1 { }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Inherited
+    @Scope
+    @interface S2 { }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Scope
+    @interface NonInheritedScope { }
+
+    @S1
+    class Parent { }
+    class ChildA extends Parent { }
+
+    @S1 @S2
+    class ChildMultipleInheritedScopes extends Parent { }
+    class ChildB extends ChildMultipleInheritedScopes { }
+
+    @NonInheritedScope
+    class ChildNonInheritedScope extends Parent { }
+    class ChildC extends ChildNonInheritedScope { }
 
     @Test
     public void testScopeId_1() {
@@ -123,5 +154,25 @@ public class ScopeTest {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
         assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getDeclaredMethod("method")));
         assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getDeclaredMethod("method"), ScopeIdentifier.of(Singleton.class)));
+    }
+
+    @Test
+    public void testScopeResolution_6() {
+        AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
+        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ChildA.class));
+        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ChildA.class, ScopeIdentifier.of(NotScoped.class)));
+    }
+
+    @Test
+    public void testScopeResolution_7() {
+        AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
+        assertThrows(ScopeResolutionException.class, () -> resolution.resolve(ChildB.class));
+    }
+
+    @Test
+    public void testScopeResolution_8() {
+        AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(ChildC.class));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(ChildC.class, ScopeIdentifier.of(Singleton.class)));
     }
 }

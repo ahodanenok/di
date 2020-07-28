@@ -3,13 +3,15 @@ package ahodanenok.di;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -85,6 +87,21 @@ public class QualifierTest {
     @Retention(RetentionPolicy.RUNTIME)
     @interface ParamQualifier2 { }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface RC {
+        R[] value();
+    }
+
+    @Qualifier
+    @Repeatable(RC.class)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface R {
+        String[] value();
+    }
+
+    class RepeatableQualifierParams {
+        void m(@ParamQualifier @ParamQualifier2 @R("R1") @R("R2") int test) { }
+    }
 
     @Test
     public void testQualifierResolution_1() {
@@ -266,5 +283,25 @@ public class QualifierTest {
         assertTrue(resolution.resolve(constructor, 0).containsAll(Arrays.asList(
                 constructor.getParameterAnnotations()[0][0],
                 constructor.getParameterAnnotations()[0][1])));
+    }
+
+    @Test
+    public void testQualifierResolution_22() throws Exception {
+        class C {
+            void a(@ParamQualifier int a) { }
+            void b(@ParamQualifier2 int a) { }
+            void c(@R("R1") @R("R2") int a) { }
+        }
+
+        Method m = RepeatableQualifierParams.class.getDeclaredMethod("m", int.class);
+        AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
+        Set<? extends Annotation> result = resolution.resolve(m, 0);
+        assertEquals(4, result.size());
+
+        List<Annotation> check = new ArrayList<>();
+        check.add(C.class.getDeclaredMethod("a", int.class).getParameterAnnotations()[0][0]);
+        check.add(C.class.getDeclaredMethod("b", int.class).getParameterAnnotations()[0][0]);
+        check.addAll(Arrays.asList(C.class.getDeclaredMethod("c", int.class).getParameters()[0].getAnnotationsByType(R.class)));
+        assertTrue(result.containsAll(check));
     }
 }

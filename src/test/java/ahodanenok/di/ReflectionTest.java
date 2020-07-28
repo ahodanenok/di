@@ -25,6 +25,12 @@ public class ReflectionTest {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Inherited
+    @interface C {
+        String value();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Inherited
     @interface RC {
         R[] value();
     }
@@ -37,12 +43,14 @@ public class ReflectionTest {
     }
 
     @A("PA1")
+    @C("PC1")
     @R("PR1")
     @R("PR2")
     @R("PR3")
     static class Parent { }
 
     @A("CA1")
+    @C("CC1")
     @R("CR1")
     @R("CR2")
     static class ChildA extends Parent { }
@@ -65,6 +73,20 @@ public class ReflectionTest {
     }
 
     @Test
+    public void testAnnotationsDirectly_2() {
+        List<Annotation> result = ReflectionAssistant.annotations(
+                ChildA.class,
+                ReflectionAssistant.AnnotationPresence.DIRECTLY).collect(Collectors.toList());
+
+        assertEquals(3, result.size());
+        assertTrue(result.get(0) instanceof A);
+        assertEquals("CA1", ((A) result.get(0)).value());
+        assertTrue(result.get(1) instanceof C);
+        assertEquals("CC1", ((C) result.get(1)).value());
+        assertTrue(result.get(2) instanceof RC);
+    }
+
+    @Test
     public void testAnnotationsIndirectly_1() {
         List<Annotation> result = ReflectionAssistant.annotations(
                 ChildA.class,
@@ -81,6 +103,23 @@ public class ReflectionTest {
     }
 
     @Test
+    public void testAnnotationsIndirectly_2() {
+        List<Annotation> result = ReflectionAssistant.annotations(
+                ChildA.class,
+                ReflectionAssistant.AnnotationPresence.INDIRECTLY).collect(Collectors.toList());
+
+        assertEquals(4, result.size());
+        assertTrue(result.get(0) instanceof A);
+        assertEquals("CA1", ((A) result.get(0)).value());
+        assertTrue(result.get(1) instanceof C);
+        assertEquals("CC1", ((C) result.get(1)).value());
+        assertTrue(result.get(2) instanceof R);
+        assertEquals("CR1", ((R) result.get(2)).value());
+        assertTrue(result.get(3) instanceof R);
+        assertEquals("CR2", ((R) result.get(3)).value());
+    }
+
+    @Test
     public void testAnnotationsPresent_1() {
         List<Annotation> result = ReflectionAssistant.annotations(
                 ChildB.class,
@@ -92,6 +131,22 @@ public class ReflectionTest {
         assertEquals("PA1", ((A) result.get(0)).value());
         assertTrue(result.get(1) instanceof B);
         assertEquals("CB1", ((B) result.get(1)).value());
+    }
+
+    @Test
+    public void testAnnotationsPresent_2() {
+        List<Annotation> result = ReflectionAssistant.annotations(
+                ChildB.class,
+                ReflectionAssistant.AnnotationPresence.PRESENT).collect(Collectors.toList());
+
+        assertEquals(4, result.size());
+        assertTrue(result.get(0) instanceof A);
+        assertEquals("PA1", ((A) result.get(0)).value());
+        assertTrue(result.get(1) instanceof C);
+        assertEquals("PC1", ((C) result.get(1)).value());
+        assertTrue(result.get(2) instanceof RC);
+        assertTrue(result.get(3) instanceof B);
+        assertEquals("CB1", ((B) result.get(3)).value());
     }
 
     @Test
@@ -110,5 +165,24 @@ public class ReflectionTest {
         assertEquals("CR1", ((R) result.get(2)).value());
         assertTrue(result.get(3) instanceof R);
         assertEquals("CR2", ((R) result.get(3)).value());
+    }
+
+    @Test
+    public void testAnnotationsAssociated_2() {
+        List<Annotation> result = ReflectionAssistant.annotations(
+                ChildB.class,
+                ReflectionAssistant.AnnotationPresence.ASSOCIATED).collect(Collectors.toList());
+
+        assertEquals(5, result.size());
+        assertTrue(result.get(0) instanceof A);
+        assertEquals("PA1", ((A) result.get(0)).value());
+        assertTrue(result.get(1) instanceof C);
+        assertEquals("PC1", ((C) result.get(1)).value());
+        assertTrue(result.get(2) instanceof R);
+        assertEquals("CR1", ((R) result.get(2)).value());
+        assertTrue(result.get(3) instanceof R);
+        assertEquals("CR2", ((R) result.get(3)).value());
+        assertTrue(result.get(4) instanceof B);
+        assertEquals("CB1", ((B) result.get(4)).value());
     }
 }

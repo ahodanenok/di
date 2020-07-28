@@ -4,14 +4,10 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.annotation.Repeatable;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ReflectionAssistant {
@@ -34,12 +30,7 @@ public final class ReflectionAssistant {
         }
     }
 
-    public static Stream<Annotation> scopes(Class<?> clazz) {
-        return Arrays.stream(clazz.getDeclaredAnnotations())
-                .filter(a -> a.annotationType().isAnnotationPresent(Scope.class));
-    }
-
-    public static Stream<Annotation> parameterAnnotations(Executable executable, int parameterIndex) {
+    public static Stream<? extends Annotation> parameterAnnotations(Executable executable, int parameterIndex, AnnotationPresence presence) {
         int parameterCount = executable.getParameterCount();
 
         if (parameterIndex < 0 || parameterIndex >= parameterCount) {
@@ -58,7 +49,19 @@ public final class ReflectionAssistant {
             return Stream.empty();
         }
 
-        return Arrays.stream(executable.getParameterAnnotations()[index]);
+        if (presence == AnnotationPresence.DIRECTLY || presence == AnnotationPresence.PRESENT) {
+            return Arrays.stream(executable.getParameterAnnotations()[index]);
+        } else if (presence == AnnotationPresence.INDIRECTLY || presence == AnnotationPresence.ASSOCIATED) {
+            Stream<? extends Annotation> stream = Stream.empty();
+            Parameter p = executable.getParameters()[index];
+            for (Class<? extends Annotation> type : annotationTypes(p.getDeclaredAnnotations())) {
+                stream = Stream.concat(stream, Arrays.stream(p.getAnnotationsByType(type)));
+            }
+
+            return stream;
+        } else {
+            throw new IllegalArgumentException("unknown presence: " + presence);
+        }
     }
 
     public enum AnnotationPresence {
@@ -72,22 +75,80 @@ public final class ReflectionAssistant {
     public static Stream<? extends Annotation> annotations(AnnotatedElement annotatedElement, AnnotationPresence presence, Class<? extends Annotation>... annotationTypes) {
         Stream<Annotation> stream = Stream.empty();
         if (presence == AnnotationPresence.DIRECTLY) {
-            List<Class<?>> types = Arrays.asList(annotationTypes);
-            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotations())).filter(a -> types.contains(a.annotationType()));
+            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotations()));
+            if (annotationTypes.length > 0) {
+                List<Class<?>> types = Arrays.asList(annotationTypes);
+                stream = stream.filter(a -> types.contains(a.annotationType()));
+            }
         } else if (presence == AnnotationPresence.PRESENT) {
-            List<Class<?>> types = Arrays.asList(annotationTypes);
-            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotations())).filter(a -> types.contains(a.annotationType()));
+            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotations()));
+            if (annotationTypes.length > 0) {
+                List<Class<?>> types = Arrays.asList(annotationTypes);
+                stream = stream.filter(a -> types.contains(a.annotationType()));
+            }
         } else if (presence == AnnotationPresence.INDIRECTLY) {
-            for (Class<? extends Annotation> type : annotationTypes) {
+            List<Class<? extends Annotation>> types;
+            if (annotationTypes.length > 0) {
+                types = Arrays.asList(annotationTypes);
+            } else {
+                types = annotationTypes(annotatedElement.getDeclaredAnnotations());
+            }
+
+            for (Class<? extends Annotation> type : types) {
                 stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotationsByType(type)));
             }
         } else if (presence == AnnotationPresence.ASSOCIATED) {
-            for (Class<? extends Annotation> type : annotationTypes) {
+            List<Class<? extends Annotation>> types;
+            if (annotationTypes.length > 0) {
+                types = Arrays.asList(annotationTypes);
+            } else {
+                types = annotationTypes(annotatedElement.getAnnotations());
+            }
+
+            for (Class<? extends Annotation> type : types) {
                 stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotationsByType(type)));
             }
+        } else {
+            throw new IllegalArgumentException("unknown presence: " + presence);
         }
 
         return stream;
+    }
+
+    private static List<Class<? extends Annotation>> annotationTypes(Annotation[] annotations) {
+        return Arrays.stream(annotations).map(a -> {
+            try {
+                Method m = a.annotationType().getDeclaredMethod("value");
+                // if annotation is a container for a repeatable annotation, then return type of the repeatable annotation
+                if (m.getReturnType().isArray() && m.getReturnType().getComponentType().isAnnotation()
+                        && m.getReturnType().getComponentType().isAnnotationPresent(Repeatable.class)) {
+                    @SuppressWarnings("unchecked") // value() has array of annotations as return type
+                            Class<? extends Annotation> c = (Class<? extends Annotation>) m.getReturnType().getComponentType();
+                    return c;
+                }
+            } catch (NoSuchMethodException e) {
+                // no-op
+            }
+
+            return a.annotationType();
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    private static Class<? extends Annotation> checkRepeatableContainer(Annotation a) {
+        try {
+            Method m = a.annotationType().getDeclaredMethod("value");
+            // if annotation is a container for a repeatable annotation, then return type of the repeatable annotation
+            if (m.getReturnType().isArray() && m.getReturnType().getComponentType().isAnnotation()
+                    && m.getReturnType().getComponentType().isAnnotationPresent(Repeatable.class)) {
+                @SuppressWarnings("unchecked") // value() has array of annotations as return type
+                Class<? extends Annotation> c = (Class<? extends Annotation>) m.getReturnType().getComponentType();
+                return c;
+            }
+        } catch (NoSuchMethodException e) {
+            // no-op
+        }
+
+        return null;
     }
 
     private static Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();

@@ -33,7 +33,7 @@ public class InjectableConstructor<T> implements Injectable<T> {
             // todo: cache
             boolean[] optional = new boolean[constructor.getParameterCount()];
             for (int i = 0; i < constructor.getParameterCount(); i++) {
-                optional[i] = ReflectionAssistant.parameterAnnotations(constructor, i)
+                optional[i] = ReflectionAssistant.parameterAnnotations(constructor, i, ReflectionAssistant.AnnotationPresence.DIRECTLY)
                         .anyMatch(a -> a.annotationType().equals(OptionalDependency.class));
             }
 

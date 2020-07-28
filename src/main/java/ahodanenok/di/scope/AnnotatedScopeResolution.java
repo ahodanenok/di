@@ -4,6 +4,7 @@ import ahodanenok.di.exception.ScopeResolutionException;
 
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
@@ -17,14 +18,33 @@ public class AnnotatedScopeResolution implements ScopeResolution{
 
     @Override
     public ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope) {
-        Set<Annotation> scopes = collect(clazz.getDeclaredAnnotations());
-        if (scopes.size() > 1) {
-            // todo: error message
-            throw new ScopeResolutionException(clazz, "more than 1 scope, found scopes are " + scopes);
+
+        ScopeIdentifier scope = null;
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            Set<Annotation> scopes = collect(currentClass.getDeclaredAnnotations());
+            if (scopes.size() > 1) {
+                // todo: error message
+                throw new ScopeResolutionException(clazz, "more than 1 scope, found scopes are " + scopes + " declared on the class " + currentClass.getName());
+            }
+
+            if (scopes.size() == 1) {
+                Annotation scopeAnnotation = scopes.iterator().next();
+                if (currentClass == clazz || scopeAnnotation.annotationType().isAnnotationPresent(Inherited.class)) {
+                    scope = ScopeIdentifier.of(scopeAnnotation);
+                }
+
+                // whether annotation inherited or not, stop
+                // if inherited then use it, otherwise don't go up the hierarchy
+                break;
+            }
+
+            currentClass = currentClass.getSuperclass();
         }
 
-        if (scopes.size() == 1) {
-            return ScopeIdentifier.of(scopes.iterator().next());
+        // todo: is scope is null - check stereotypes
+        if (scope != null) {
+            return scope;
         } else {
             return defaultScope;
         }

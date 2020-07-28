@@ -15,7 +15,9 @@ public class DependencyValueExactLookup implements DependencyValueLookup {
     public <T> Set<DependencyValue<T>> execute(Set<DependencyValue<?>> values, DependencyIdentifier<T> id) {
         Set<DependencyValue<T>> matching = new HashSet<>();
         for (DependencyValue<?> v : values) {
-            if (Objects.equals(id.qualifiers(), v.id().qualifiers()) && typesMatch(id.type(), v.id().type())) {
+            if (v.id().qualifiers().isEmpty() == id.qualifiers().isEmpty()
+                    && v.id().qualifiers().containsAll(id.qualifiers())
+                    && typesMatch(id.type(), v.id().type())) {
                 @SuppressWarnings("unchecked") // if ids are equals, type is T
                 DependencyValue<T> matched = (DependencyValue<T>) v;
                 matching.add(matched);

@@ -17,13 +17,10 @@ import java.util.*;
 // todo: events (like in cdi)
 // todo: qualifiers @Any, @Default
 // todo: provider field (static and instance)
-// todo: allow multiple qualifiers
-// todo: allow repeated qualifiers
 // todo: stereotypes
 // todo: injection points (could be injected)
 // todo: eager singleton initialization
 // todo: alternatives
-// todo: annotation inheritance
 
 /**
  * Container is a coordinator between providers
@@ -108,6 +105,7 @@ public final class DIContainer {
 
         ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
             // todo: cache
+            // todo: which fields should be skipped (i.e inherited)
             new InjectableField(this, f).inject(instance);
         });
 
@@ -116,6 +114,7 @@ public final class DIContainer {
         // A method with no @Inject annotation that overrides a method annotated with @Inject will not be injected.
         ReflectionAssistant.methods(instance.getClass()).filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
+            // todo: which methods should be skipped (i.e inherited)
             new InjectableMethod(this, m).inject(instance);
         });
     }

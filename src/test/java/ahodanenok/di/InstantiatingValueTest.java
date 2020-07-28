@@ -71,7 +71,6 @@ public class InstantiatingValueTest {
     public void testQualifiers_2() {
         DependencyInstantiatingValue<TestInterface> v =
                 new DependencyInstantiatingValue<>(TestInterface.class, TestInstance.class);
-        System.out.println(container.scopeResolution());
         v.bind(container);
         assertEquals(1, v.id().qualifiers().size());
         assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());

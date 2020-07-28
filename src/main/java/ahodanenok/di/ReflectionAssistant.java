@@ -1,8 +1,5 @@
 package ahodanenok.di;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
-import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.*;

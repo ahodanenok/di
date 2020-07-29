@@ -20,4 +20,8 @@ public interface DependencyValue<T> {
     ScopeIdentifier scope();
 
     Provider<? extends T> provider();
+
+    default boolean isInitOnStartup() {
+        return false;
+    }
 }

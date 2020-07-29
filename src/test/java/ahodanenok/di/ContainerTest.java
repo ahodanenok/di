@@ -2,20 +2,38 @@ package ahodanenok.di;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Collectors;
+import javax.inject.Singleton;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ContainerTest {
 
-    class A {
-        public final int f = 1;
-    }
+    @Singleton
+    static class EagerSingleton {
 
-    class B extends A {
-        public int f;
+        static boolean init = false;
+
+        public EagerSingleton() {
+            init = true;
+        }
     }
 
     @Test
-    public void a() {
-        System.out.println(ReflectionAssistant.fields(B.class).collect(Collectors.toList()));
+    public void testEagerInit_1() {
+        DependencyInstantiatingValue<EagerSingleton> v = new DependencyInstantiatingValue<>(EagerSingleton.class);
+        v.setInitOnStartup(true);
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(EagerSingleton.init);
+    }
+
+    static class EagerNotScoped { }
+
+    @Test
+    public void testEagerInit_2() {
+        DependencyInstantiatingValue<EagerNotScoped> v = new DependencyInstantiatingValue<>(EagerNotScoped.class);
+        v.setInitOnStartup(true);
+
+        assertThrows(IllegalStateException.class, () -> DIContainer.builder().addValue(v).build());
     }
 }

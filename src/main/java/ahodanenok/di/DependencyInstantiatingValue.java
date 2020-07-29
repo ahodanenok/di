@@ -7,6 +7,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -27,6 +28,8 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
 
     private Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;
+
+    private boolean initOnStartup;
 
     public DependencyInstantiatingValue(Class<T> instanceClass) {
         this(instanceClass, instanceClass);
@@ -52,6 +55,15 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
     public DependencyInstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
         this(id.type(), instanceClass);
         this.id = id;
+    }
+
+    @Override
+    public boolean isInitOnStartup() {
+        return initOnStartup;
+    }
+
+    public void setInitOnStartup(boolean initOnStartup) {
+        this.initOnStartup = initOnStartup;
     }
 
     @Override

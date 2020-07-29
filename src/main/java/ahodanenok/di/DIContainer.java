@@ -7,6 +7,7 @@ import ahodanenok.di.scope.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.*;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
@@ -18,7 +19,6 @@ import java.util.*;
 // todo: qualifiers @Any, @Default
 // todo: stereotypes
 // todo: injection points (could be injected)
-// todo: eager singleton initialization
 // todo: alternatives
 
 /**
@@ -189,6 +189,16 @@ public final class DIContainer {
 
             for (DependencyValue<?> value : container.values) {
                 value.bind(container);
+            }
+
+            for (DependencyValue<?> value : container.values) {
+                if (value.isInitOnStartup()) {
+                    if (value.scope().equals(ScopeIdentifier.of(Singleton.class))) {
+                        instance(value.id());
+                    } else {
+                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
+                    }
+                }
             }
 
             return container;

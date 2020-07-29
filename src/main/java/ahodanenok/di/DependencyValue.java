@@ -24,4 +24,8 @@ public interface DependencyValue<T> {
     default boolean isInitOnStartup() {
         return false;
     }
+
+    default boolean isDefault() {
+        return false;
+    }
 }

@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 // todo: @Disposes method for created instance
-public class DependencyMethodProviderValue<T> implements DependencyValue<T> {
+public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T> {
 
     private DIContainer container;
 

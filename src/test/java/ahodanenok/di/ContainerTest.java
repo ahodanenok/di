@@ -36,4 +36,50 @@ public class ContainerTest {
 
         assertThrows(IllegalStateException.class, () -> DIContainer.builder().addValue(v).build());
     }
+
+    @Test
+    public void testDefault_1() {
+        DependencyInstanceValue<Integer> v = new DependencyInstanceValue<Integer>(10);
+        v.setDefault(true);
+
+        DIContainer container = DIContainer.builder().addValue(v).build();
+        assertEquals(10, container.instance(int.class));
+    }
+
+    @Test
+    public void testDefault_2() {
+        DependencyInstanceValue<Integer> v1 = new DependencyInstanceValue<>(10);
+        v1.setDefault(true);
+
+        DependencyInstanceValue<Integer> v2 = new DependencyInstanceValue<>(20);
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
+        assertEquals(20, container.instance(int.class));
+    }
+
+    @Test
+    public void testDefault_3() {
+        DependencyInstanceValue<Integer> v1 = new DependencyInstanceValue<>(10);
+        v1.setDefault(true);
+
+        DependencyInstanceValue<Integer> v2 = new DependencyInstanceValue<>(20);
+        v2.setDefault(true);
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
+        assertThrows(IllegalStateException.class, () -> container.instance(int.class));
+    }
+
+    @Test
+    public void testDefault_4() {
+        DependencyInstanceValue<Integer> v1 = new DependencyInstanceValue<>(10);
+        v1.setDefault(true);
+
+        DependencyInstanceValue<Integer> v2 = new DependencyInstanceValue<>(20);
+        v2.setDefault(true);
+
+        DependencyInstanceValue<Integer> v3 = new DependencyInstanceValue<>(10);
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).addValue(v3).build();
+        assertThrows(IllegalStateException.class, () -> container.instance(int.class));
+    }
 }

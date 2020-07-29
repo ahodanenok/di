@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
+public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> {
 
     // todo: check that class is really an instantiable class
 

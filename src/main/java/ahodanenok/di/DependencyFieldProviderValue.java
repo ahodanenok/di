@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
-public class DependencyFieldProviderValue<T> implements DependencyValue<T> {
+public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> {
 
     private DIContainer container;
     private Field field;

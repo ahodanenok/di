@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
 // todo: implement decorators
@@ -63,8 +64,19 @@ public final class DIContainer {
             return null;
         }
 
-        if (result.size() > 2) {
-            throw new UnsatisfiedDependencyException(id, "multiple providers");
+        if (result.size() > 1) {
+            Set<DependencyValue<T>> values = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
+            if (values.size() > 1) {
+                throw new UnsatisfiedDependencyException(id, "multiple providers");
+            }
+
+            if (result.size() - values.size() > 1) {
+                throw new IllegalStateException(
+                        "There are multiple values marked as default for " + id + ", " +
+                                "values are " + result.stream().map(DependencyValue::id).collect(Collectors.toList()));
+            }
+
+            result = values;
         }
 
         DependencyValue<T> value = result.iterator().next();

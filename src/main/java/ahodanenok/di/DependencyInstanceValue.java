@@ -15,7 +15,7 @@ import javax.inject.Singleton;
  *
  * @param <T> type of the value
  */
-public class DependencyInstanceValue<T> implements DependencyValue<T> {
+public class DependencyInstanceValue<T> extends AbstractDependencyValue<T> {
 
     private DependencyIdentifier<T> id;
     private Provider<? extends T> instance;

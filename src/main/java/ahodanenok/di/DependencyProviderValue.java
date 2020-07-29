@@ -4,7 +4,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Provider;
 
-public class DependencyProviderValue<T> implements DependencyValue<T> {
+public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
 
     private DependencyIdentifier<T> id;
     private Class<T> type;

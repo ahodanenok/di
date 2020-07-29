@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -118,7 +119,8 @@ public class DependencyInstantiatingValue<T> implements DependencyValue<T> {
         } else {
             try {
                 // @Inject is optional for public, no-argument constructors
-                if (instanceClass.isMemberClass() || instanceClass.isLocalClass() || instanceClass.isAnonymousClass()) {
+                if (!Modifier.isStatic(instanceClass.getModifiers())
+                        && (instanceClass.isMemberClass() || instanceClass.isLocalClass() || instanceClass.isAnonymousClass())) {
                     constructor = instanceClass.getConstructor(instanceClass.getEnclosingClass());
                 } else {
                     constructor = instanceClass.getConstructor();

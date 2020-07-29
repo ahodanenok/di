@@ -1,5 +1,6 @@
 package ahodanenok.di.scope;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
@@ -26,4 +27,10 @@ public interface ScopeResolution {
      * @param defaultScope returned if scope wasn't resolved
      */
     ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope);
+
+    default ScopeIdentifier resolve(Field field) {
+        return resolve(field, ScopeIdentifier.of(NotScoped.class));
+    }
+
+    ScopeIdentifier resolve(Field field, ScopeIdentifier defaultScope);
 }

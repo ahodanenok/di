@@ -194,4 +194,24 @@ public final class ReflectionAssistant {
 
         return true;
     }
+
+    public static void checkFieldTypeAssignable(Class<?> type, Field field) {
+        Class<?> target;
+        if (type.isPrimitive()) {
+            target = PRIMITIVE_WRAPPERS.get(type);
+        } else {
+            target = type;
+        }
+
+        Class<?> src;
+        if (field.getType().isPrimitive()) {
+            src = PRIMITIVE_WRAPPERS.get(field.getType());
+        } else {
+            src = field.getType();
+        }
+
+        if (!target.isAssignableFrom(src)) {
+            throw new IllegalArgumentException(String.format("Type of the field %s is not assignable to %s", field, type));
+        }
+    }
 }

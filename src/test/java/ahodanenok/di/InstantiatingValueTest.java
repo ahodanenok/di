@@ -155,6 +155,17 @@ public class InstantiatingValueTest {
 
        assertEquals(10, v.provider().get().n);
     }
+
+    public static class NestedClass { }
+
+    @Test
+    public void testNestedClass_1() {
+        DependencyInstantiatingValue<NestedClass> v =
+                new DependencyInstantiatingValue<>(NestedClass.class);
+        v.bind(container);
+
+        assertNotNull(v.provider().get());
+    }
 }
 
 @Qualifier

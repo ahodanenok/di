@@ -5,6 +5,7 @@ import ahodanenok.di.exception.ScopeResolutionException;
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
@@ -56,6 +57,21 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         if (scopes.size() > 1) {
             // todo: error message
             throw new ScopeResolutionException(method, "more than 1 scope, found scopes are " + scopes);
+        }
+
+        if (scopes.size() == 1) {
+            return ScopeIdentifier.of(scopes.iterator().next());
+        } else {
+            return defaultScope;
+        }
+    }
+
+    @Override
+    public ScopeIdentifier resolve(Field field, ScopeIdentifier defaultScope) {
+        Set<Annotation> scopes = collect(field.getDeclaredAnnotations());
+        if (scopes.size() > 1) {
+            // todo: error message
+            throw new ScopeResolutionException(field, "more than 1 scope, found scopes are " + scopes);
         }
 
         if (scopes.size() == 1) {

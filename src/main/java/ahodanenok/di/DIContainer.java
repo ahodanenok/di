@@ -16,7 +16,6 @@ import java.util.*;
 // todo: logging
 // todo: events (like in cdi)
 // todo: qualifiers @Any, @Default
-// todo: provider field (static and instance)
 // todo: stereotypes
 // todo: injection points (could be injected)
 // todo: eager singleton initialization

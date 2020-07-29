@@ -45,6 +45,10 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
 
         // todo: maybe use scope of method owner class as a default
         scope = container.scopeResolution().resolve(method, ScopeIdentifier.of(NotScoped.class));
+
+        if (method.isAnnotationPresent(DefaultValue.class)) {
+            setDefault(true);
+        }
     }
 
     @Override

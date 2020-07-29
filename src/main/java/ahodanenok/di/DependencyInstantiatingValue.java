@@ -76,6 +76,10 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         }
 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
+
+        if (instanceClass.isAnnotationPresent(DefaultValue.class)) {
+            setDefault(true);
+        }
     }
 
     @Override

@@ -40,4 +40,9 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     public Provider<? extends T> provider() {
         return providerValue.provider().get();
     }
+
+    @Override
+    public boolean isDefault() {
+        return super.isDefault() || providerValue.isDefault();
+    }
 }

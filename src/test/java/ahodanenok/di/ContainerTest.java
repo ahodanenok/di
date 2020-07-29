@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,5 +82,72 @@ public class ContainerTest {
 
         DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).addValue(v3).build();
         assertThrows(IllegalStateException.class, () -> container.instance(int.class));
+    }
+
+    @DefaultValue
+    public static class Default_1 { }
+
+    @Test
+    public void testDefault_5() {
+        DependencyInstantiatingValue<Default_1> v = new DependencyInstantiatingValue<>(Default_1.class);
+
+        DIContainer container = DIContainer.builder().addValue(v).build();
+        assertNotNull(container.instance(Default_1.class));
+    }
+
+    public static class DefaultParent { }
+    @DefaultValue
+    public static class DefaultChildA extends DefaultParent { }
+    public static class DefaultChildB extends DefaultParent { }
+
+    @Test
+    public void testDefault_6() {
+        DependencyInstantiatingValue<DefaultParent> v1 = new DependencyInstantiatingValue<>(DefaultParent.class, DefaultChildA.class);
+        DependencyInstantiatingValue<DefaultParent> v2 = new DependencyInstantiatingValue<>(DefaultParent.class, DefaultChildB.class);
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
+        assertTrue(container.instance(DefaultParent.class) instanceof DefaultChildB);
+    }
+
+    @DefaultValue
+    public static class DefaultProvider implements Provider<String> {
+        @Override
+        public String get() {
+            return "default";
+        }
+    }
+
+    @Test
+    public void testDefault_7() {
+        DependencyProviderValue<String> v = new DependencyProviderValue<>(String.class, DefaultProvider.class);
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isDefault());
+    }
+
+    public static class DefaultMethod {
+        @DefaultValue
+        public void m() { }
+    }
+
+    @Test
+    public void testDefault_8() throws Exception {
+        DependencyMethodProviderValue<String> v = new DependencyMethodProviderValue<>(String.class, DefaultMethod.class.getDeclaredMethod("m"));
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isDefault());
+    }
+
+    public static class DefaultField {
+        @DefaultValue
+        String f;
+    }
+
+    @Test
+    public void testDefault_9() throws Exception {
+        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, DefaultField.class.getDeclaredField("f"));
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isDefault());
     }
 }

@@ -1,6 +1,5 @@
 package ahodanenok.di;
 
-import ahodanenok.di.exception.ScopeResolutionException;
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.scope.*;
@@ -13,14 +12,12 @@ import java.util.stream.Collectors;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
 // todo: implement decorators
-// todo: default values, which are injected when no others are found (@Default)
 // todo: JSR-250
 // todo: logging
 // todo: events (like in cdi)
 // todo: qualifiers @Any, @Default
 // todo: stereotypes
 // todo: injection points (could be injected)
-// todo: alternatives
 
 /**
  * Container is a coordinator between providers

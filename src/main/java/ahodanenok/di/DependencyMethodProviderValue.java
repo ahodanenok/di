@@ -46,6 +46,10 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
         // todo: maybe use scope of method owner class as a default
         scope = container.scopeResolution().resolve(method, ScopeIdentifier.of(NotScoped.class));
 
+        if (initOnStartup == null && method.isAnnotationPresent(Eager.class)) {
+            setInitOnStartup(true);
+        }
+
         if (method.isAnnotationPresent(DefaultValue.class)) {
             setDefault(true);
         }
@@ -65,6 +69,7 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
             // todo: how to register instance of declaring class in container if method is not static
 
             Object instance = methodInstanceId != null ? container.instance(methodInstanceId) : null;
+            // todo: if method is not static instance is required, throw unsatisfied dependency if null
             // todo: suppress warnings when type is checked in constructor
             return (T) new InjectableMethod(container, method).inject(instance);
         };

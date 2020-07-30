@@ -38,6 +38,73 @@ public class ContainerTest {
         assertThrows(IllegalStateException.class, () -> DIContainer.builder().addValue(v).build());
     }
 
+    @Eager
+    @Singleton
+    public static class EagerClass { }
+
+    @Test
+    public void testEagerInit_4() throws Exception {
+        DependencyInstantiatingValue<EagerClass> v = new DependencyInstantiatingValue<>(EagerClass.class);
+        v.setInitOnStartup(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isInitOnStartup());
+    }
+
+    @Test
+    public void testEagerInit_5() throws Exception {
+        DependencyInstantiatingValue<EagerClass> v = new DependencyInstantiatingValue<>(EagerClass.class);
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isInitOnStartup());
+    }
+
+    public static class EagerField {
+        @Eager
+        @Singleton
+        static String f = "1";
+    }
+
+    @Test
+    public void testEagerInit_6() throws Exception {
+        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, EagerField.class.getDeclaredField("f"));
+        v.setInitOnStartup(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isInitOnStartup());
+    }
+
+    @Test
+    public void testEagerInit_7() throws Exception {
+        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, EagerField.class.getDeclaredField("f"));
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isInitOnStartup());
+    }
+
+    public static class EagerMethod {
+        @Eager
+        @Singleton
+        static String m() { return "test"; }
+    }
+
+    @Test
+    public void testEagerInit_8() throws Exception {
+        DependencyMethodProviderValue<String> v = new DependencyMethodProviderValue<>(String.class, EagerMethod.class.getDeclaredMethod("m"));
+        v.setInitOnStartup(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isInitOnStartup());
+    }
+
+    @Test
+    public void testEagerInit_9() throws Exception {
+        DependencyMethodProviderValue<String> v = new DependencyMethodProviderValue<>(String.class, EagerMethod.class.getDeclaredMethod("m"));
+
+        DIContainer.builder().addValue(v).build();
+        assertTrue(v.isInitOnStartup());
+    }
+
     @Test
     public void testDefault_1() {
         DependencyInstanceValue<Integer> v = new DependencyInstanceValue<Integer>(10);

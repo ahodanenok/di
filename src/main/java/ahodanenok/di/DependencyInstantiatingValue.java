@@ -29,8 +29,6 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     private Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;
 
-    private boolean initOnStartup;
-
     public DependencyInstantiatingValue(Class<T> instanceClass) {
         this(instanceClass, instanceClass);
     }
@@ -58,15 +56,6 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     }
 
     @Override
-    public boolean isInitOnStartup() {
-        return initOnStartup;
-    }
-
-    public void setInitOnStartup(boolean initOnStartup) {
-        this.initOnStartup = initOnStartup;
-    }
-
-    @Override
     public void bind(DIContainer container) {
         this.container = container;
 
@@ -76,6 +65,10 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         }
 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
+
+        if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
+            setInitOnStartup(true);
+        }
 
         if (instanceClass.isAnnotationPresent(DefaultValue.class)) {
             setDefault(true);

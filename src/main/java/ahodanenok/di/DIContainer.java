@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 // todo: lookup instance by name (@Named)
 // todo: rethink exceptions' names
 // todo: profiles (set of values enabled by name)
+// todo: when null if valid as dependency value, when to throw unsatisfied dependency
 
 /**
  * Container is a coordinator between providers

@@ -105,6 +105,24 @@ public class ContainerTest {
         assertTrue(v.isInitOnStartup());
     }
 
+    @Eager
+    @Singleton
+    public static class EagerProvider implements Provider<String> {
+        @Override
+        public String get() {
+            return "default";
+        }
+    }
+
+    @Test
+    public void testEagerInit_10() throws Exception {
+        DependencyProviderValue<String> v = new DependencyProviderValue<>(String.class, EagerProvider.class);
+        v.setInitOnStartup(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isInitOnStartup());
+    }
+
     @Test
     public void testDefault_1() {
         DependencyInstanceValue<Integer> v = new DependencyInstanceValue<Integer>(10);
@@ -192,17 +210,35 @@ public class ContainerTest {
         assertTrue(v.isDefault());
     }
 
+    @Test
+    public void testDefault_8() {
+        DependencyProviderValue<String> v = new DependencyProviderValue<>(String.class, DefaultProvider.class);
+        v.setDefault(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isDefault());
+    }
+
     public static class DefaultMethod {
         @DefaultValue
         public void m() { }
     }
 
     @Test
-    public void testDefault_8() throws Exception {
+    public void testDefault_9() throws Exception {
         DependencyMethodProviderValue<String> v = new DependencyMethodProviderValue<>(String.class, DefaultMethod.class.getDeclaredMethod("m"));
 
         DIContainer.builder().addValue(v).build();
         assertTrue(v.isDefault());
+    }
+
+    @Test
+    public void testDefault_10() throws Exception {
+        DependencyMethodProviderValue<String> v = new DependencyMethodProviderValue<>(String.class, DefaultMethod.class.getDeclaredMethod("m"));
+        v.setDefault(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isDefault());
     }
 
     public static class DefaultField {
@@ -211,10 +247,28 @@ public class ContainerTest {
     }
 
     @Test
-    public void testDefault_9() throws Exception {
+    public void testDefault_11() throws Exception {
         DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, DefaultField.class.getDeclaredField("f"));
 
         DIContainer.builder().addValue(v).build();
         assertTrue(v.isDefault());
+    }
+
+    @Test
+    public void testDefault_12() throws Exception {
+        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, DefaultField.class.getDeclaredField("f"));
+        v.setDefault(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isDefault());
+    }
+
+    @Test
+    public void testDefault_13() {
+        DependencyInstantiatingValue<Default_1> v = new DependencyInstantiatingValue<>(Default_1.class);
+        v.setDefault(false);
+
+        DIContainer.builder().addValue(v).build();
+        assertFalse(v.isDefault());
     }
 }

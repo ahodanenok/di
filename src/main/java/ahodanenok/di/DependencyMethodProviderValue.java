@@ -50,7 +50,7 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
             setInitOnStartup(true);
         }
 
-        if (method.isAnnotationPresent(DefaultValue.class)) {
+        if (defaultValue == null && method.isAnnotationPresent(DefaultValue.class)) {
             setDefault(true);
         }
     }

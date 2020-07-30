@@ -46,7 +46,7 @@ public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> 
             setInitOnStartup(true);
         }
 
-        if (field.isAnnotationPresent(DefaultValue.class)) {
+        if (defaultValue == null && field.isAnnotationPresent(DefaultValue.class)) {
             setDefault(true);
         }
     }

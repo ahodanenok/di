@@ -3,10 +3,10 @@ package ahodanenok.di;
 public abstract class AbstractDependencyValue<T> implements DependencyValue<T> {
 
     protected Boolean initOnStartup;
-    private boolean defaultValue;
+    protected Boolean defaultValue;
 
     public boolean isDefault() {
-        return defaultValue;
+        return Boolean.TRUE.equals(defaultValue);
     }
 
     public void setDefault(boolean defaultValue) {

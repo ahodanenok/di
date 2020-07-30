@@ -70,7 +70,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
             setInitOnStartup(true);
         }
 
-        if (instanceClass.isAnnotationPresent(DefaultValue.class)) {
+        if (defaultValue == null && instanceClass.isAnnotationPresent(DefaultValue.class)) {
             setDefault(true);
         }
     }

@@ -45,4 +45,9 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     public boolean isDefault() {
         return super.isDefault() || providerValue.isDefault();
     }
+
+    @Override
+    public boolean isInitOnStartup() {
+        return super.isInitOnStartup() || providerValue.isInitOnStartup();
+    }
 }

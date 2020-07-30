@@ -136,6 +136,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
             try {
                 // @Inject is optional for public, no-argument constructors
                 if (!Modifier.isStatic(instanceClass.getModifiers())
+                        // todo: leave only support for member classes
                         && (instanceClass.isMemberClass() || instanceClass.isLocalClass() || instanceClass.isAnonymousClass())) {
                     constructor = instanceClass.getConstructor(instanceClass.getEnclosingClass());
                 } else {

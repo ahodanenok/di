@@ -15,9 +15,12 @@ import java.util.stream.Collectors;
 // todo: JSR-250
 // todo: logging
 // todo: events (like in cdi)
-// todo: qualifiers @Any, @Default
+// todo: qualifier @Any
 // todo: stereotypes
 // todo: injection points (could be injected)
+// todo: lookup instance by name (@Named)
+// todo: rethink exceptions' names
+// todo: profiles (set of values enabled by name)
 
 /**
  * Container is a coordinator between providers

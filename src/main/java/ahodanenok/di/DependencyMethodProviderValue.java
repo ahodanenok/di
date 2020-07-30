@@ -58,6 +58,7 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
 
     @Override
     public Provider<? extends T> provider() {
+        // todo: if like in ahodanenok.di.DependencyFieldProviderValue.provider
         return () -> {
             // todo: allow specifying provider method in supeclass or interface, concrete implementation will provide it
             // todo: check for conflicts on annotations on provider method from interface and its implementation

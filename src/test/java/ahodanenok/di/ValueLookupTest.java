@@ -111,4 +111,18 @@ public class ValueLookupTest {
         assertEquals(1, value.size());
         assertEquals("2", value.iterator().next().provider().get());
     }
+
+    @Test
+    public void lookupExact_7() {
+        @Any class T { }
+
+        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+
+        Set<DependencyValue<?>> values = new LinkedHashSet<>();
+        values.add(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));
+
+        Set<DependencyValue<String>> value = lookup.execute(values, DependencyIdentifier.of(String.class, T.class.getAnnotation(Any.class)));
+        assertEquals(1, value.size());
+        assertEquals("1", value.iterator().next().provider().get());
+    }
 }

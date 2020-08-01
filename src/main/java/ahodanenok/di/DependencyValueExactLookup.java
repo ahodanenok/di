@@ -16,7 +16,7 @@ public class DependencyValueExactLookup implements DependencyValueLookup {
         Set<DependencyValue<T>> matching = new HashSet<>();
         for (DependencyValue<?> v : values) {
             if (v.id().qualifiers().isEmpty() == id.qualifiers().isEmpty()
-                    && v.id().qualifiers().containsAll(id.qualifiers())
+                    && (v.id().qualifiers().containsAll(id.qualifiers()) || id.qualifiers().stream().anyMatch(a -> a.annotationType() == Any.class))
                     && typesMatch(id.type(), v.id().type())) {
                 @SuppressWarnings("unchecked") // if ids are equals, type is T
                 DependencyValue<T> matched = (DependencyValue<T>) v;

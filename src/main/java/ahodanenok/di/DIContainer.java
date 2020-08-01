@@ -2,6 +2,8 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.name.AnnotatedNameResolution;
+import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.*;
 
 import javax.inject.Inject;
@@ -17,7 +19,6 @@ import java.util.stream.Collectors;
 // todo: events (like in cdi)
 // todo: stereotypes
 // todo: injection points (could be injected)
-// todo: lookup instance by name (@Named)
 // todo: rethink exceptions' names
 // todo: profiles (set of values enabled by name)
 // todo: when null if valid as dependency value, when to throw unsatisfied dependency
@@ -31,6 +32,7 @@ public final class DIContainer {
     private Map<ScopeIdentifier, Scope> scopes;
     private ScopeResolution scopeResolution;
     private QualifierResolution qualifierResolution;
+    private NameResolution nameResolution;
 
     private Set<DependencyValue<?>> values;
     private DependencyValueLookup valueLookup;
@@ -48,6 +50,8 @@ public final class DIContainer {
         return qualifierResolution;
     }
 
+    public NameResolution nameResolution() { return nameResolution; }
+
     private Scope lookupScope(ScopeIdentifier id) {
         Scope scope = scopes.get(id);
         if (scope != null) {
@@ -57,31 +61,31 @@ public final class DIContainer {
         }
     }
 
-    private <T> DependencyValue<T> lookupValue(DependencyIdentifier<T> id) {
-        Set<DependencyValue<T>> result = valueLookup.execute(values, id);
-
+    public Provider<?> provider(String name) {
+        Set<DependencyValue<?>> result = values.stream().filter(v -> name.equals(v.getName())).collect(Collectors.toSet());
         if (result.isEmpty()) {
             return null;
         }
 
         if (result.size() > 1) {
-            Set<DependencyValue<T>> values = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
-            if (values.size() > 1) {
-                throw new UnsatisfiedDependencyException(id, "multiple providers");
+            Set<DependencyValue<?>> withoutDefaults = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
+            if (withoutDefaults.size() > 1) {
+                //throw new UnsatisfiedDependencyException(id, "multiple providers");
+                throw new RuntimeException(); // todo: errors
             }
 
-            if (result.size() - values.size() > 1) {
-                throw new IllegalStateException(
-                        "There are multiple values marked as default for " + id + ", " +
-                                "values are " + result.stream().map(DependencyValue::id).collect(Collectors.toList()));
+            if (result.size() - withoutDefaults.size() > 1) {
+//                throw new IllegalStateException(
+//                        "There are multiple values marked as default for " + id + ", " +
+//                                "values are " + values.stream().map(DependencyValue::id).collect(Collectors.toList()));
+                throw new IllegalStateException(); // todo: errors
             }
 
-            result = values;
+            result = withoutDefaults;
         }
 
-        DependencyValue<T> value = result.iterator().next();
-        // todo: cache looked up values
-        return value;
+        DependencyValue<?> value = result.iterator().next();
+        return provider(value);
     }
 
     public <T> Provider<? extends T> provider(Class<T> type) {
@@ -89,21 +93,53 @@ public final class DIContainer {
     }
 
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        DependencyValue<T> value = lookupValue(id);
-        if (value == null) {
-            return () -> null;
+        Set<DependencyValue<T>> result = valueLookup.execute(values, id);
+        if (result.isEmpty()) {
+            return null;
         }
 
+        if (result.size() > 1) {
+            Set<DependencyValue<T>> withoutDefaults = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
+            if (withoutDefaults.size() > 1) {
+                throw new UnsatisfiedDependencyException(id, "multiple providers"); // todo: errors
+            }
+
+            if (result.size() - withoutDefaults.size() > 1) {
+                // todo: errors
+                throw new IllegalStateException(
+                        "There are multiple values marked as default for " + id + ", " +
+                                "values are " + result.stream().map(DependencyValue::id).collect(Collectors.toList()));
+            }
+
+            result = withoutDefaults;
+        }
+
+        DependencyValue<T> value = result.iterator().next();
+        return provider(value);
+    }
+
+    private <T> Provider<? extends T> provider(DependencyValue<T> value) {
+        Objects.requireNonNull(value, "value is null")    ;
         Scope scope = lookupScope(value.scope());
-        return () -> scope.get(value.id(), value.provider());
+        return () -> scope.get(value);
     }
 
     public <T> T instance(Class<T> type) {
-        return provider(DependencyIdentifier.of(type)).get();
+        Provider<? extends T> p = provider(DependencyIdentifier.of(type));
+        if (p == null) {
+            return null;
+        }
+
+        return p.get();
     }
 
     public <T> T instance(DependencyIdentifier<T> id) {
-        return provider(id).get();
+        Provider<? extends T> p = provider(id);
+        if (p == null) {
+            return null;
+        }
+
+        return p.get();
     }
 
     public void inject(Object instance) {
@@ -175,6 +211,11 @@ public final class DIContainer {
             return this;
         }
 
+        public Builder withNameResolution(NameResolution nameResolution) {
+            DIContainer.this.nameResolution = nameResolution;
+            return this;
+        }
+
         public DIContainer build() {
             DIContainer container = DIContainer.this;
 
@@ -193,6 +234,10 @@ public final class DIContainer {
 
             if (container.qualifierResolution == null) {
                 container.qualifierResolution = new AnnotatedQualifierResolution();
+            }
+
+            if (container.nameResolution == null) {
+                container.nameResolution = new AnnotatedNameResolution();
             }
 
             if (container.valueLookup == null) {

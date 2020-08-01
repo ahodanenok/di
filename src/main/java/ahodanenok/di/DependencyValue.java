@@ -17,6 +17,8 @@ public interface DependencyValue<T> {
 
     DependencyIdentifier<T> id();
 
+    String getName();
+
     ScopeIdentifier scope();
 
     Provider<? extends T> provider();

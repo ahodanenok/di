@@ -42,6 +42,15 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     }
 
     @Override
+    public String getName() {
+        if (name != null) {
+            return name;
+        }
+
+        return providerValue.getName();
+    }
+
+    @Override
     public boolean isDefault() {
         if (defaultValue == null) {
             return providerValue.isDefault();

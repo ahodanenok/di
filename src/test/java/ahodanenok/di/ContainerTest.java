@@ -271,4 +271,63 @@ public class ContainerTest {
         DIContainer.builder().addValue(v).build();
         assertFalse(v.isDefault());
     }
+
+    @Test
+    public void testProviderByName() {
+        DependencyInstanceValue<String> v1 = new DependencyInstanceValue<>("1");
+        v1.setName("v-1");
+
+        DependencyInstanceValue<String> v2 = new DependencyInstanceValue<>("2");
+        v2.setName("v-2");
+
+        DependencyInstanceValue<String> v3 = new DependencyInstanceValue<>("3");
+        v3.setName("v-3");
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).addValue(v3).build();
+
+        Provider<?> v;
+
+        v = container.provider("v-1");
+        assertNotNull(v);
+        assertEquals("1", v.get());
+
+        v = container.provider("v-2");
+        assertNotNull(v);
+        assertEquals("2", v.get());
+
+        v = container.provider("v-3");
+        assertNotNull(v);
+        assertEquals("3", v.get());
+
+        v = container.provider("v-4");
+        assertNull(v);
+    }
+
+    @Test
+    public void testProviderByNameWithDefault() {
+        DependencyInstanceValue<String> v1 = new DependencyInstanceValue<>("1");
+        v1.setName("v");
+        v1.setDefault(true);
+
+        DependencyInstanceValue<String> v2 = new DependencyInstanceValue<>("2");
+        v2.setName("v");
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
+
+        Provider<?> v = container.provider("v");
+        assertNotNull(v);
+        assertEquals("2", v.get());
+    }
+
+    @Test
+    public void testProviderByNameAmbiguous() {
+        DependencyInstanceValue<String> v1 = new DependencyInstanceValue<>("1");
+        v1.setName("v");
+
+        DependencyInstanceValue<String> v2 = new DependencyInstanceValue<>("2");
+        v2.setName("v");
+
+        DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
+        assertThrows(RuntimeException.class, () -> container.provider("v"));
+    }
 }

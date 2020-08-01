@@ -6,6 +6,7 @@ import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -65,6 +66,10 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         }
 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
+
+        if (name == null) {
+            setName(container.nameResolution().resolve(instanceClass));
+        }
 
         if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
             setInitOnStartup(true);

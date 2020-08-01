@@ -1,8 +1,7 @@
 package ahodanenok.di.scope;
 
-import ahodanenok.di.DependencyIdentifier;
+import ahodanenok.di.DependencyValue;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,7 @@ import java.util.Map;
 public class SingletonScope implements Scope {
 
     private ScopeIdentifier id;
-    private Map<DependencyIdentifier<?>, Object> instances;
+    private Map<DependencyValue<?>, Object> instances;
 
     public SingletonScope() {
         this.id = ScopeIdentifier.of(Singleton.class);
@@ -26,12 +25,12 @@ public class SingletonScope implements Scope {
     }
 
     @Override
-    public <T> T get(DependencyIdentifier<T> id, Provider<? extends T> provider) {
+    public <T> T get(DependencyValue<T> value) {
         @SuppressWarnings("unchecked") // provider for id returns some subtype of T or T itself
-        T instance = (T) instances.get(id);
+        T instance = (T) instances.get(value);
         if (instance == null) {
-            instance = provider.get();
-            instances.put(id, instance);
+            instance = value.provider().get();
+            instances.put(value, instance);
         }
 
         return instance;

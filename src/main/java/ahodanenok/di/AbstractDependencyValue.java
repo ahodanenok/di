@@ -2,8 +2,17 @@ package ahodanenok.di;
 
 public abstract class AbstractDependencyValue<T> implements DependencyValue<T> {
 
+    protected String name;
     protected Boolean initOnStartup;
     protected Boolean defaultValue;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public boolean isDefault() {
         return Boolean.TRUE.equals(defaultValue);

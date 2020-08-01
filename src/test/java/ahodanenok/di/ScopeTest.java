@@ -71,12 +71,11 @@ public class ScopeTest {
     public void testNotScoped_2() {
         class Test { }
 
-        DependencyIdentifier<Test> id = DependencyIdentifier.of(Test.class);
-        Provider<Test> provider = () -> new Test();
+        DependencyProviderValue<Test> v = new DependencyProviderValue<>(Test.class, Test::new);
 
         DefaultScope scope = new DefaultScope();
-        Test a = scope.get(id, provider);
-        Test b = scope.get(id, provider);
+        Test a = scope.get(v);
+        Test b = scope.get(v);
         assertNotSame(a, b);
     }
 
@@ -90,12 +89,11 @@ public class ScopeTest {
     public void testSingleton_2() {
         class Test { }
 
-        DependencyIdentifier<Test> id = DependencyIdentifier.of(Test.class);
-        Provider<Test> provider = () -> new Test();
+        DependencyProviderValue<Test> v = new DependencyProviderValue<>(Test.class, Test::new);
 
         SingletonScope scope = new SingletonScope();
-        Test a = scope.get(id, provider);
-        Test b = scope.get(id, provider);
+        Test a = scope.get(v);
+        Test b = scope.get(v);
         assertSame(a, b);
     }
 

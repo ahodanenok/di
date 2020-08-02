@@ -5,6 +5,8 @@ import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.name.AnnotatedNameResolution;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.*;
+import ahodanenok.di.stereotype.DefaultStereotypeResolution;
+import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -33,6 +35,7 @@ public final class DIContainer {
     private ScopeResolution scopeResolution;
     private QualifierResolution qualifierResolution;
     private NameResolution nameResolution;
+    private StereotypeResolution stereotypeResolution;
 
     private Set<DependencyValue<?>> values;
     private DependencyValueLookup valueLookup;
@@ -216,6 +219,11 @@ public final class DIContainer {
             return this;
         }
 
+        public Builder withStereotypeResolution(StereotypeResolution stereotypeResolution) {
+            DIContainer.this.stereotypeResolution = stereotypeResolution;
+            return this;
+        }
+
         public DIContainer build() {
             DIContainer container = DIContainer.this;
 
@@ -238,6 +246,10 @@ public final class DIContainer {
 
             if (container.nameResolution == null) {
                 container.nameResolution = new AnnotatedNameResolution();
+            }
+
+            if (container.stereotypeResolution == null) {
+                container.stereotypeResolution = new DefaultStereotypeResolution();
             }
 
             if (container.valueLookup == null) {

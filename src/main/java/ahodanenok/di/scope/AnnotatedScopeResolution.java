@@ -8,7 +8,10 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -18,7 +21,7 @@ import java.util.stream.Collectors;
 public class AnnotatedScopeResolution implements ScopeResolution{
 
     @Override
-    public ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope) {
+    public ScopeIdentifier resolve(Class<?> clazz, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope) {
 
         ScopeIdentifier scope = null;
         Class<?> currentClass = clazz;
@@ -43,6 +46,18 @@ public class AnnotatedScopeResolution implements ScopeResolution{
             currentClass = currentClass.getSuperclass();
         }
 
+        if (scope == null) {
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypes.get());
+            if (s.size() > 1) {
+                // todo: exception type, message
+                throw new IllegalStateException("Multiple stereotypes declare a scope");
+            }
+
+            if (s.size() == 1) {
+                scope = s.iterator().next();
+            }
+        }
+
         // todo: is scope is null - check stereotypes
         if (scope != null) {
             return scope;
@@ -52,7 +67,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
     }
 
     @Override
-    public ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope) {
+    public ScopeIdentifier resolve(Method method, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope) {
         Set<Annotation> scopes = collect(method.getDeclaredAnnotations());
         if (scopes.size() > 1) {
             // todo: error message
@@ -62,12 +77,23 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         if (scopes.size() == 1) {
             return ScopeIdentifier.of(scopes.iterator().next());
         } else {
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypes.get());
+            if (s.size() > 1) {
+                // todo: exception type, message
+                throw new IllegalStateException("Multiple stereotypes declare a scope");
+            }
+
+            if (s.size() == 1) {
+                return s.iterator().next();
+            }
+
+
             return defaultScope;
         }
     }
 
     @Override
-    public ScopeIdentifier resolve(Field field, ScopeIdentifier defaultScope) {
+    public ScopeIdentifier resolve(Field field, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope) {
         Set<Annotation> scopes = collect(field.getDeclaredAnnotations());
         if (scopes.size() > 1) {
             // todo: error message
@@ -77,6 +103,16 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         if (scopes.size() == 1) {
             return ScopeIdentifier.of(scopes.iterator().next());
         } else {
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypes.get());
+            if (s.size() > 1) {
+                // todo: exception type, message
+                throw new IllegalStateException("Multiple stereotypes declare a scope");
+            }
+
+            if (s.size() == 1) {
+                return s.iterator().next();
+            }
+
             return defaultScope;
         }
     }
@@ -85,5 +121,17 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         return Arrays.stream(annotations)
                 .filter(a -> a.annotationType().isAnnotationPresent(Scope.class))
                 .collect(Collectors.toSet());
+    }
+
+    private Set<ScopeIdentifier> scopesFromStereotypes(Set<Annotation> stereotypes) {
+        Set<ScopeIdentifier> scopes = new HashSet<>();
+        for (Annotation s : stereotypes) {
+            ScopeIdentifier stereotypeScope = resolve(s.annotationType(), Collections::emptySet, null);
+            if (stereotypeScope != null) {
+                scopes.add(stereotypeScope);
+            }
+        }
+
+        return scopes;
     }
 }

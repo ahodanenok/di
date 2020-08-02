@@ -7,6 +7,7 @@ import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.function.Supplier;
 
 // todo: @Disposes method for created instance
 public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T> {
@@ -43,11 +44,13 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
         Set<Annotation> qualifiers = container.qualifierResolution().resolve(method);
         id = DependencyIdentifier.of(type, qualifiers);
 
+        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(method);
+
         // todo: maybe use scope of method owner class as a default
-        scope = container.scopeResolution().resolve(method, ScopeIdentifier.of(NotScoped.class));
+        scope = container.scopeResolution().resolve(method, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(method, () -> container.stereotypeResolution().resolve(method)));
+            setName(container.nameResolution().resolve(method, stereotypes));
         }
 
         if (initOnStartup == null && method.isAnnotationPresent(Eager.class)) {

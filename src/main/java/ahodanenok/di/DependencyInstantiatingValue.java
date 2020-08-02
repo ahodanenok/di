@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> {
@@ -65,12 +66,12 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
             id = DependencyIdentifier.of(type, qualifiers);
         }
 
-        scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
+        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(instanceClass);
+
+        scope = container.scopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(
-                    instanceClass,
-                    () -> container.stereotypeResolution().resolve(instanceClass)));
+            setName(container.nameResolution().resolve(instanceClass, stereotypes));
         }
 
         if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {

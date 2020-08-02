@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Provider;
@@ -8,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> {
 
@@ -40,10 +42,12 @@ public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> 
             id = DependencyIdentifier.of(type, qualifiers);
         }
 
-        scope = container.scopeResolution().resolve(field);
+        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(field);
+
+        scope = container.scopeResolution().resolve(field, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(field, () -> container.stereotypeResolution().resolve(field)));
+            setName(container.nameResolution().resolve(field, stereotypes));
         }
 
         if (initOnStartup == null && field.isAnnotationPresent(Eager.class)) {

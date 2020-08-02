@@ -47,7 +47,7 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
         scope = container.scopeResolution().resolve(method, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(method));
+            setName(container.nameResolution().resolve(method, () -> container.stereotypeResolution().resolve(method)));
         }
 
         if (initOnStartup == null && method.isAnnotationPresent(Eager.class)) {

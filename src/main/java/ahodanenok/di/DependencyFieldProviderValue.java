@@ -43,7 +43,7 @@ public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> 
         scope = container.scopeResolution().resolve(field);
 
         if (name == null) {
-            setName(container.nameResolution().resolve(field));
+            setName(container.nameResolution().resolve(field, () -> container.stereotypeResolution().resolve(field)));
         }
 
         if (initOnStartup == null && field.isAnnotationPresent(Eager.class)) {

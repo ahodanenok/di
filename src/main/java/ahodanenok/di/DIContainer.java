@@ -55,6 +55,10 @@ public final class DIContainer {
 
     public NameResolution nameResolution() { return nameResolution; }
 
+    public StereotypeResolution stereotypeResolution() {
+        return stereotypeResolution;
+    }
+
     private Scope lookupScope(ScopeIdentifier id) {
         Scope scope = scopes.get(id);
         if (scope != null) {

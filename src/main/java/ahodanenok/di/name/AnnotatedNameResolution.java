@@ -2,17 +2,18 @@ package ahodanenok.di.name;
 
 import javax.inject.Named;
 import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Set;
 import java.util.function.Supplier;
 
-// todo: stereotype aware, if stereotype is present and named is not, check stereotype for name
 public class AnnotatedNameResolution implements NameResolution {
 
     @Override
-    public String resolve(Class<?> clazz) {
-        return named(clazz, () -> {
+    public String resolve(Class<?> clazz, Supplier<Set<Annotation>> stereotypes) {
+        return named(clazz, stereotypes, () -> {
             String name = clazz.getSimpleName();
             // todo: check how to use code points
             return Introspector.decapitalize(name);
@@ -20,13 +21,13 @@ public class AnnotatedNameResolution implements NameResolution {
     }
 
     @Override
-    public String resolve(Field field) {
-        return named(field, field::getName);
+    public String resolve(Field field, Supplier<Set<Annotation>> stereotypes) {
+        return named(field, stereotypes, field::getName);
     }
 
     @Override
-    public String resolve(Method method) {
-        return named(method, () -> {
+    public String resolve(Method method, Supplier<Set<Annotation>> stereotypes) {
+        return named(method, stereotypes, () -> {
             String name = method.getName();
             if (name.length() > 2
                     && method.getReturnType().equals(boolean.class)
@@ -44,8 +45,26 @@ public class AnnotatedNameResolution implements NameResolution {
         });
     }
 
-    private String named(AnnotatedElement element, Supplier<String> defaultName) {
+    private String named(AnnotatedElement element, Supplier<Set<Annotation>> stereotypes, Supplier<String> defaultName) {
         Named named = element.getAnnotation(Named.class);
+        if (named == null && stereotypes != null) {
+            for (Annotation s : stereotypes.get()) {
+                if (s.annotationType().isAnnotationPresent(Named.class)) {
+                    Named n = s.annotationType().getAnnotation(Named.class);
+                    if (!n.value().trim().isEmpty()) {
+                        // todo: exception type, message
+                        throw new IllegalStateException(
+                                "@Named annotation declared on a stereotype can't provide a name," +
+                                        " it can only be used on a stereotype to enable default name for values marked with this stereotype." +
+                                        " Stereotype " + s + " with " + n);
+                    }
+
+                    // all @Named annotations will be with empty name, doesn't matter which will be assigned
+                    named = n;
+                }
+            }
+        }
+
         // if there is no named annotation, element doesn't have a name, event a default one
         if (named == null) {
             return null;

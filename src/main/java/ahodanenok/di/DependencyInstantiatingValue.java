@@ -68,7 +68,9 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         scope = container.scopeResolution().resolve(instanceClass, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(instanceClass));
+            setName(container.nameResolution().resolve(
+                    instanceClass,
+                    () -> container.stereotypeResolution().resolve(instanceClass)));
         }
 
         if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {

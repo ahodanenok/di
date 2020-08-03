@@ -8,4 +8,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
+// todo: target
 public @interface Any { }

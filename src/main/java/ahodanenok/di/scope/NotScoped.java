@@ -8,6 +8,6 @@ import java.lang.annotation.*;
  */
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD}) // todo: field
 @Documented
 public @interface NotScoped { }

@@ -1,9 +1,6 @@
 package ahodanenok.di.scope;
 
-import ahodanenok.di.DependencyIdentifier;
 import ahodanenok.di.DependencyValue;
-
-import javax.inject.Provider;
 
 /**
  * @see NotScoped

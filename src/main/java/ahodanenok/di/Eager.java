@@ -12,4 +12,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
+// todo: target
 public @interface Eager { }

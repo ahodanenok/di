@@ -65,7 +65,7 @@ public class AnnotatedNameResolution implements NameResolution {
             }
         }
 
-        // if there is no named annotation, element doesn't have a name, event a default one
+        // if there is no named annotation, element doesn't have a name, even a default one
         if (named == null) {
             return null;
         }

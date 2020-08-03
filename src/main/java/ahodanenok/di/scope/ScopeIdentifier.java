@@ -3,6 +3,7 @@ package ahodanenok.di.scope;
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 
+// constants for singleton, not scoped
 public final class ScopeIdentifier {
 
     public static ScopeIdentifier of(Annotation annotation) {

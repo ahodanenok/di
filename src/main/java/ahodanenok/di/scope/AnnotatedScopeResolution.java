@@ -58,7 +58,6 @@ public class AnnotatedScopeResolution implements ScopeResolution{
             }
         }
 
-        // todo: is scope is null - check stereotypes
         if (scope != null) {
             return scope;
         } else {

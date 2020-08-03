@@ -1,9 +1,6 @@
 package ahodanenok.di;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.*;
 
 /**
  * Tells to container to initialize value at container initialization
@@ -11,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Documented
 @Inherited
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-// todo: target
 public @interface Eager { }

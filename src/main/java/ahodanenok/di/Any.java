@@ -1,12 +1,10 @@
 package ahodanenok.di;
 
 import javax.inject.Qualifier;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.*;
 
-@Documented
 @Qualifier
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
-// todo: target
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 public @interface Any { }

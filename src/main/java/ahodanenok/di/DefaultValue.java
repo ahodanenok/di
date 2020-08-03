@@ -1,12 +1,9 @@
 package ahodanenok.di;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
-// todo: documented
-// todo: inherited?
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DefaultValue { }

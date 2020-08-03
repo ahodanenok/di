@@ -12,13 +12,10 @@ public class InjectableMethod implements Injectable<Object> {
 
     private DIContainer container;
     private Method method;
-    private QualifierResolution qualifierResolution;
 
     public InjectableMethod(DIContainer container, Method method) {
         this.container = container;
         this.method = method;
-        // todo: get QualifierResolution from container
-        this.qualifierResolution = new AnnotatedQualifierResolution();
     }
 
     @Override
@@ -50,7 +47,7 @@ public class InjectableMethod implements Injectable<Object> {
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
-            Set<Annotation> qualifiers = qualifierResolution.resolve(method, i);
+            Set<Annotation> qualifiers = container.qualifierResolution().resolve(method, i);
             DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
             Object arg = container.instance(id);
             if (arg == null && !optional[i]) {

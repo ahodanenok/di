@@ -12,13 +12,10 @@ public class InjectableField implements Injectable<Object> {
 
     private DIContainer container;
     private Field field;
-    private QualifierResolution qualifierResolution;
 
     public InjectableField(DIContainer container, Field field) {
         this.container = container;
         this.field = field;
-        // todo: get QualifierResolution from container
-        this.qualifierResolution = new AnnotatedQualifierResolution();
     }
 
     @Override
@@ -36,7 +33,7 @@ public class InjectableField implements Injectable<Object> {
             throw new InjectionFailedException(field, "field is final");
         }
 
-        Set<Annotation> qualifiers = qualifierResolution.resolve(field);
+        Set<Annotation> qualifiers = container.qualifierResolution().resolve(field);
         DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifiers);
         Object value = container.instance(id);
         if (value == null && !field.isAnnotationPresent(OptionalDependency.class)) {

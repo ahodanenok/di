@@ -15,7 +15,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("privateField")).inject(new AccessTest());
+                container.getContext(), AccessTest.class.getDeclaredField("privateField")).inject(new AccessTest());
         assertEquals("private", test.getPrivateField());
         assertNull(test.getPublicField());
         assertNull(test.getPackageField());
@@ -29,7 +29,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("publicField")).inject(new AccessTest());
+                container.getContext(), AccessTest.class.getDeclaredField("publicField")).inject(new AccessTest());
         assertEquals("public", test.getPublicField());
         assertNull(test.getPrivateField());
         assertNull(test.getPackageField());
@@ -43,7 +43,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("packageField")).inject(new AccessTest());
+                container.getContext(), AccessTest.class.getDeclaredField("packageField")).inject(new AccessTest());
         assertEquals("default", test.getPackageField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
@@ -57,7 +57,7 @@ public class InjectableFieldTest {
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
-                container, AccessTest.class.getDeclaredField("protectedField")).inject(new AccessTest());
+                container.getContext(), AccessTest.class.getDeclaredField("protectedField")).inject(new AccessTest());
         assertEquals("protected", test.getProtectedField());
         assertNull(test.getPrivateField());
         assertNull(test.getPublicField());
@@ -71,7 +71,7 @@ public class InjectableFieldTest {
                 .build();
 
         assertThrows(InjectionFailedException.class, () ->
-                new InjectableField(container, AccessTest.class.getDeclaredField("finalField"))
+                new InjectableField(container.getContext(), AccessTest.class.getDeclaredField("finalField"))
                         .inject(new AccessTest()));
     }
 
@@ -83,7 +83,7 @@ public class InjectableFieldTest {
                 .build();
 
         new InjectableField(
-                container, AccessTest.class.getDeclaredField("staticField")).inject(null);
+                container.getContext(), AccessTest.class.getDeclaredField("staticField")).inject(null);
         assertEquals("static", AccessTest.getStaticField());
     }
 }

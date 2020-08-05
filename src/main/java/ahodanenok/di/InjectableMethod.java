@@ -10,11 +10,11 @@ import java.util.Set;
 
 public class InjectableMethod implements Injectable<Object> {
 
-    private DIContainer container;
+    private DIContainerContext context;
     private Method method;
 
-    public InjectableMethod(DIContainer container, Method method) {
-        this.container = container;
+    public InjectableMethod(DIContainerContext context, Method method) {
+        this.context = context;
         this.method = method;
     }
 
@@ -47,9 +47,9 @@ public class InjectableMethod implements Injectable<Object> {
         int i = 0;
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
-            Set<Annotation> qualifiers = container.qualifierResolution().resolve(method, i);
+            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(method, i);
             DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
-            Object arg = container.instance(id);
+            Object arg = context.getContainer().instance(id);
             if (arg == null && !optional[i]) {
                 throw new UnsatisfiedDependencyException(this, id, "not found");
             }

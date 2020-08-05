@@ -10,11 +10,11 @@ import java.util.Set;
 
 public class InjectableField implements Injectable<Object> {
 
-    private DIContainer container;
+    private DIContainerContext context;
     private Field field;
 
-    public InjectableField(DIContainer container, Field field) {
-        this.container = container;
+    public InjectableField(DIContainerContext context, Field field) {
+        this.context = context;
         this.field = field;
     }
 
@@ -33,9 +33,9 @@ public class InjectableField implements Injectable<Object> {
             throw new InjectionFailedException(field, "field is final");
         }
 
-        Set<Annotation> qualifiers = container.qualifierResolution().resolve(field);
+        Set<Annotation> qualifiers = context.getQualifierResolution().resolve(field);
         DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifiers);
-        Object value = container.instance(id);
+        Object value = context.getContainer().instance(id);
         if (value == null && !field.isAnnotationPresent(OptionalDependency.class)) {
             throw new UnsatisfiedDependencyException(this, id, "not found");
         }

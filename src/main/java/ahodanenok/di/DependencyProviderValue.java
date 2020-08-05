@@ -21,8 +21,8 @@ public class DependencyProviderValue<T> extends AbstractDependencyValue<T> {
     }
 
     @Override
-    public void bind(DIContainer container) {
-        providerValue.bind(container);
+    public void bind(DIContainerContext context) {
+        providerValue.bind(context);
         id = DependencyIdentifier.of(type, providerValue.id().qualifiers());
     }
 

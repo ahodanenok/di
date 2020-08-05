@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 // todo: @Disposes method for created instance
 public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T> {
 
-    private DIContainer container;
+    private DIContainerContext context;
 
     private DependencyIdentifier<T> id;
     private Class<T> type;
@@ -38,19 +38,19 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
     }
 
     @Override
-    public void bind(DIContainer container) {
-        this.container = container;
+    public void bind(DIContainerContext context) {
+        this.context = context;
 
-        Set<Annotation> qualifiers = container.qualifierResolution().resolve(method);
+        Set<Annotation> qualifiers = context.getQualifierResolution().resolve(method);
         id = DependencyIdentifier.of(type, qualifiers);
 
-        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(method);
+        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(method);
 
         // todo: maybe use scope of method owner class as a default
-        scope = container.scopeResolution().resolve(method, stereotypes, ScopeIdentifier.of(NotScoped.class));
+        scope = context.getScopeResolution().resolve(method, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(method, stereotypes));
+            setName(context.getNameResolution().resolve(method, stereotypes));
         }
 
         if (initOnStartup == null && method.isAnnotationPresent(Eager.class)) {
@@ -75,10 +75,10 @@ public class DependencyMethodProviderValue<T> extends AbstractDependencyValue<T>
             // todo: check for conflicts on annotations on provider method from interface and its implementation
             // todo: how to register instance of declaring class in container if method is not static
 
-            Object instance = methodInstanceId != null ? container.instance(methodInstanceId) : null;
+            Object instance = methodInstanceId != null ? context.getContainer().instance(methodInstanceId) : null;
             // todo: if method is not static instance is required, throw unsatisfied dependency if null
             // todo: suppress warnings when type is checked in constructor
-            return (T) new InjectableMethod(container, method).inject(instance);
+            return (T) new InjectableMethod(context, method).inject(instance);
         };
     }
 

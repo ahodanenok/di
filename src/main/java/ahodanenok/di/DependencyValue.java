@@ -13,7 +13,7 @@ public interface DependencyValue<T> {
 
     // todo: values after bind are considered as initialized and shouldn't be configurable after that
     // todo: validate values are correct (scopes, qualifiers, types, etc)
-    default void bind(DIContainer container) { }
+    default void bind(DIContainerContext context) { }
 
     DependencyIdentifier<T> id();
 

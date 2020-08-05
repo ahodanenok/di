@@ -35,10 +35,7 @@ import java.util.stream.Collectors;
 public final class DIContainer {
 
     private Map<ScopeIdentifier, Scope> scopes;
-    private ScopeResolution scopeResolution;
-    private QualifierResolution qualifierResolution;
-    private NameResolution nameResolution;
-    private StereotypeResolution stereotypeResolution;
+    private DIContainerContext context;
 
     private Set<DependencyValue<?>> values;
     private DependencyValueLookup valueLookup;
@@ -46,20 +43,11 @@ public final class DIContainer {
     private DIContainer() {
         this.values = new HashSet<>();
         this.scopes = new HashMap<>();
+        this.context = new DIContainerContext(this);
     }
 
-    public ScopeResolution scopeResolution() {
-        return scopeResolution;
-    }
-
-    public QualifierResolution qualifierResolution() {
-        return qualifierResolution;
-    }
-
-    public NameResolution nameResolution() { return nameResolution; }
-
-    public StereotypeResolution stereotypeResolution() {
-        return stereotypeResolution;
+    DIContainerContext getContext() {
+        return context;
     }
 
     private Scope lookupScope(ScopeIdentifier id) {
@@ -163,7 +151,7 @@ public final class DIContainer {
         ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
             // todo: cache
             // todo: which fields should be skipped (i.e inherited)
-            new InjectableField(this, f).inject(instance);
+            new InjectableField(context, f).inject(instance);
         });
 
         // todo: conform to spec
@@ -172,7 +160,7 @@ public final class DIContainer {
         ReflectionAssistant.methods(instance.getClass()).filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
             // todo: which methods should be skipped (i.e inherited)
-            new InjectableMethod(this, m).inject(instance);
+            new InjectableMethod(context, m).inject(instance);
         });
     }
 
@@ -212,22 +200,22 @@ public final class DIContainer {
          * Default implementation is {@link AnnotatedScopeResolution}
          */
         public Builder withScopeResolution(ScopeResolution scopeResolution) {
-            DIContainer.this.scopeResolution = scopeResolution;
+            DIContainer.this.context.scopeResolution = scopeResolution;
             return this;
         }
 
         public Builder withQualifierResolution(QualifierResolution qualifierResolution) {
-            DIContainer.this.qualifierResolution = qualifierResolution;
+            DIContainer.this.context.qualifierResolution = qualifierResolution;
             return this;
         }
 
         public Builder withNameResolution(NameResolution nameResolution) {
-            DIContainer.this.nameResolution = nameResolution;
+            DIContainer.this.context.nameResolution = nameResolution;
             return this;
         }
 
         public Builder withStereotypeResolution(StereotypeResolution stereotypeResolution) {
-            DIContainer.this.stereotypeResolution = stereotypeResolution;
+            DIContainer.this.context.stereotypeResolution = stereotypeResolution;
             return this;
         }
 
@@ -243,20 +231,20 @@ public final class DIContainer {
                 container.scopes.putIfAbsent(scope.id(), scope);
             }
 
-            if (container.scopeResolution == null) {
-                container.scopeResolution = new AnnotatedScopeResolution();
+            if (container.context.scopeResolution == null) {
+                container.context.scopeResolution = new AnnotatedScopeResolution();
             }
 
-            if (container.qualifierResolution == null) {
-                container.qualifierResolution = new AnnotatedQualifierResolution();
+            if (container.context.qualifierResolution == null) {
+                container.context.qualifierResolution = new AnnotatedQualifierResolution();
             }
 
-            if (container.nameResolution == null) {
-                container.nameResolution = new AnnotatedNameResolution();
+            if (container.context.nameResolution == null) {
+                container.context.nameResolution = new AnnotatedNameResolution();
             }
 
-            if (container.stereotypeResolution == null) {
-                container.stereotypeResolution = new DefaultStereotypeResolution();
+            if (container.context.stereotypeResolution == null) {
+                container.context.stereotypeResolution = new DefaultStereotypeResolution();
             }
 
             if (container.valueLookup == null) {
@@ -264,7 +252,7 @@ public final class DIContainer {
             }
 
             for (DependencyValue<?> value : container.values) {
-                value.bind(container);
+                value.bind(context);
             }
 
             for (DependencyValue<?> value : container.values) {

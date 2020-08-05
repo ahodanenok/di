@@ -13,7 +13,7 @@ public class InjectableConstructorTest {
         DIContainer container = DIContainer.builder().build();
 
         assertNotNull(new InjectableConstructor<>(
-                container, PublicConstructor.class.getDeclaredConstructor()).inject());
+                container.getContext(), PublicConstructor.class.getDeclaredConstructor()).inject());
     }
 
 
@@ -22,7 +22,7 @@ public class InjectableConstructorTest {
         DIContainer container = DIContainer.builder().build();
 
         assertNotNull(new InjectableConstructor<>(
-                container, PackageConstructor.class.getDeclaredConstructor()).inject());
+                container.getContext(), PackageConstructor.class.getDeclaredConstructor()).inject());
     }
 
     @Test
@@ -30,7 +30,7 @@ public class InjectableConstructorTest {
         DIContainer container = DIContainer.builder().build();
 
         assertNotNull(new InjectableConstructor<>(
-                container, ProtectedConstructor.class.getDeclaredConstructor()).inject());
+                container.getContext(), ProtectedConstructor.class.getDeclaredConstructor()).inject());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class InjectableConstructorTest {
         DIContainer container = DIContainer.builder().build();
 
         assertNotNull(new InjectableConstructor<>(
-                container, PrivateConstructor.class.getDeclaredConstructor()).inject());
+                container.getContext(), PrivateConstructor.class.getDeclaredConstructor()).inject());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class InjectableConstructorTest {
                 .addValue(new DependencyInstanceValue<>(this))
                 .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(int.class), 10))
                 .build();
-        TestClass t = new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, int.class)).inject();
+        TestClass t = new InjectableConstructor<>(container.getContext(), TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, int.class)).inject();
         assertEquals(10, t.n);
     }
 
@@ -68,6 +68,6 @@ public class InjectableConstructorTest {
 
         DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>(10)).build();
         assertThrows(UnsatisfiedDependencyException.class, () ->
-                new InjectableConstructor<>(container, TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, String.class)).inject());
+                new InjectableConstructor<>(container.getContext(), TestClass.class.getDeclaredConstructor(InjectableConstructorTest.class, String.class)).inject());
     }
 }

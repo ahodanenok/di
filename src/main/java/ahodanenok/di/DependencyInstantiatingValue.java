@@ -1,15 +1,11 @@
 package ahodanenok.di;
 
 import ahodanenok.di.exception.DependencyInstantiatingException;
-import ahodanenok.di.exception.InjectionFailedException;
-import ahodanenok.di.interceptor.AroundConstruct;
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -22,7 +18,7 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
 
     // todo: check that class is really an instantiable class
 
-    private DIContainer container;
+    private DIContainerContext context;
 
     private DependencyIdentifier<T> id;
     private Class<T> type;
@@ -59,20 +55,20 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
     }
 
     @Override
-    public void bind(DIContainer container) {
-        this.container = container;
+    public void bind(DIContainerContext context) {
+        this.context = context;
 
         if (id == null) {
-            Set<Annotation> qualifiers = container.qualifierResolution().resolve(instanceClass);
+            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(instanceClass);
             id = DependencyIdentifier.of(type, qualifiers);
         }
 
-        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(instanceClass);
+        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(instanceClass);
 
-        scope = container.scopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
+        scope = context.getScopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(instanceClass, stereotypes));
+            setName(context.getNameResolution().resolve(instanceClass, stereotypes));
         }
 
         if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
@@ -94,13 +90,13 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         return () -> {
                 if (targetConstructor == null) {
                     Constructor<? extends T> constructor = resolveConstructor();
-                    targetConstructor = new InjectableConstructor<>(container, constructor);
+                    targetConstructor = new InjectableConstructor<>(context, constructor);
 //                    targetConstructor.setAroundConstructObserver();
                 }
 
                 T instance = targetConstructor.inject();
                 if (instance != null) {
-                    container.inject(instance);
+                    context.getContainer().inject(instance);
                     // todo: post create
                 }
 

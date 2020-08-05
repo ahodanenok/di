@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> {
 
-    private DIContainer container;
+    private DIContainerContext context;
     private Field field;
     private Class<T> type;
     private DependencyIdentifier<T> id;
@@ -34,20 +34,20 @@ public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> 
     }
 
     @Override
-    public void bind(DIContainer container) {
-        this.container = container;
+    public void bind(DIContainerContext context) {
+        this.context = context;
 
         if (id == null) {
-            Set<Annotation> qualifiers = container.qualifierResolution().resolve(field);
+            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(field);
             id = DependencyIdentifier.of(type, qualifiers);
         }
 
-        Supplier<Set<Annotation>> stereotypes = () -> container.stereotypeResolution().resolve(field);
+        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(field);
 
-        scope = container.scopeResolution().resolve(field, stereotypes, ScopeIdentifier.of(NotScoped.class));
+        scope = context.getScopeResolution().resolve(field, stereotypes, ScopeIdentifier.of(NotScoped.class));
 
         if (name == null) {
-            setName(container.nameResolution().resolve(field, stereotypes));
+            setName(context.getNameResolution().resolve(field, stereotypes));
         }
 
         if (initOnStartup == null && field.isAnnotationPresent(Eager.class)) {
@@ -83,7 +83,7 @@ public class DependencyFieldProviderValue<T> extends AbstractDependencyValue<T> 
             };
         } else {
             return () -> {
-                Object instance = container.instance(field.getDeclaringClass());
+                Object instance = context.getContainer().instance(field.getDeclaringClass());
                 if (instance == null) {
                     throw new UnsatisfiedDependencyException(DependencyIdentifier.of(field.getDeclaringClass()), "not found");
                 }

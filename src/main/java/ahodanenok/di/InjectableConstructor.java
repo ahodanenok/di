@@ -2,20 +2,26 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.interceptor.AroundConstruct;
+import ahodanenok.di.interceptor.AroundConstructObserver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 public class InjectableConstructor<T> implements Injectable<T> {
 
     private DIContainer container;
     private Constructor<? extends T> constructor;
+    private AroundConstructObserver observer;
 
     public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {
         this.container = container;
         this.constructor = constructor;
+    }
+
+    public void setAroundConstructObserver(AroundConstructObserver observer) {
+        this.observer = observer;
     }
 
     @Override
@@ -54,15 +60,14 @@ public class InjectableConstructor<T> implements Injectable<T> {
                 args[i++] = arg;
             }
 
-            boolean accessible = constructor.isAccessible();
-            try {
-                constructor.setAccessible(true);
-                // todo: expose creating as an object, so clients could do something before and after creating an instance
-                return constructor.newInstance(args);
-            } finally {
-                constructor.setAccessible(accessible);
+            AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args);
+            if (observer != null) {
+                observer.observe(aroundConstruct);
+                return aroundConstruct.getInstance();
+            } else {
+                return aroundConstruct.proceed();
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ReflectiveOperationException e) {
             throw new InjectionFailedException(constructor, e);
         }
     }

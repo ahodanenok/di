@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.DependencyInstantiatingException;
 import ahodanenok.di.exception.InjectionFailedException;
+import ahodanenok.di.interceptor.AroundConstruct;
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 
@@ -94,11 +95,15 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
                 if (targetConstructor == null) {
                     Constructor<? extends T> constructor = resolveConstructor();
                     targetConstructor = new InjectableConstructor<>(container, constructor);
+//                    targetConstructor.setAroundConstructObserver();
                 }
 
                 T instance = targetConstructor.inject();
-                container.inject(instance);
-                // todo: post create
+                if (instance != null) {
+                    container.inject(instance);
+                    // todo: post create
+                }
+
                 return instance;
         };
     }

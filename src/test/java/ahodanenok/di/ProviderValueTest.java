@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.value.ProviderValue;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Provider;
@@ -13,20 +14,20 @@ public class ProviderValueTest {
 
     @Test
     public void test_1() {
-        DependencyProviderValue<String> v = new DependencyProviderValue<>(String.class, () -> "test");
+        ProviderValue<String> v = new ProviderValue<>(String.class, () -> "test");
         v.bind(DIContainer.builder().build().getContext());
         assertEquals(String.class, v.id().type());
-        assertEquals(ScopeIdentifier.of(Singleton.class), v.scope());
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
         assertEquals("test", v.provider().get());
     }
 
 
     @Test
     public void test_2() {
-        DependencyProviderValue<String> v = new DependencyProviderValue<>(String.class, TestProvider.class);
+        ProviderValue<String> v = new ProviderValue<>(String.class, TestProvider.class);
         v.bind(DIContainer.builder().build().getContext());
         assertEquals(String.class, v.id().type());
-        assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
         assertEquals("provider", v.provider().get());
     }
 }

@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.cl.AccessTest;
 import ahodanenok.di.exception.InjectionFailedException;
+import ahodanenok.di.value.InstanceValue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +12,7 @@ public class InjectableFieldTest {
     @Test
     public void testPrivateAccess_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "private"))
+                .addValue(new InstanceValue<>(String.class, "private"))
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
@@ -25,7 +26,7 @@ public class InjectableFieldTest {
     @Test
     public void testPublicAccess_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "public"))
+                .addValue(new InstanceValue<>(String.class, "public"))
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
@@ -39,7 +40,7 @@ public class InjectableFieldTest {
     @Test
     public void testPackageAccess_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "default"))
+                .addValue(new InstanceValue<>(String.class, "default"))
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
@@ -53,7 +54,7 @@ public class InjectableFieldTest {
     @Test
     public void testProtectedAccess_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "protected"))
+                .addValue(new InstanceValue<>(String.class, "protected"))
                 .build();
 
         AccessTest test = (AccessTest) new InjectableField(
@@ -67,7 +68,7 @@ public class InjectableFieldTest {
     @Test
     public void testFinal_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "final"))
+                .addValue(new InstanceValue<>(String.class, "final"))
                 .build();
 
         assertThrows(InjectionFailedException.class, () ->
@@ -79,7 +80,7 @@ public class InjectableFieldTest {
     @Test
     public void testStatic_1() throws Exception {
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(String.class), "static"))
+                .addValue(new InstanceValue<>(String.class, "static"))
                 .build();
 
         new InjectableField(

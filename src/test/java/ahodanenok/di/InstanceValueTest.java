@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.value.InstanceValue;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Singleton;
@@ -11,22 +12,24 @@ public class InstanceValueTest {
 
     @Test
     public void test_1() {
-        DependencyInstanceValue<String> v = new DependencyInstanceValue<>("test");
+        InstanceValue<String> v = new InstanceValue<>("test");
         assertEquals(String.class, v.id().type());
-        assertEquals(ScopeIdentifier.of(Singleton.class), v.scope());
+        assertEquals(String.class, v.metadata().valueType());
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
         assertEquals("test", v.provider().get());
     }
 
     @Test
     public void test_2() {
-        DependencyInstanceValue<Number> v = new DependencyInstanceValue<Number>(DependencyIdentifier.of(Number.class), 10);
+        InstanceValue<Number> v = new InstanceValue<Number>(Number.class, 10);
         assertEquals(Number.class, v.id().type());
-        assertEquals(ScopeIdentifier.of(Singleton.class), v.scope());
+        assertEquals(Integer.class, v.metadata().valueType());
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
         assertEquals(10, v.provider().get());
     }
 
     @Test
     public void test_3() {
-        assertThrows(IllegalArgumentException.class, () -> new DependencyInstanceValue<>(null));
+        assertThrows(NullPointerException.class, () -> new InstanceValue<>(null));
     }
 }

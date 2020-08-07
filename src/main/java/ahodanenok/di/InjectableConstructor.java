@@ -13,15 +13,10 @@ public class InjectableConstructor<T> implements Injectable<T> {
 
     private DIContainerContext context;
     private Constructor<? extends T> constructor;
-    private AroundConstructObserver observer;
 
     public InjectableConstructor(DIContainerContext context, Constructor<? extends T> constructor) {
         this.context = context;
         this.constructor = constructor;
-    }
-
-    public void setAroundConstructObserver(AroundConstructObserver observer) {
-        this.observer = observer;
     }
 
     @Override
@@ -61,13 +56,18 @@ public class InjectableConstructor<T> implements Injectable<T> {
             }
 
             AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args);
-            if (observer != null) {
-                observer.observe(aroundConstruct);
+
+            if (context.getAroundConstructObserver() != null) {
+                context.getAroundConstructObserver().observe(aroundConstruct);
                 return aroundConstruct.getInstance();
             } else {
                 return aroundConstruct.proceed();
             }
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
+            if (e instanceof UnsatisfiedDependencyException) {
+                throw (UnsatisfiedDependencyException) e;
+            }
+
             throw new InjectionFailedException(constructor, e);
         }
     }

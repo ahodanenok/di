@@ -1,22 +1,21 @@
 package ahodanenok.di.scope;
 
 import javax.inject.Scope;
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 // constants for singleton, not scoped
 public final class ScopeIdentifier {
 
+    public static final ScopeIdentifier NOT_SCOPED = of(NotScoped.class);
+    public static final ScopeIdentifier SINGLETON = of(Singleton.class);
+
     public static ScopeIdentifier of(Annotation annotation) {
-        return new ScopeIdentifier(annotation.annotationType());
+        return of(annotation.annotationType());
     }
 
     public static ScopeIdentifier of(Class<?> annotationClass) {
-        return new ScopeIdentifier(annotationClass);
-    }
 
-    private Class<?> annotationClass;
-
-    private ScopeIdentifier(Class<?> annotationClass) {
         if (annotationClass == null) {
             throw new IllegalArgumentException("Annotation class is null");
         }
@@ -29,11 +28,17 @@ public final class ScopeIdentifier {
             throw new IllegalArgumentException(String.format("Class '%s' is not marked with @Scope annotation", annotationClass.getName()));
         }
 
-        this.annotationClass = annotationClass;
+        return new ScopeIdentifier(annotationClass.getName());
+    }
+
+    private String name;
+
+    private ScopeIdentifier(String name) {
+        this.name = name;
     }
 
     public String get() {
-        return annotationClass.getName();
+        return name;
     }
 
     @Override
@@ -42,7 +47,7 @@ public final class ScopeIdentifier {
     }
 
     public int hashCode() {
-        return annotationClass.hashCode();
+        return name.hashCode();
     }
 
     public boolean equals(Object object) {
@@ -59,6 +64,6 @@ public final class ScopeIdentifier {
         }
 
         ScopeIdentifier other = (ScopeIdentifier) object;
-        return annotationClass.equals(other.annotationClass);
+        return name.equals(other.name);
     }
 }

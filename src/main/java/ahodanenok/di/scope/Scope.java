@@ -1,6 +1,8 @@
 package ahodanenok.di.scope;
 
-import ahodanenok.di.DependencyValue;
+import ahodanenok.di.value.Value;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Rules for reusing instances of dependencies.
@@ -12,7 +14,7 @@ public interface Scope {
 
     ScopeIdentifier id();
 
-    <T> T get(DependencyValue<T> id);
+    <T> T get(Value<T> id);
 
     // todo: when scope is over, destroy it and its bindings
 }

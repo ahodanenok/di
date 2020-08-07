@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.value.Value;
+
 import java.util.Set;
 
 /**
@@ -14,5 +16,5 @@ public interface DependencyValueLookup {
      *
      * @return matched dependencies or empty set if none found
      */
-    <T> Set<DependencyValue<T>> execute(Set<DependencyValue<?>> values, DependencyIdentifier<T> id);
+    <T> Set<Value<T>> execute(Set<Value<?>> values, DependencyIdentifier<T> id);
 }

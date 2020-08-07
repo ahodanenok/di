@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.value.InstanceValue;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -49,7 +50,7 @@ public class OptionalTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>("check")).build();
+        DIContainer container = DIContainer.builder().addValue(new InstanceValue<Object>("check")).build();
         M obj = new M();
         new InjectableMethod(container.getContext(), M.class.getDeclaredMethod("method", String.class, Integer.class)).inject(obj);
         assertEquals("check", obj.s);
@@ -64,7 +65,7 @@ public class OptionalTest {
             M(@OptionalDependency int a) { }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<>(this)).build();
+        DIContainer container = DIContainer.builder().addValue(new InstanceValue<>(this)).build();
         assertThrows(RuntimeException.class, () -> new InjectableConstructor<>(container.getContext(), M.class.getDeclaredConstructor(OptionalTest.class, int.class)).inject());
     }
 
@@ -79,7 +80,7 @@ public class OptionalTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<>(this)).build();
+        DIContainer container = DIContainer.builder().addValue(new InstanceValue<>(this)).build();
         M obj = new InjectableConstructor<>(container.getContext(), M.class.getDeclaredConstructor(OptionalTest.class, Integer.class)).inject();
         assertNull(obj.f);
     }
@@ -98,8 +99,8 @@ public class OptionalTest {
         }
 
         DIContainer container = DIContainer.builder()
-                .addValue(new DependencyInstanceValue<>(this))
-                .addValue(new DependencyInstanceValue<>("check"))
+                .addValue(new InstanceValue<>(this))
+                .addValue(new InstanceValue<>("check"))
                 .build();
         M obj = new InjectableConstructor<>(container.getContext(), M.class.getDeclaredConstructor(OptionalTest.class, String.class, Integer.class)).inject();
         assertEquals("check", obj.s);

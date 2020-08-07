@@ -1,89 +1,76 @@
-package ahodanenok.di;
+package ahodanenok.di.value;
 
-import ahodanenok.di.exception.DependencyInstantiatingException;
-import ahodanenok.di.scope.NotScoped;
-import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.*;
+import ahodanenok.di.value.metadata.ClassMetadata;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> {
-
-    // todo: check that class is really an instantiable class
+public class InstantiatingValue<T> extends AbstractValue<T> {
 
     private DIContainerContext context;
 
-    private DependencyIdentifier<T> id;
-    private Class<T> type;
-
-    private ScopeIdentifier scope;
-
-    private Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;
 
-    public DependencyInstantiatingValue(Class<T> instanceClass) {
+    public InstantiatingValue(Class<T> instanceClass) {
         this(instanceClass, instanceClass);
     }
 
-    public DependencyInstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
+    public InstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
+        super(type, new ClassMetadata<>(instanceClass));
+
         if (!ReflectionAssistant.isInstantiable(instanceClass)) {
             throw new IllegalArgumentException("Can't create an instance of a class: " +  instanceClass.getName());
         }
-
-        this.type = type;
-        this.instanceClass = instanceClass;
     }
-
-    /**
-     *
-     * Note that qualifiers on instanceClass will be ignore,
-     * as it is assumed that all necessary qualifiers present in id
-     *
-     * @param id
-     * @param instanceClass
-     */
-    public DependencyInstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
-        this(id.type(), instanceClass);
-        this.id = id;
-    }
+//
+//    /**
+//     *
+//     * Note that qualifiers on instanceClass will be ignore,
+//     * as it is assumed that all necessary qualifiers present in id
+//     *
+//     * @param id
+//     * @param instanceClass
+//     */
+//    public InstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
+//        this(id.type(), instanceClass);
+//    }
 
     @Override
     public void bind(DIContainerContext context) {
         this.context = context;
-
-        if (id == null) {
-            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(instanceClass);
-            id = DependencyIdentifier.of(type, qualifiers);
-        }
-
-        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(instanceClass);
-
-        scope = context.getScopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
-
-        if (name == null) {
-            setName(context.getNameResolution().resolve(instanceClass, stereotypes));
-        }
-
-        if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
-            setInitOnStartup(true);
-        }
-
-        if (defaultValue == null && instanceClass.isAnnotationPresent(DefaultValue.class)) {
-            setDefault(true);
-        }
+//
+//        if (id == null) {
+//            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(instanceClass);
+//            id = DependencyIdentifier.of(type, qualifiers);
+//        }
+//
+//        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(instanceClass);
+//
+//        scope = context.getScopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
+//
+//        if (name == null) {
+//            setName(context.getNameResolution().resolve(instanceClass, stereotypes));
+//        }
+//
+//        if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
+//            setInitOnStartup(true);
+//        }
+//
+//        if (defaultValue == null && instanceClass.isAnnotationPresent(DefaultValue.class)) {
+//            setDefault(true);
+//        }
     }
 
-    @Override
-    public DependencyIdentifier<T> id() {
-        return id;
-    }
+//    @Override
+//    public DependencyIdentifier<T> id() {
+//        return id;
+//    }
 
     @Override
     public Provider<? extends T> provider() {
@@ -103,11 +90,11 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
                 return instance;
         };
     }
-
-    @Override
-    public ScopeIdentifier scope() {
-        return scope;
-    }
+//
+//    @Override
+//    public ScopeIdentifier scope() {
+//        return scope;
+//    }
 
     private Constructor<? extends T> resolveConstructor() {
         // todo: conform to spec
@@ -116,6 +103,8 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
         // @Inject is optional for public, no-argument constructors when no other constructors are present.
         // This enables injectors to invoke default constructors.
 
+        Class<? extends T> instanceClass = metadata().valueType();
+
         // Injectable constructors are annotated with @Inject
         Set<Constructor<?>> constructors = Arrays.stream(instanceClass.getDeclaredConstructors())
                 .filter(c -> c.isAnnotationPresent(Inject.class))
@@ -123,10 +112,11 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
 
         // @Inject can apply to at most one constructor per class.
         if (constructors.size() > 1) {
-            throw new DependencyInstantiatingException(id, instanceClass,
-                    "multiple constructors are marked with @Inject," +
-                    " to make this class available for dependency injection leave only such constructor," +
-                    " constructors: " + constructors);
+//            throw new DependencyInstantiatingException(id, instanceClass,
+//                    "multiple constructors are marked with @Inject," +
+//                    " to make this class available for dependency injection leave only such constructor," +
+//                    " constructors: " + constructors);
+            throw new RuntimeException();
         }
 
         Constructor<? extends T> constructor = null;
@@ -145,21 +135,24 @@ public class DependencyInstantiatingValue<T> extends AbstractDependencyValue<T> 
                     constructor = instanceClass.getConstructor();
                 }
             } catch (NoSuchMethodException e) {
-                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
-                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+//                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
+//                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+                throw new RuntimeException();
             }
 
             // @Inject is optional for public, no-argument constructors when no other constructors are present.
             if (instanceClass.getDeclaredConstructors().length > 1) {
-                throw new DependencyInstantiatingException(id, instanceClass, "multiple constructors are found, mark appropriate constructor with @Inject" +
-                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+//                throw new DependencyInstantiatingException(id, instanceClass, "multiple constructors are found, mark appropriate constructor with @Inject" +
+//                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+                throw new RuntimeException();
             }
         }
 
 
         if (constructor == null) {
-            throw new DependencyInstantiatingException(id, instanceClass,
-                    "no applicable constructor found, either leave only one constructor without parameters or mark some constructor with @Inject");
+//            throw new DependencyInstantiatingException(id, instanceClass,
+//                    "no applicable constructor found, either leave only one constructor without parameters or mark some constructor with @Inject");
+            throw new RuntimeException();
         }
 
 

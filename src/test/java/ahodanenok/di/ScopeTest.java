@@ -5,11 +5,11 @@ import ahodanenok.di.scope.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import ahodanenok.di.stereotype.DefaultStereotypeResolution;
+import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.Stereotype;
+import ahodanenok.di.value.ProviderValue;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Provider;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Inherited;
@@ -95,7 +95,7 @@ public class ScopeTest {
     public void testNotScoped_2() {
         class Test { }
 
-        DependencyProviderValue<Test> v = new DependencyProviderValue<>(Test.class, Test::new);
+        ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
 
         DefaultScope scope = new DefaultScope();
         Test a = scope.get(v);
@@ -113,7 +113,7 @@ public class ScopeTest {
     public void testSingleton_2() {
         class Test { }
 
-        DependencyProviderValue<Test> v = new DependencyProviderValue<>(Test.class, Test::new);
+        ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
 
         SingletonScope scope = new SingletonScope();
         Test a = scope.get(v);
@@ -214,7 +214,7 @@ public class ScopeTest {
     @Test
     public void testClassWithScopedStereotype() {
         AnnotatedScopeResolution scopeResolution = new AnnotatedScopeResolution();
-        DefaultStereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         ScopeIdentifier scope = scopeResolution.resolve(
                 ClassWithScopedStereotype.class,
@@ -226,7 +226,7 @@ public class ScopeTest {
     @Test
     public void testScopedClassWithScopedStereotype() {
         AnnotatedScopeResolution scopeResolution = new AnnotatedScopeResolution();
-        DefaultStereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         ScopeIdentifier scope = scopeResolution.resolve(
                 ScopedClassWithScopedStereotype.class,
@@ -238,7 +238,7 @@ public class ScopeTest {
     @Test
     public void testClassWithMultipleScopedStereotypes() {
         AnnotatedScopeResolution scopeResolution = new AnnotatedScopeResolution();
-        DefaultStereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         assertThrows(IllegalStateException.class, () -> scopeResolution.resolve(
                 ClassWithMultipleScopedStereotypes.class,

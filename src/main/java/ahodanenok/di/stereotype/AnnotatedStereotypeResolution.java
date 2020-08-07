@@ -7,7 +7,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class DefaultStereotypeResolution implements StereotypeResolution {
+public class AnnotatedStereotypeResolution implements StereotypeResolution {
 
     @Override
     public Set<Annotation> resolve(Class<?> clazz) {

@@ -1,6 +1,6 @@
 package ahodanenok.di;
 
-import ahodanenok.di.stereotype.DefaultStereotypeResolution;
+import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.Stereotype;
 import org.junit.jupiter.api.Test;
 
@@ -77,13 +77,13 @@ public class StereotypesTest {
 
     @Test
     public void testClassNoStereotypes() {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         assertTrue(resolution.resolve(ClassNoStereotypes.class).isEmpty());
     }
 
     @Test
     public void testClassSingleStereotype() {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Annotation> s = resolution.resolve(ClassSingleStereotype.class);
         assertEquals(1, s.size());
         assertEquals(A.class, s.iterator().next().annotationType());
@@ -91,7 +91,7 @@ public class StereotypesTest {
 
     @Test
     public void testClassWithInheritedStereotype() {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(ClassInheritedStereotype.class)
                 .stream()
                 .map(Annotation::annotationType)
@@ -102,7 +102,7 @@ public class StereotypesTest {
 
     @Test
     public void testClassWithStereotypeWithStereotypes() {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(ClassWithStereotypesWithStereotypes.class)
                 .stream()
                 .map(Annotation::annotationType)
@@ -114,7 +114,7 @@ public class StereotypesTest {
 
     @Test
     public void testClassStereotypeLoop() {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(ClassWithStereotypeLoop.class)
                 .stream()
                 .map(Annotation::annotationType)
@@ -142,13 +142,13 @@ public class StereotypesTest {
 
     @Test
     public void testFieldNoStereotypes() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         assertTrue(resolution.resolve(FieldNoStereotypes.class.getDeclaredField("f")).isEmpty());
     }
 
     @Test
     public void testFieldSingleStereotype() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Annotation> s = resolution.resolve(FieldSingleStereotype.class.getDeclaredField("f"));
         assertEquals(1, s.size());
         assertEquals(A.class, s.iterator().next().annotationType());
@@ -156,7 +156,7 @@ public class StereotypesTest {
 
     @Test
     public void testFieldWithStereotypeWithStereotypes() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(FieldWithStereotypesWithStereotypes.class.getDeclaredField("f"))
                 .stream()
                 .map(Annotation::annotationType)
@@ -168,7 +168,7 @@ public class StereotypesTest {
 
     @Test
     public void testFieldWithStereotypesLoop() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(FieldWithStereotypesLoop.class.getDeclaredField("f"))
                 .stream()
                 .map(Annotation::annotationType)
@@ -196,13 +196,13 @@ public class StereotypesTest {
 
     @Test
     public void testMethodNoStereotypes() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         assertTrue(resolution.resolve(MethodNoStereotypes.class.getDeclaredMethod("m")).isEmpty());
     }
 
     @Test
     public void testMethodSingleStereotype() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Annotation> s = resolution.resolve(MethodSingleStereotype.class.getDeclaredMethod("m"));
         assertEquals(1, s.size());
         assertEquals(A.class, s.iterator().next().annotationType());
@@ -210,7 +210,7 @@ public class StereotypesTest {
 
     @Test
     public void testMethodWithStereotypeWithStereotypes() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(MethodWithStereotypesWithStereotypes.class.getDeclaredMethod("m"))
                 .stream()
                 .map(Annotation::annotationType)
@@ -222,7 +222,7 @@ public class StereotypesTest {
 
     @Test
     public void testMethodWithStereotypesLoop() throws Exception {
-        DefaultStereotypeResolution resolution = new DefaultStereotypeResolution();
+        AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Class<? extends Annotation>> s = resolution.resolve(MethodWithStereotypesLoop.class.getDeclaredMethod("m"))
                 .stream()
                 .map(Annotation::annotationType)

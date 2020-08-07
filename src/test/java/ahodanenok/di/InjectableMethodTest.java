@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.cl.AccessTest;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.value.InstanceValue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +50,7 @@ public class InjectableMethodTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<>(DependencyIdentifier.of(int.class), 10)).build();
+        DIContainer container = DIContainer.builder().addValue(new InstanceValue<>(int.class, 10)).build();
         assertEquals(10, new InjectableMethod(
                 container.getContext(), TestClass.class.getDeclaredMethod("m", int.class)).inject(new TestClass()));
     }
@@ -63,7 +64,7 @@ public class InjectableMethodTest {
             }
         }
 
-        DIContainer container = DIContainer.builder().addValue(new DependencyInstanceValue<Object>(10)).build();
+        DIContainer container = DIContainer.builder().addValue(new InstanceValue<Object>(10)).build();
         assertThrows(UnsatisfiedDependencyException.class, () -> new InjectableMethod(
                 container.getContext(), TestClass.class.getDeclaredMethod("m", String.class)).inject(new TestClass()));
     }

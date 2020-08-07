@@ -1,6 +1,8 @@
-package ahodanenok.di;
+package ahodanenok.di.value;
 
-import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.DIContainerContext;
+import ahodanenok.di.DependencyIdentifier;
+import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Provider;
 
@@ -9,7 +11,7 @@ import javax.inject.Provider;
 
 // todo: some api to describe values (builders maybe), that they could be created by container lately
 // todo: must have some sort of identifier by which it will be picked for providing dependency
-public interface DependencyValue<T> {
+public interface Value<T> {
 
     // todo: values after bind are considered as initialized and shouldn't be configurable after that
     // todo: validate values are correct (scopes, qualifiers, types, etc)
@@ -17,19 +19,11 @@ public interface DependencyValue<T> {
 
     DependencyIdentifier<T> id();
 
-    String getName();
+    Class<T> type();
 
-    ScopeIdentifier scope();
+    ValueMetadata metadata();
 
     Provider<? extends T> provider();
-
-    default boolean isInitOnStartup() {
-        return false;
-    }
-
-    default boolean isDefault() {
-        return false;
-    }
 
     // todo: toString
 }

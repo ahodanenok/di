@@ -1,7 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.name.AnnotatedNameResolution;
-import ahodanenok.di.stereotype.DefaultStereotypeResolution;
+import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.Stereotype;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import org.junit.jupiter.api.Test;
@@ -75,7 +75,7 @@ public class NamesTest {
     @Test
     public void testClassNamedStereotypeWithName() {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
         assertEquals(
                 "defaultNamedClassViaStereotype",
                 nameResolution.resolve(
@@ -86,7 +86,7 @@ public class NamesTest {
     @Test
     public void testNamedClassWithDefaultNamedStereotype() {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
         assertEquals(
                 "className",
                 nameResolution.resolve(
@@ -97,7 +97,7 @@ public class NamesTest {
     @Test
     public void testClassDefaultNamedViaStereotype() {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
         assertThrows(IllegalStateException.class,
                 () -> nameResolution.resolve(
                         ClassWithNamedStereotypeWithName.class,
@@ -159,7 +159,7 @@ public class NamesTest {
     @Test
     public void testFieldNamedStereotypeWithName() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Field f = DefaultNamedField.class.getDeclaredField("fd");
         assertEquals(
@@ -170,7 +170,7 @@ public class NamesTest {
     @Test
     public void testNamedFieldWithDefaultNamedStereotype() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Field f = NamedField.class.getDeclaredField("fn");
         assertEquals(
@@ -181,7 +181,7 @@ public class NamesTest {
     @Test
     public void testFieldDefaultNamedViaStereotype() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Field f = NamedField.class.getDeclaredField("fs");
         assertThrows(IllegalStateException.class,
@@ -289,7 +289,7 @@ public class NamesTest {
     @Test
     public void testMethodNamedStereotypeWithName() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Method m = DefaultNamedMethod.class.getDeclaredMethod("mn");
         assertEquals(
@@ -300,7 +300,7 @@ public class NamesTest {
     @Test
     public void testNamedMethodWithDefaultNamedStereotype() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Method m = NamedMethod.class.getDeclaredMethod("mn");
         assertEquals(
@@ -311,7 +311,7 @@ public class NamesTest {
     @Test
     public void testMethodDefaultNamedViaStereotype() throws Exception {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
-        StereotypeResolution stereotypeResolution = new DefaultStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 
         Method m = NamedMethod.class.getDeclaredMethod("ms");
         assertThrows(IllegalStateException.class,

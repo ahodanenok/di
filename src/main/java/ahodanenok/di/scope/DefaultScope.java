@@ -1,21 +1,19 @@
 package ahodanenok.di.scope;
 
-import ahodanenok.di.DependencyValue;
+import ahodanenok.di.value.Value;
 
 /**
  * @see NotScoped
  */
 public class DefaultScope implements Scope {
 
-    private ScopeIdentifier id = ScopeIdentifier.of(NotScoped.class);
-
     @Override
     public ScopeIdentifier id() {
-        return id;
+        return ScopeIdentifier.NOT_SCOPED;
     }
 
     @Override
-    public <T> T get(DependencyValue<T> value) {
+    public <T> T get(Value<T> value) {
         return value.provider().get();
     }
 }

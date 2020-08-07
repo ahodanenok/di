@@ -1,7 +1,8 @@
 package ahodanenok.di;
 
+import ahodanenok.di.value.Value;
+
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -12,14 +13,14 @@ import java.util.Set;
 public class DependencyValueExactLookup implements DependencyValueLookup {
 
     @Override
-    public <T> Set<DependencyValue<T>> execute(Set<DependencyValue<?>> values, DependencyIdentifier<T> id) {
-        Set<DependencyValue<T>> matching = new HashSet<>();
-        for (DependencyValue<?> v : values) {
+    public <T> Set<Value<T>> execute(Set<Value<?>> values, DependencyIdentifier<T> id) {
+        Set<Value<T>> matching = new HashSet<>();
+        for (Value<?> v : values) {
             if (v.id().qualifiers().isEmpty() == id.qualifiers().isEmpty()
                     && (v.id().qualifiers().containsAll(id.qualifiers()) || id.qualifiers().stream().anyMatch(a -> a.annotationType() == Any.class))
                     && typesMatch(id.type(), v.id().type())) {
                 @SuppressWarnings("unchecked") // if ids are equals, type is T
-                DependencyValue<T> matched = (DependencyValue<T>) v;
+                        Value<T> matched = (Value<T>) v;
                 matching.add(matched);
             }
         }

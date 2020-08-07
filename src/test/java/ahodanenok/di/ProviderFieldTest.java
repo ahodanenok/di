@@ -2,6 +2,8 @@ package ahodanenok.di;
 
 import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
+import ahodanenok.di.value.FieldProviderValue;
+import ahodanenok.di.value.InstantiatingValue;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Qualifier;
@@ -32,74 +34,74 @@ public class ProviderFieldTest {
 
     @Test
     public void test_1() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, PF1.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF1.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF1.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF1.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
         assertEquals(Collections.emptySet(), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
         assertEquals("1", v.provider().get());
     }
 
     @Test
     public void test_2() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(DependencyIdentifier.of(String.class), PF1.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF1.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF1.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF1.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
         assertEquals(Collections.emptySet(), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
         assertEquals("1", v.provider().get());
     }
 
     @Test
     public void test_3() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, PF2.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF2.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF2.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF2.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
         assertEquals(Collections.singleton(PF2.class.getDeclaredField("f").getDeclaredAnnotation(A.class)), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
         assertEquals("2", v.provider().get());
     }
 
     @Test
     public void test_4() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(DependencyIdentifier.of(String.class), PF2.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF2.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF2.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF2.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
-        assertEquals(Collections.emptySet(), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(NotScoped.class), v.scope());
+        assertEquals(Collections.singleton(PF2.class.getDeclaredField("f").getAnnotation(A.class)), v.id().qualifiers());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
         assertEquals("2", v.provider().get());
     }
 
     @Test
     public void test_5() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(String.class, PF3.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF3.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF3.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF3.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
         assertEquals(Collections.singleton(PF3.class.getDeclaredField("f").getDeclaredAnnotation(A.class)), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(Singleton.class), v.scope());
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
         assertEquals("3", v.provider().get());
     }
 
     @Test
     public void test_6() throws Exception {
-        DependencyFieldProviderValue<String> v = new DependencyFieldProviderValue<>(DependencyIdentifier.of(String.class), PF3.class.getDeclaredField("f"));
-        v.bind(DIContainer.builder().addValue(new DependencyInstantiatingValue<>(PF3.class)).build().getContext());
+        FieldProviderValue<String> v = new FieldProviderValue<>(String.class, PF3.class.getDeclaredField("f"));
+        v.bind(DIContainer.builder().addValue(new InstantiatingValue<>(PF3.class)).build().getContext());
 
         assertEquals(String.class, v.id().type());
-        assertEquals(Collections.emptySet(), v.id().qualifiers());
-        assertEquals(ScopeIdentifier.of(Singleton.class), v.scope());
+        assertEquals(Collections.singleton(PF3.class.getDeclaredField("f").getDeclaredAnnotation(A.class)), v.id().qualifiers());
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
         assertEquals("3", v.provider().get());
     }
 
     @Test
     public void test_7() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> {
-            DependencyFieldProviderValue<Integer> v = new DependencyFieldProviderValue<>(DependencyIdentifier.of(int.class), PF3.class.getDeclaredField("f"));
+            FieldProviderValue<Integer> v = new FieldProviderValue<>(int.class, PF3.class.getDeclaredField("f"));
         });
     }
 }

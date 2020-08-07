@@ -2,15 +2,18 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.interceptor.*;
 import ahodanenok.di.name.AnnotatedNameResolution;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.*;
-import ahodanenok.di.stereotype.DefaultStereotypeResolution;
+import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
+import ahodanenok.di.value.Value;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 // todo: profile from stereotype
 // todo: documentation
 // todo: generics
+// todo: yaml config
 
 /**
  * Container is a coordinator between providers
@@ -37,8 +41,11 @@ public final class DIContainer {
     private Map<ScopeIdentifier, Scope> scopes;
     private DIContainerContext context;
 
-    private Set<DependencyValue<?>> values;
+    private Set<Value<?>> values;
     private DependencyValueLookup valueLookup;
+
+    private InterceptorRegistry interceptors;
+    private Map<Member, InterceptorChain> resolvedInterceptorChains;
 
     private DIContainer() {
         this.values = new HashSet<>();
@@ -60,13 +67,14 @@ public final class DIContainer {
     }
 
     public Provider<?> provider(String name) {
-        Set<DependencyValue<?>> result = values.stream().filter(v -> name.equals(v.getName())).collect(Collectors.toSet());
+        // todo: names
+        Set<Value<?>> result = Collections.emptySet();//values.stream().filter(v -> name.equals(v.getName())).collect(Collectors.toSet());
         if (result.isEmpty()) {
             return null;
         }
 
         if (result.size() > 1) {
-            Set<DependencyValue<?>> withoutDefaults = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
+            Set<Value<?>> withoutDefaults = result.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
             if (withoutDefaults.size() > 1) {
                 //throw new UnsatisfiedDependencyException(id, "multiple providers");
                 throw new RuntimeException(); // todo: errors
@@ -82,7 +90,7 @@ public final class DIContainer {
             result = withoutDefaults;
         }
 
-        DependencyValue<?> value = result.iterator().next();
+        Value<?> value = result.iterator().next();
         return provider(value);
     }
 
@@ -91,13 +99,13 @@ public final class DIContainer {
     }
 
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        Set<DependencyValue<T>> result = valueLookup.execute(values, id);
+        Set<Value<T>> result = valueLookup.execute(values, id);
         if (result.isEmpty()) {
             return null;
         }
 
         if (result.size() > 1) {
-            Set<DependencyValue<T>> withoutDefaults = result.stream().filter(v -> !v.isDefault()).collect(Collectors.toSet());
+            Set<Value<T>> withoutDefaults = result.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
             if (withoutDefaults.size() > 1) {
                 throw new UnsatisfiedDependencyException(id, "multiple providers"); // todo: errors
             }
@@ -106,19 +114,19 @@ public final class DIContainer {
                 // todo: errors
                 throw new IllegalStateException(
                         "There are multiple values marked as default for " + id + ", " +
-                                "values are " + result.stream().map(DependencyValue::id).collect(Collectors.toList()));
+                                "values are " + result.stream().map(Value::id).collect(Collectors.toList()));
             }
 
             result = withoutDefaults;
         }
 
-        DependencyValue<T> value = result.iterator().next();
+        Value<T> value = result.iterator().next();
         return provider(value);
     }
 
-    private <T> Provider<? extends T> provider(DependencyValue<T> value) {
+    private <T> Provider<? extends T> provider(Value<T> value) {
         Objects.requireNonNull(value, "value is null")    ;
-        Scope scope = lookupScope(value.scope());
+        Scope scope = lookupScope(value.metadata().scope());
         return () -> scope.get(value);
     }
 
@@ -164,6 +172,27 @@ public final class DIContainer {
         });
     }
 
+    private void interceptAroundConstruct(AroundConstruct<?> aroundConstruct) throws Exception {
+        if (interceptors == null) {
+            aroundConstruct.proceed();
+            return;
+        }
+
+        if (resolvedInterceptorChains == null) {
+            resolvedInterceptorChains = new HashMap<>();
+        }
+
+        InterceptorChain chain = resolvedInterceptorChains.get(aroundConstruct.getConstructor());
+        if (chain == null) {
+//            Set<Annotation> bindings = context.getInterceptorBindingsResolution().resolve(aroundConstruct.getConstructor());
+            List<Method> methods = interceptors.aroundConstructInterceptorMethods(aroundConstruct.getConstructor());
+            chain = new InterceptorChain(aroundConstruct, methods);
+            resolvedInterceptorChains.put(aroundConstruct.getConstructor(), chain);
+        }
+
+        chain.proceed();
+    }
+
     public static Builder builder() {
         DIContainer container = new DIContainer();
         return container.new Builder();
@@ -171,7 +200,7 @@ public final class DIContainer {
 
     public class Builder {
 
-        public Builder addValue(DependencyValue<?> value) {
+        public Builder addValue(Value<?> value) {
             DIContainer.this.values.add(value);
             return this;
         }
@@ -244,26 +273,38 @@ public final class DIContainer {
             }
 
             if (container.context.stereotypeResolution == null) {
-                container.context.stereotypeResolution = new DefaultStereotypeResolution();
+                container.context.stereotypeResolution = new AnnotatedStereotypeResolution();
             }
+
+            if (container.context.interceptorMetadataResolution == null) {
+                container.context.interceptorMetadataResolution = new AnnotatedInterceptorMetadataResolution();
+            }
+
+            container.context.aroundConstructObserver = DIContainer.this::interceptAroundConstruct;
 
             if (container.valueLookup == null) {
                 container.valueLookup = new DependencyValueExactLookup();
             }
 
-            for (DependencyValue<?> value : container.values) {
+            for (Value<?> value : container.values) {
                 value.bind(context);
             }
 
-            for (DependencyValue<?> value : container.values) {
-                if (value.isInitOnStartup()) {
-                    if (value.scope().equals(ScopeIdentifier.of(Singleton.class))) {
-                        instance(value.id());
-                    } else {
-                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
-                    }
-                }
-            }
+            // todo: eager init
+//            for (Value<?> value : container.values) {
+//                if (value.isInitOnStartup()) {
+//                    if (value.scope().equals(ScopeIdentifier.of(Singleton.class))) {
+//                        instance(value.id());
+//                    } else {
+//                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
+//                    }
+//                }
+//            }
+
+//            if (interceptorClasses != null) {
+//                container.interceptors = new InterceptorRegistry(container, container.context.interceptorMetadataResolution);
+//                container.interceptors.setInterceptorClasses(interceptorClasses);
+//            }
 
             return container;
         }

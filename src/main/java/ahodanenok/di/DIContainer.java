@@ -1,5 +1,8 @@
 package ahodanenok.di;
 
+import ahodanenok.di.event.AroundConstructEvent;
+import ahodanenok.di.event.Event;
+import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.*;
@@ -8,6 +11,7 @@ import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
+import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 
 import javax.inject.Inject;
@@ -172,9 +176,22 @@ public final class DIContainer {
         });
     }
 
-    private void interceptAroundConstruct(AroundConstruct<?> aroundConstruct) throws Exception {
+    private void handleEvent(Event event) {
+        // todo: simple handling for now just to implement aroundConstruct
+        if (event instanceof AroundConstructEvent) {
+            interceptAroundConstruct(((AroundConstructEvent<?>) event).getAroundConstruct());
+        }
+    }
+
+    private void interceptAroundConstruct(AroundConstruct<?> aroundConstruct) {
         if (interceptors == null) {
-            aroundConstruct.proceed();
+            try {
+                aroundConstruct.proceed();
+            } catch (ReflectiveOperationException e) {
+                // todo: error
+                throw new RuntimeException(e);
+            }
+
             return;
         }
 
@@ -190,7 +207,12 @@ public final class DIContainer {
             resolvedInterceptorChains.put(aroundConstruct.getConstructor(), chain);
         }
 
-        chain.proceed();
+        try {
+            chain.proceed();
+        } catch (Exception e) {
+            // todo: error
+            throw new RuntimeException(e);
+        }
     }
 
     public static Builder builder() {
@@ -286,6 +308,14 @@ public final class DIContainer {
                 container.valueLookup = new DependencyValueExactLookup();
             }
 
+            Events events = new Events() {
+                @Override
+                public void fire(Event event) {
+                    container.handleEvent(event);
+                }
+            };
+
+            container.values.add(new InstanceValue<>(events));
             for (Value<?> value : container.values) {
                 value.bind(context);
             }

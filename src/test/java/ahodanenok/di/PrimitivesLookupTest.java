@@ -23,7 +23,7 @@ public class PrimitivesLookupTest {
         values.add(new InstanceValue<>(true));
         values.add(new InstanceValue<>('z'));
 
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
         Set<Value<Byte>> byteResult = lookup.execute(values, DependencyIdentifier.of(byte.class));
@@ -110,7 +110,7 @@ public class PrimitivesLookupTest {
         values.add(new InstanceValue<>(boolean.class, true));
         values.add(new InstanceValue<>(char.class, 'z'));
 
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
         Set<Value<Byte>> byteResult = lookup.execute(values, DependencyIdentifier.of(byte.class));

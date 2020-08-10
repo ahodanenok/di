@@ -6,9 +6,9 @@ import java.util.Set;
 
 /**
  * Behaviour for determining how dependencies are selected by id from all available.
- * @see DIContainer.Builder#withValuesLookup(ahodanenok.di.DependencyValueLookup)
+ * @see DIContainer.Builder#withValuesLookup(ValueLookup)
  */
-public interface DependencyValueLookup {
+public interface ValueLookup {
 
     /**
      * Collect all dependencies matching given id.

@@ -43,22 +43,18 @@ import java.util.stream.Collectors;
 public final class DIContainer {
 
     private Map<ScopeIdentifier, Scope> scopes;
-    private DIContainerContext context;
 
     private Set<Value<?>> values;
-    private DependencyValueLookup valueLookup;
+    private ValueLookup valueLookup;
 
-    private InterceptorRegistry interceptors;
+    private Set<Value<?>> interceptors;
+    private InterceptorLookup interceptorLookup;
+
     private Map<Member, InterceptorChain> resolvedInterceptorChains;
 
     private DIContainer() {
         this.values = new HashSet<>();
         this.scopes = new HashMap<>();
-        this.context = new DIContainerContext(this);
-    }
-
-    DIContainerContext getContext() {
-        return context;
     }
 
     private Scope lookupScope(ScopeIdentifier id) {
@@ -71,8 +67,7 @@ public final class DIContainer {
     }
 
     public Provider<?> provider(String name) {
-        // todo: names
-        Set<Value<?>> result = Collections.emptySet();//values.stream().filter(v -> name.equals(v.getName())).collect(Collectors.toSet());
+        Set<Value<?>> result = values.stream().filter(v -> name.equals(v.metadata().getName())).collect(Collectors.toSet());
         if (result.isEmpty()) {
             return null;
         }
@@ -118,7 +113,7 @@ public final class DIContainer {
                 // todo: errors
                 throw new IllegalStateException(
                         "There are multiple values marked as default for " + id + ", " +
-                                "values are " + result.stream().map(Value::id).collect(Collectors.toList()));
+                                "values are " + result.stream().map(Value::type).collect(Collectors.toList()));
             }
 
             result = withoutDefaults;
@@ -130,7 +125,7 @@ public final class DIContainer {
 
     private <T> Provider<? extends T> provider(Value<T> value) {
         Objects.requireNonNull(value, "value is null")    ;
-        Scope scope = lookupScope(value.metadata().scope());
+        Scope scope = lookupScope(value.metadata().getScope());
         return () -> scope.get(value);
     }
 
@@ -163,7 +158,7 @@ public final class DIContainer {
         ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
             // todo: cache
             // todo: which fields should be skipped (i.e inherited)
-            new InjectableField(context, f).inject(instance);
+            new InjectableField(this, f).inject(instance);
         });
 
         // todo: conform to spec
@@ -172,7 +167,7 @@ public final class DIContainer {
         ReflectionAssistant.methods(instance.getClass()).filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
             // todo: which methods should be skipped (i.e inherited)
-            new InjectableMethod(context, m).inject(instance);
+            new InjectableMethod(this, m).inject(instance);
         });
     }
 
@@ -201,8 +196,18 @@ public final class DIContainer {
 
         InterceptorChain chain = resolvedInterceptorChains.get(aroundConstruct.getConstructor());
         if (chain == null) {
+            List<Value<?>> classInterceptors = interceptorLookup.lookup(this, aroundConstruct.getConstructor().getDeclaringClass(), interceptors);
+            List<Method> methods = new ArrayList<>();
+            for (Value<?> interceptor : classInterceptors) {
+                Method aroundConstructMethod = instance(InterceptorMetadataResolution.class)
+                        .resolveAroundConstruct(interceptor.metadata().valueType());
+                if (aroundConstructMethod != null) {
+                    methods.add(aroundConstructMethod);
+                }
+            }
+
 //            Set<Annotation> bindings = context.getInterceptorBindingsResolution().resolve(aroundConstruct.getConstructor());
-            List<Method> methods = interceptors.aroundConstructInterceptorMethods(aroundConstruct.getConstructor());
+//            List<Method> methods = interceptors.aroundConstructInterceptorMethods(aroundConstruct.getConstructor());
             chain = new InterceptorChain(aroundConstruct, methods);
             resolvedInterceptorChains.put(aroundConstruct.getConstructor(), chain);
         }
@@ -222,8 +227,15 @@ public final class DIContainer {
 
     public class Builder {
 
+        private List<Scope> scopes;
+        private List<Value<?>> values;
+
         public Builder addValue(Value<?> value) {
-            DIContainer.this.values.add(value);
+            if (values == null) {
+                values = new ArrayList<>();
+            }
+
+            values.add(value);
             return this;
         }
 
@@ -233,15 +245,19 @@ public final class DIContainer {
 //        }
 
         public Builder addScope(Scope scope) {
-            DIContainer.this.scopes.put(scope.id(), scope);
+            if (scopes == null) {
+                scopes = new ArrayList<>();
+            }
+
+            scopes.add(scope);
             return this;
         }
 
         /**
          * Provide a custom implementation of dependencies lookup.
-         * Default implementation is {@link DependencyValueExactLookup}
+         * Default implementation is {@link ValueExactLookup}
          */
-        public Builder withValuesLookup(DependencyValueLookup valueLookup) {
+        public Builder withValuesLookup(ValueLookup valueLookup) {
             DIContainer.this.valueLookup = valueLookup;
             return this;
         }
@@ -251,22 +267,22 @@ public final class DIContainer {
          * Default implementation is {@link AnnotatedScopeResolution}
          */
         public Builder withScopeResolution(ScopeResolution scopeResolution) {
-            DIContainer.this.context.scopeResolution = scopeResolution;
+            //this.scopeResolution = scopeResolution; // todo
             return this;
         }
 
         public Builder withQualifierResolution(QualifierResolution qualifierResolution) {
-            DIContainer.this.context.qualifierResolution = qualifierResolution;
+            //this.qualifierResolution = qualifierResolution; // todo
             return this;
         }
 
         public Builder withNameResolution(NameResolution nameResolution) {
-            DIContainer.this.context.nameResolution = nameResolution;
+            //this.nameResolution = nameResolution; todo
             return this;
         }
 
         public Builder withStereotypeResolution(StereotypeResolution stereotypeResolution) {
-            DIContainer.this.context.stereotypeResolution = stereotypeResolution;
+            //this.stereotypeResolution = stereotypeResolution; todo
             return this;
         }
 
@@ -277,47 +293,64 @@ public final class DIContainer {
             Set<Scope> scopes = new HashSet<>();
             scopes.add(new DefaultScope());
             scopes.add(new SingletonScope());
-            // todo: load custom scopes
+            if (this.scopes != null) {
+                scopes.addAll(this.scopes);
+            }
             for (Scope scope : scopes) {
                 container.scopes.putIfAbsent(scope.id(), scope);
             }
 
-            if (container.context.scopeResolution == null) {
-                container.context.scopeResolution = new AnnotatedScopeResolution();
-            }
-
-            if (container.context.qualifierResolution == null) {
-                container.context.qualifierResolution = new AnnotatedQualifierResolution();
-            }
-
-            if (container.context.nameResolution == null) {
-                container.context.nameResolution = new AnnotatedNameResolution();
-            }
-
-            if (container.context.stereotypeResolution == null) {
-                container.context.stereotypeResolution = new AnnotatedStereotypeResolution();
-            }
-
-            if (container.context.interceptorMetadataResolution == null) {
-                container.context.interceptorMetadataResolution = new AnnotatedInterceptorMetadataResolution();
-            }
-
-            container.context.aroundConstructObserver = DIContainer.this::interceptAroundConstruct;
-
             if (container.valueLookup == null) {
-                container.valueLookup = new DependencyValueExactLookup();
+                container.valueLookup = new ValueExactLookup();
             }
 
-            Events events = new Events() {
+            if (container.interceptorLookup == null) {
+                container.interceptorLookup = new DefaultInterceptorLookup();
+            }
+
+            InstanceValue<ScopeResolution> scopeResolution =
+                    new InstanceValue<>(ScopeResolution.class, new AnnotatedScopeResolution());
+            scopeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            scopeResolution.metadata().setDefault(true);
+            container.values.add(scopeResolution);
+
+            InstanceValue<QualifierResolution> qualifierResolution =
+                    new InstanceValue<>(QualifierResolution.class, new AnnotatedQualifierResolution());
+            qualifierResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            qualifierResolution.metadata().setDefault(true);
+            container.values.add(qualifierResolution);
+
+            InstanceValue<NameResolution> nameResolution =
+                    new InstanceValue<>(NameResolution.class, new AnnotatedNameResolution());
+            nameResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            nameResolution.metadata().setDefault(true);
+            container.values.add(nameResolution);
+
+            InstanceValue<StereotypeResolution> stereotypeResolution =
+                    new InstanceValue<>(StereotypeResolution.class, new AnnotatedStereotypeResolution());
+            stereotypeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            stereotypeResolution.metadata().setDefault(true);
+            container.values.add(stereotypeResolution);
+
+            InstanceValue<InterceptorMetadataResolution> interceptorMetadataResolution =
+                    new InstanceValue<>(InterceptorMetadataResolution.class, new AnnotatedInterceptorMetadataResolution());
+            interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            interceptorMetadataResolution.metadata().setDefault(true);
+            container.values.add(interceptorMetadataResolution);
+
+            container.values.add(new InstanceValue<>(new Events() {
                 @Override
                 public void fire(Event event) {
                     container.handleEvent(event);
                 }
-            };
+            }));
 
-            container.values.add(new InstanceValue<>(events));
-            for (Value<?> value : container.values) {
-                value.bind(context);
+            if (values != null) {
+                for (Value<?> value : values) {
+                    value.bind(container);
+                }
+
+                container.values.addAll(values);
             }
 
             // todo: eager init
@@ -329,11 +362,6 @@ public final class DIContainer {
 //                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
 //                    }
 //                }
-//            }
-
-//            if (interceptorClasses != null) {
-//                container.interceptors = new InterceptorRegistry(container, container.context.interceptorMetadataResolution);
-//                container.interceptors.setInterceptorClasses(interceptorClasses);
 //            }
 
             return container;

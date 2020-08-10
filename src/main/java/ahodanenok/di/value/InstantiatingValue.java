@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 public class InstantiatingValue<T> extends AbstractValue<T> {
 
-    private DIContainerContext context;
-
     private InjectableConstructor<? extends T> targetConstructor;
 
     public InstantiatingValue(Class<T> instanceClass) {
@@ -22,79 +20,31 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     }
 
     public InstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
-        super(type, new ClassMetadata<>(instanceClass));
+        super(type, new ClassMetadata(instanceClass));
 
         if (!ReflectionAssistant.isInstantiable(instanceClass)) {
             throw new IllegalArgumentException("Can't create an instance of a class: " +  instanceClass.getName());
         }
     }
-//
-//    /**
-//     *
-//     * Note that qualifiers on instanceClass will be ignore,
-//     * as it is assumed that all necessary qualifiers present in id
-//     *
-//     * @param id
-//     * @param instanceClass
-//     */
-//    public InstantiatingValue(DependencyIdentifier<T> id, Class<? extends T> instanceClass) {
-//        this(id.type(), instanceClass);
-//    }
-
-    @Override
-    public void bind(DIContainerContext context) {
-        this.context = context;
-//
-//        if (id == null) {
-//            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(instanceClass);
-//            id = DependencyIdentifier.of(type, qualifiers);
-//        }
-//
-//        Supplier<Set<Annotation>> stereotypes = () -> context.getStereotypeResolution().resolve(instanceClass);
-//
-//        scope = context.getScopeResolution().resolve(instanceClass, stereotypes, ScopeIdentifier.of(NotScoped.class));
-//
-//        if (name == null) {
-//            setName(context.getNameResolution().resolve(instanceClass, stereotypes));
-//        }
-//
-//        if (initOnStartup == null && instanceClass.isAnnotationPresent(Eager.class)) {
-//            setInitOnStartup(true);
-//        }
-//
-//        if (defaultValue == null && instanceClass.isAnnotationPresent(DefaultValue.class)) {
-//            setDefault(true);
-//        }
-    }
-
-//    @Override
-//    public DependencyIdentifier<T> id() {
-//        return id;
-//    }
 
     @Override
     public Provider<? extends T> provider() {
         return () -> {
                 if (targetConstructor == null) {
                     Constructor<? extends T> constructor = resolveConstructor();
-                    targetConstructor = new InjectableConstructor<>(context, constructor);
+                    targetConstructor = new InjectableConstructor<>(container, constructor);
 //                    targetConstructor.setAroundConstructObserver();
                 }
 
                 T instance = targetConstructor.inject();
                 if (instance != null) {
-                    context.getContainer().inject(instance);
+                    container.inject(instance);
                     // todo: post create
                 }
 
                 return instance;
         };
     }
-//
-//    @Override
-//    public ScopeIdentifier scope() {
-//        return scope;
-//    }
 
     private Constructor<? extends T> resolveConstructor() {
         // todo: conform to spec
@@ -103,7 +53,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         // @Inject is optional for public, no-argument constructors when no other constructors are present.
         // This enables injectors to invoke default constructors.
 
-        Class<? extends T> instanceClass = metadata().valueType();
+        Class<?> instanceClass = metadata().valueType();
 
         // Injectable constructors are annotated with @Inject
         Set<Constructor<?>> constructors = Arrays.stream(instanceClass.getDeclaredConstructors())
@@ -119,7 +69,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             throw new RuntimeException();
         }
 
-        Constructor<? extends T> constructor = null;
+        Constructor<?> constructor = null;
         if (!constructors.isEmpty()) {
             @SuppressWarnings("unchecked") // constructor comes from instanceClass, which is T or its subclass
             Constructor<? extends T> c = (Constructor<? extends T>) constructors.iterator().next();
@@ -156,6 +106,6 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         }
 
 
-        return constructor;
+        return (Constructor<? extends T>) constructor;
     }
 }

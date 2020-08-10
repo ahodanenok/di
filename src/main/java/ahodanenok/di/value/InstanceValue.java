@@ -29,20 +29,15 @@ public class InstanceValue<T> extends AbstractValue<T> {
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> InstanceValue(Class<T> clazz, V instance) {
-        super(clazz, new ExplicitMetadata<>((Class<T>) instance.getClass()));
-
+        super(clazz, new ExplicitMetadata(instance.getClass()));
         metadata().setScope(ScopeIdentifier.SINGLETON);
-//
-//        if (id == null) {
-//            throw new IllegalArgumentException("id is null");
-//        }
 
         this.instance = () -> instance;
     }
 
     @Override
-    public ExplicitMetadata<T> metadata() {
-        return (ExplicitMetadata<T>) super.metadata();
+    public ExplicitMetadata metadata() {
+        return (ExplicitMetadata) super.metadata();
     }
 
     @Override

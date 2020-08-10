@@ -5,7 +5,6 @@ import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.AroundConstruct;
-import ahodanenok.di.interceptor.AroundConstructObserver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -13,14 +12,14 @@ import java.util.Set;
 
 public class InjectableConstructor<T> implements Injectable<T> {
 
-    private DIContainerContext context;
+    private DIContainer container;
     private Constructor<? extends T> constructor;
     private Events events;
 
-    public InjectableConstructor(DIContainerContext context, Constructor<? extends T> constructor) {
-        this.context = context;
+    public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {
+        this.container = container;
         this.constructor = constructor;
-        this.events = context.getContainer().instance(Events.class);
+        this.events = container.instance(Events.class);
     }
 
     @Override
@@ -48,9 +47,9 @@ public class InjectableConstructor<T> implements Injectable<T> {
         while (i < paramCount) {
             Class<?> type = types[i];
 
-            Set<Annotation> qualifiers = context.getQualifierResolution().resolve(constructor, i);
+            Set<Annotation> qualifiers = container.instance(QualifierResolution.class).resolve(constructor, i);
             DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
-            Object arg = context.getContainer().instance(id);
+            Object arg = container.instance(id);
             if (arg == null && !optional[i]) {
                 throw new UnsatisfiedDependencyException(this, id, "not found");
             }

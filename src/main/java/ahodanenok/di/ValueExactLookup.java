@@ -10,15 +10,15 @@ import java.util.Set;
  * Primitives and corresponding wrappers are considered identical.
  * Arrays are considered identical if element types are identical.
  */
-public class DependencyValueExactLookup implements DependencyValueLookup {
+public class ValueExactLookup implements ValueLookup {
 
     @Override
     public <T> Set<Value<T>> execute(Set<Value<?>> values, DependencyIdentifier<T> id) {
         Set<Value<T>> matching = new HashSet<>();
         for (Value<?> v : values) {
-            if (v.id().qualifiers().isEmpty() == id.qualifiers().isEmpty()
-                    && (v.id().qualifiers().containsAll(id.qualifiers()) || id.qualifiers().stream().anyMatch(a -> a.annotationType() == Any.class))
-                    && typesMatch(id.type(), v.id().type())) {
+            if (v.metadata().getQualifiers().isEmpty() == id.qualifiers().isEmpty()
+                    && (v.metadata().getQualifiers().containsAll(id.qualifiers()) || id.qualifiers().stream().anyMatch(a -> a.annotationType() == Any.class))
+                    && typesMatch(id.type(), v.type())) {
                 @SuppressWarnings("unchecked") // if ids are equals, type is T
                         Value<T> matched = (Value<T>) v;
                 matching.add(matched);

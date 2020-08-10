@@ -14,7 +14,7 @@ public class InjectableMethodTest {
         DIContainer container = DIContainer.builder().build();
 
         assertEquals("public", new InjectableMethod(
-                container.getContext(), AccessTest.class.getDeclaredMethod("publicMethod")).inject(new AccessTest()));
+                container, AccessTest.class.getDeclaredMethod("publicMethod")).inject(new AccessTest()));
     }
 
 
@@ -23,7 +23,7 @@ public class InjectableMethodTest {
         DIContainer container = DIContainer.builder().build();
 
         assertEquals("package", new InjectableMethod(
-                container.getContext(), AccessTest.class.getDeclaredMethod("packageMethod")).inject(new AccessTest()));
+                container, AccessTest.class.getDeclaredMethod("packageMethod")).inject(new AccessTest()));
     }
 
     @Test
@@ -31,7 +31,7 @@ public class InjectableMethodTest {
         DIContainer container = DIContainer.builder().build();
 
         assertEquals("protected", new InjectableMethod(
-                container.getContext(), AccessTest.class.getDeclaredMethod("protectedMethod")).inject(new AccessTest()));
+                container, AccessTest.class.getDeclaredMethod("protectedMethod")).inject(new AccessTest()));
     }
 
     @Test
@@ -39,7 +39,7 @@ public class InjectableMethodTest {
         DIContainer container = DIContainer.builder().build();
 
         assertEquals("private", new InjectableMethod(
-                container.getContext(), AccessTest.class.getDeclaredMethod("privateMethod")).inject(new AccessTest()));
+                container, AccessTest.class.getDeclaredMethod("privateMethod")).inject(new AccessTest()));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class InjectableMethodTest {
 
         DIContainer container = DIContainer.builder().addValue(new InstanceValue<>(int.class, 10)).build();
         assertEquals(10, new InjectableMethod(
-                container.getContext(), TestClass.class.getDeclaredMethod("m", int.class)).inject(new TestClass()));
+                container, TestClass.class.getDeclaredMethod("m", int.class)).inject(new TestClass()));
     }
 
 
@@ -66,6 +66,6 @@ public class InjectableMethodTest {
 
         DIContainer container = DIContainer.builder().addValue(new InstanceValue<Object>(10)).build();
         assertThrows(UnsatisfiedDependencyException.class, () -> new InjectableMethod(
-                container.getContext(), TestClass.class.getDeclaredMethod("m", String.class)).inject(new TestClass()));
+                container, TestClass.class.getDeclaredMethod("m", String.class)).inject(new TestClass()));
     }
 }

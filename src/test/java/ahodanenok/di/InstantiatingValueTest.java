@@ -2,7 +2,6 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.DependencyInstantiatingException;
-import ahodanenok.di.scope.NotScoped;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.InstantiatingValue;
@@ -64,61 +63,61 @@ public class InstantiatingValueTest {
     public void testQualifiers_1() {
         InstantiatingValue<TestInstance> v =
                 new InstantiatingValue<>(TestInstance.class);
-        v.bind(container.getContext());
-        assertEquals(1, v.id().qualifiers().size());
-        assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());
-        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
+        v.bind(container);
+        assertEquals(1, v.metadata().getQualifiers().size());
+        assertEquals(TestQualifier_Class.class, v.metadata().getQualifiers().iterator().next().annotationType());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().getScope());
     }
 
     @Test
     public void testQualifiers_2() {
         InstantiatingValue<TestInterface> v =
                 new InstantiatingValue<>(TestInterface.class, TestInstance.class);
-        v.bind(container.getContext());
-        assertEquals(1, v.id().qualifiers().size());
-        assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());
-        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
+        v.bind(container);
+        assertEquals(1, v.metadata().getQualifiers().size());
+        assertEquals(TestQualifier_Class.class, v.metadata().getQualifiers().iterator().next().annotationType());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().getScope());
     }
 
     @Test
     public void testQualifiers_3() {
         InstantiatingValue<TestInstance> v =
                 new InstantiatingValue<>(TestInstance.class, TestInstance.class);
-        v.bind(container.getContext());
-        assertEquals(1, v.id().qualifiers().size());
-        assertEquals(TestQualifier_Class.class, v.id().qualifiers().iterator().next().annotationType());
-        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().scope());
+        v.bind(container);
+        assertEquals(1, v.metadata().getQualifiers().size());
+        assertEquals(TestQualifier_Class.class, v.metadata().getQualifiers().iterator().next().annotationType());
+        assertEquals(ScopeIdentifier.NOT_SCOPED, v.metadata().getScope());
     }
 
     @Test
     public void testScope_1() {
         InstantiatingValue<TestInstanceScope> v =
                 new InstantiatingValue<>(TestInstanceScope.class);
-        v.bind(container.getContext());
-        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
+        v.bind(container);
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().getScope());
     }
 
     @Test
     public void testScope_2() {
         InstantiatingValue<TestInterface> v =
                 new InstantiatingValue<>(TestInterface.class, TestInstanceScope.class);
-        v.bind(container.getContext());
-        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
+        v.bind(container);
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().getScope());
     }
 
     @Test
     public void testScope_3() {
         InstantiatingValue<TestInstanceScope> v =
                 new InstantiatingValue<>(TestInstanceScope.class, TestInstanceScope.class);
-        v.bind(container.getContext());
-        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().scope());
+        v.bind(container);
+        assertEquals(ScopeIdentifier.SINGLETON, v.metadata().getScope());
     }
 
     @Test
     public void testDefaultConstructor_1() {
         InstantiatingValue<TestClass_Default> v =
                 new InstantiatingValue<>(TestClass_Default.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
         assertNotNull(v.provider().get());
     }
@@ -128,7 +127,7 @@ public class InstantiatingValueTest {
     public void testDefaultConstructor_2() {
         InstantiatingValue<TestClass_Default_NotPublic> v =
                 new InstantiatingValue<>(TestClass_Default_NotPublic.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
         assertThrows(DependencyInjectionException.class, () -> v.provider().get());
     }
@@ -138,7 +137,7 @@ public class InstantiatingValueTest {
     public void testDefaultConstructor_3() {
         InstantiatingValue<TestClass_Default_NotSingle> v =
                 new InstantiatingValue<>(TestClass_Default_NotSingle.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
         assertThrows(DependencyInjectionException.class, () -> v.provider().get());
     }
@@ -148,7 +147,7 @@ public class InstantiatingValueTest {
     public void testMultipleConstructors_1() {
         InstantiatingValue<TestClass_Multiple> v =
                 new InstantiatingValue<>(TestClass_Multiple.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
         assertThrows(DependencyInstantiatingException.class, () -> v.provider().get());
     }
@@ -158,7 +157,7 @@ public class InstantiatingValueTest {
     public void testMultipleConstructors_2() {
         InstantiatingValue<TestInject_MultipleInject> v =
                 new InstantiatingValue<>(TestInject_MultipleInject.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
        assertEquals(10, v.provider().get().n);
     }
@@ -169,7 +168,7 @@ public class InstantiatingValueTest {
     public void testNestedClass_1() {
         InstantiatingValue<NestedClass> v =
                 new InstantiatingValue<>(NestedClass.class);
-        v.bind(container.getContext());
+        v.bind(container);
 
         assertNotNull(v.provider().get());
     }

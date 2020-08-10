@@ -2,23 +2,75 @@ package ahodanenok.di.value.metadata;
 
 import ahodanenok.di.scope.ScopeIdentifier;
 
-import javax.inject.Named;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Set;
 
-public interface ValueMetadata<T> {
+public abstract class ValueMetadata {
 
-    Class<? extends T> valueType();
+    protected Class<?> type;
+    protected String name;
+    protected ScopeIdentifier scope = ScopeIdentifier.NOT_SCOPED;
+    protected boolean isDefault = false;
+    protected boolean eager = false;
+    protected Set<Annotation> qualifiers = Collections.emptySet();
+    protected Set<Annotation> stereotypes = Collections.emptySet();
+    protected Set<Annotation> interceptorBindings = Collections.emptySet();
 
-    String name();
+    public ValueMetadata(Class<?> type) {
+        this.type = type;
+    }
 
-    ScopeIdentifier scope();
+    public Class<?> valueType() {
+        return type;
+    };
 
-    boolean isDefault();
+    public String getName() {
+        return name;
+    }
 
-    boolean isEager();
+    public ScopeIdentifier getScope() {
+        return scope;
+    }
 
-    Set<Annotation> qualifiers();
+    public boolean isDefault() {
+        return isDefault;
+    }
 
-    Set<Annotation> stereotypes();
+    public boolean isEager() {
+        return eager;
+    }
+
+    public boolean isInterceptor() {
+        return false;
+    }
+
+    public Set<Annotation> getQualifiers() {
+        return qualifiers;
+    }
+
+    public Set<Annotation> getStereotypes() {
+        return stereotypes;
+    }
+
+    public Set<Annotation> getInterceptorBindings() {
+        return interceptorBindings;
+    }
+
+    public Method getAroundInvoke() {
+        return null;
+    }
+
+    public Method getAroundConstruct() {
+        return null;
+    }
+
+    public Method getPostConstruct() {
+        return null;
+    }
+
+    public Method getPreDestroy() {
+        return null;
+    }
 }

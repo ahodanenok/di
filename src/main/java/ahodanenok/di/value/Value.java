@@ -1,7 +1,6 @@
 package ahodanenok.di.value;
 
-import ahodanenok.di.DIContainerContext;
-import ahodanenok.di.DependencyIdentifier;
+import ahodanenok.di.DIContainer;
 import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Provider;
@@ -15,11 +14,9 @@ public interface Value<T> {
 
     // todo: values after bind are considered as initialized and shouldn't be configurable after that
     // todo: validate values are correct (scopes, qualifiers, types, etc)
-    default void bind(DIContainerContext context) { }
+    default void bind(DIContainer container) { }
 
-    DependencyIdentifier<T> id();
-
-    Class<T> type();
+    Class<? extends T> type();
 
     ValueMetadata metadata();
 

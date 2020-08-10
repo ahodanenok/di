@@ -1,6 +1,5 @@
 package ahodanenok.di;
 
-import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_1() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));
@@ -48,7 +47,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_2() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));
@@ -62,7 +61,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_3() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));
@@ -76,7 +75,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_4() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class), T.class.getAnnotation(C.class)), "1"));
@@ -90,7 +89,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_5() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class), T.class.getAnnotation(B.class)), "1"));
@@ -104,7 +103,7 @@ public class ValueLookupTest {
 
     @Test
     public void lookupExact_6() {
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));
@@ -120,7 +119,7 @@ public class ValueLookupTest {
     public void lookupExact_7() {
         @Any class T { }
 
-        DependencyValueExactLookup lookup = new DependencyValueExactLookup();
+        ValueExactLookup lookup = new ValueExactLookup();
 
         Set<Value<?>> values = new LinkedHashSet<>();
 //        values.add(new InstanceValue<>(DependencyIdentifier.of(String.class, T.class.getAnnotation(A.class)), "1"));

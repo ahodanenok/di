@@ -1,13 +1,11 @@
 package ahodanenok.di;
 
 import ahodanenok.di.interceptor.AnnotatedInterceptorMetadataResolution;
-import ahodanenok.di.interceptor.InterceptorRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.InvocationContext;
-import java.util.Collections;
 
 public class InterceptorsTest {
 

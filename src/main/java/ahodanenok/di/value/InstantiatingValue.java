@@ -1,6 +1,8 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.*;
+import ahodanenok.di.event.AroundConstructEvent;
+import ahodanenok.di.event.Events;
 import ahodanenok.di.value.metadata.ClassMetadata;
 
 import javax.inject.Inject;
@@ -28,14 +30,22 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     }
 
     @Override
+    public void bind(DIContainer container) {
+        super.bind(container);
+
+        Events events = container.instance(Events.class);
+        if (events == null) {
+            throw new IllegalStateException();
+        }
+
+        Constructor<? extends T> constructor = resolveConstructor();
+        targetConstructor = new InjectableConstructor<>(container, constructor);
+        targetConstructor.onConstruct(ac -> events.fire(new AroundConstructEvent<>(this, ac)));
+    }
+
+    @Override
     public Provider<? extends T> provider() {
         return () -> {
-                if (targetConstructor == null) {
-                    Constructor<? extends T> constructor = resolveConstructor();
-                    targetConstructor = new InjectableConstructor<>(container, constructor);
-//                    targetConstructor.setAroundConstructObserver();
-                }
-
                 T instance = targetConstructor.inject();
                 if (instance != null) {
                     container.inject(instance);
@@ -87,7 +97,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             } catch (NoSuchMethodException e) {
 //                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
 //                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
-                throw new RuntimeException();
+                throw new RuntimeException(e);
             }
 
             // @Inject is optional for public, no-argument constructors when no other constructors are present.

@@ -186,10 +186,14 @@ public class InstantiatingValueTest {
 interface TestInterface { }
 
 @Singleton
-class TestInstanceScope implements TestInterface { }
+class TestInstanceScope implements TestInterface {
+    public TestInstanceScope() { }
+}
 
 @TestQualifier_Class
-class TestInstance implements TestInterface { }
+class TestInstance implements TestInterface {
+    public TestInstance() { }
+}
 
 class TestClass_Default {
     public TestClass_Default() { }

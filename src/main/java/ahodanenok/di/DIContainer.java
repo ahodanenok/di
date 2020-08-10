@@ -54,6 +54,7 @@ public final class DIContainer {
 
     private DIContainer() {
         this.values = new HashSet<>();
+        this.interceptors = new HashSet<>();
         this.scopes = new HashMap<>();
     }
 
@@ -174,14 +175,14 @@ public final class DIContainer {
     private void handleEvent(Event event) {
         // todo: simple handling for now just to implement aroundConstruct
         if (event instanceof AroundConstructEvent) {
-            interceptAroundConstruct(((AroundConstructEvent<?>) event).getAroundConstruct());
+            interceptAroundConstruct((AroundConstructEvent<?>) event);
         }
     }
 
-    private void interceptAroundConstruct(AroundConstruct<?> aroundConstruct) {
-        if (interceptors == null) {
+    private void interceptAroundConstruct(AroundConstructEvent<?> aroundConstructEvent) {
+        if (interceptors.isEmpty()) {
             try {
-                aroundConstruct.proceed();
+                aroundConstructEvent.getAroundConstruct().proceed();
             } catch (ReflectiveOperationException e) {
                 // todo: error
                 throw new RuntimeException(e);
@@ -194,9 +195,9 @@ public final class DIContainer {
             resolvedInterceptorChains = new HashMap<>();
         }
 
-        InterceptorChain chain = resolvedInterceptorChains.get(aroundConstruct.getConstructor());
+        InterceptorChain chain = resolvedInterceptorChains.get(aroundConstructEvent.getAroundConstruct().getConstructor());
         if (chain == null) {
-            List<Value<?>> classInterceptors = interceptorLookup.lookup(this, aroundConstruct.getConstructor().getDeclaringClass(), interceptors);
+            List<Value<?>> classInterceptors = interceptorLookup.lookup(this, aroundConstructEvent.getOwnerValue(), interceptors);
             List<Method> methods = new ArrayList<>();
             for (Value<?> interceptor : classInterceptors) {
                 Method aroundConstructMethod = instance(InterceptorMetadataResolution.class)
@@ -208,8 +209,8 @@ public final class DIContainer {
 
 //            Set<Annotation> bindings = context.getInterceptorBindingsResolution().resolve(aroundConstruct.getConstructor());
 //            List<Method> methods = interceptors.aroundConstructInterceptorMethods(aroundConstruct.getConstructor());
-            chain = new InterceptorChain(aroundConstruct, methods);
-            resolvedInterceptorChains.put(aroundConstruct.getConstructor(), chain);
+            chain = new InterceptorChain(aroundConstructEvent.getAroundConstruct(), methods);
+            resolvedInterceptorChains.put(aroundConstructEvent.getAroundConstruct().getConstructor(), chain);
         }
 
         try {
@@ -338,7 +339,7 @@ public final class DIContainer {
             interceptorMetadataResolution.metadata().setDefault(true);
             container.values.add(interceptorMetadataResolution);
 
-            container.values.add(new InstanceValue<>(new Events() {
+            container.values.add(new InstanceValue<>(Events.class, new Events() {
                 @Override
                 public void fire(Event event) {
                     container.handleEvent(event);
@@ -348,6 +349,9 @@ public final class DIContainer {
             if (values != null) {
                 for (Value<?> value : values) {
                     value.bind(container);
+                    if (value.metadata().isInterceptor()) {
+                        container.interceptors.add(value);
+                    }
                 }
 
                 container.values.addAll(values);

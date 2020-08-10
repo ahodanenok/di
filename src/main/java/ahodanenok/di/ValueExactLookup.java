@@ -1,9 +1,12 @@
 package ahodanenok.di;
 
+import ahodanenok.di.event.Event;
+import ahodanenok.di.event.Events;
 import ahodanenok.di.value.Value;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.

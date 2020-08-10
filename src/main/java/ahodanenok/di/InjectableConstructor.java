@@ -9,17 +9,21 @@ import ahodanenok.di.interceptor.AroundConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class InjectableConstructor<T> implements Injectable<T> {
 
     private DIContainer container;
     private Constructor<? extends T> constructor;
-    private Events events;
+    private Consumer<AroundConstruct<T>> onConstruct;
 
     public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {
         this.container = container;
         this.constructor = constructor;
-        this.events = container.instance(Events.class);
+    }
+
+    public void onConstruct(Consumer<AroundConstruct<T>> onConstruct) {
+        this.onConstruct = onConstruct;
     }
 
     @Override
@@ -62,9 +66,9 @@ public class InjectableConstructor<T> implements Injectable<T> {
 
         try {
 
-            if (events != null) {
-//                context.getAroundConstructObserver().observe(aroundConstruct);
-                events.fire(new AroundConstructEvent<>(aroundConstruct));
+            if (onConstruct != null) {
+                //events.fire(new AroundConstructEvent<>(aroundConstruct));
+                onConstruct.accept(aroundConstruct);
                 return aroundConstruct.getInstance();
             } else {
                 return aroundConstruct.proceed();

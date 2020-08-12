@@ -14,5 +14,7 @@ public interface InterceptorMetadataResolution {
 
     Set<Annotation> resolveBindings(Constructor<?> constructor, Supplier<Set<Annotation>> stereotypes);
 
+    Set<Annotation> resolveBindings(Method constructor, Supplier<Set<Annotation>> stereotypes);
+
     Method resolveAroundConstruct(Class<?> interceptorClass);
 }

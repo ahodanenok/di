@@ -16,6 +16,7 @@ import ahodanenok.di.value.Value;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -155,7 +156,6 @@ public final class DIContainer {
 
         // todo: Fields and methods in superclasses are injected before those in subclasses.
         // todo: check circular references
-
         ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
             // todo: cache
             // todo: which fields should be skipped (i.e inherited)
@@ -165,7 +165,7 @@ public final class DIContainer {
         // todo: conform to spec
         // A method annotated with @Inject that overrides another method annotated with @Inject will only be injected once per injection request per instance.
         // A method with no @Inject annotation that overrides a method annotated with @Inject will not be injected.
-        ReflectionAssistant.methods(instance.getClass()).filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
+        ReflectionAssistant.methods(instance.getClass()).stream().filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
             // todo: which methods should be skipped (i.e inherited)
             new InjectableMethod(this, m).inject(instance);
@@ -180,7 +180,7 @@ public final class DIContainer {
     }
 
     private void interceptAroundConstruct(AroundConstructEvent<?> aroundConstructEvent) {
-        if (interceptors.isEmpty()) {
+        if (aroundConstructEvent.getOwnerValue().metadata().isInterceptor() || interceptors.isEmpty()) {
             try {
                 aroundConstructEvent.getAroundConstruct().proceed();
             } catch (ReflectiveOperationException e) {
@@ -197,19 +197,23 @@ public final class DIContainer {
 
         InterceptorChain chain = resolvedInterceptorChains.get(aroundConstructEvent.getAroundConstruct().getConstructor());
         if (chain == null) {
+            chain = new InterceptorChain(new InvocationContextImpl(aroundConstructEvent.getAroundConstruct()));
             List<Value<?>> classInterceptors = interceptorLookup.lookup(this, aroundConstructEvent.getOwnerValue(), interceptors);
-            List<Method> methods = new ArrayList<>();
             for (Value<?> interceptor : classInterceptors) {
                 Method aroundConstructMethod = instance(InterceptorMetadataResolution.class)
                         .resolveAroundConstruct(interceptor.metadata().valueType());
                 if (aroundConstructMethod != null) {
-                    methods.add(aroundConstructMethod);
+                    chain.add(ctx -> {
+                        try {
+                            return ReflectionAssistant.invoke(aroundConstructMethod, interceptor.provider().get(), ctx);
+                        } catch (InvocationTargetException e) {
+                            // todo: error, message
+                            throw new RuntimeException(e);
+                        }
+                    });
                 }
             }
 
-//            Set<Annotation> bindings = context.getInterceptorBindingsResolution().resolve(aroundConstruct.getConstructor());
-//            List<Method> methods = interceptors.aroundConstructInterceptorMethods(aroundConstruct.getConstructor());
-            chain = new InterceptorChain(aroundConstructEvent.getAroundConstruct(), methods);
             resolvedInterceptorChains.put(aroundConstructEvent.getAroundConstruct().getConstructor(), chain);
         }
 

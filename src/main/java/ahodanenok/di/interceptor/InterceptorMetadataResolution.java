@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 public interface InterceptorMetadataResolution {
 
+    boolean isInterceptor(Class<?> clazz);
+
     Set<Annotation> resolveBindings(Class<?> clazz, Supplier<Set<Annotation>> stereotypes);
 
     Set<Annotation> resolveBindings(Constructor<?> constructor, Supplier<Set<Annotation>> stereotypes);

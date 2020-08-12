@@ -16,7 +16,10 @@ public abstract class ValueMetadata {
     protected boolean eager = false;
     protected Set<Annotation> qualifiers = Collections.emptySet();
     protected Set<Annotation> stereotypes = Collections.emptySet();
+
+    protected boolean interceptor = false;
     protected Set<Annotation> interceptorBindings = Collections.emptySet();
+
 
     public ValueMetadata(Class<?> type) {
         this.type = type;
@@ -43,7 +46,7 @@ public abstract class ValueMetadata {
     }
 
     public boolean isInterceptor() {
-        return false;
+        return interceptor;
     }
 
     public Set<Annotation> getQualifiers() {

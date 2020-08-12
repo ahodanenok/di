@@ -19,12 +19,27 @@ public final class ReflectionAssistant {
         }
     }
 
-    public static Stream<Method> methods(Class<?> clazz) {
-        if (clazz.getSuperclass() == null) {
-            return Arrays.stream(clazz.getDeclaredMethods());
-        } else {
-            return Stream.concat(methods(clazz.getSuperclass()), Arrays.stream(clazz.getDeclaredMethods()));
+    public static List<Method> methods(Class<?> clazz) {
+        Set<MethodKey> keys = new HashSet<>();
+        List<Method> methods = new ArrayList<>();
+
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            for (Method m : currentClass.getDeclaredMethods()) {
+                if (keys.add(new MethodKey(m))) {
+                    methods.add(m);
+                }
+            }
+
+            currentClass = currentClass.getSuperclass();
         }
+
+        return methods;
+//        if (clazz.getSuperclass() == null) {
+//            return Arrays.stream(clazz.getDeclaredMethods());
+//        } else {
+//            return Stream.concat(methods(clazz.getSuperclass()), Arrays.stream(clazz.getDeclaredMethods()));
+//        }
     }
 
     public static Stream<? extends Annotation> parameterAnnotations(Executable executable, int parameterIndex, AnnotationPresence presence) {
@@ -213,5 +228,46 @@ public final class ReflectionAssistant {
         if (!target.isAssignableFrom(src)) {
             throw new IllegalArgumentException(String.format("Type of the field %s is not assignable to %s", field, type));
         }
+    }
+
+    public static Object invoke(Method m, Object instance, Object... args) throws InvocationTargetException {
+        boolean accessible = m.isAccessible();
+        try {
+            m.setAccessible(true);
+            return m.invoke(instance, args);
+        } catch (IllegalAccessException e) {
+            // todo: could be fired if accessible is true?
+            throw new IllegalStateException(e);
+        } finally {
+            m.setAccessible(accessible);
+        }
+    }
+
+    private static class MethodKey {
+
+        private Method method;
+
+        public MethodKey(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public int hashCode() {
+            return method.getName().hashCode() * 31 + Arrays.hashCode(method.getParameterTypes());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            MethodKey other = (MethodKey) obj;
+            return methodsEqual(this.method, other.method);
+        }
+    }
+
+    private static boolean methodsEqual(Method a, Method b) {
+        return a.getName().equals(b.getName()) && Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 }

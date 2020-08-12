@@ -1,6 +1,7 @@
 package ahodanenok.di.value.metadata;
 
 import ahodanenok.di.*;
+import ahodanenok.di.interceptor.InterceptorMetadataResolution;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
@@ -26,7 +27,11 @@ public final class ClassMetadata extends ValueMetadata implements ResolvableMeta
         isDefault = type.isAnnotationPresent(DefaultValue.class);
         eager = type.isAnnotationPresent(Eager.class);
 
-        // todo: interceptorBindings
-        interceptorBindings = Collections.emptySet();
+        InterceptorMetadataResolution interceptorMetadataResolution =
+                container.instance(InterceptorMetadataResolution.class);
+        interceptor = interceptorMetadataResolution.isInterceptor(type);
+        if (interceptor) {
+            interceptorBindings = interceptorMetadataResolution.resolveBindings(type, () -> stereotypes);
+        }
     }
 }

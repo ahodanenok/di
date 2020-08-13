@@ -79,7 +79,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
             Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypes.get());
             if (s.size() > 1) {
                 // todo: exception type, message
-                throw new IllegalStateException("Multiple stereotypes declare a scope");
+                throw new ScopeResolutionException(method, "Multiple stereotypes declare a scope");
             }
 
             if (s.size() == 1) {

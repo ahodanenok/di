@@ -1,79 +1,32 @@
-package ahodanenok.di;
+package ahodanenok.di.scope;
 
 import ahodanenok.di.exception.ScopeResolutionException;
-import ahodanenok.di.scope.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import ahodanenok.di.scope.classes.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
-import ahodanenok.di.stereotype.Stereotype;
 import ahodanenok.di.value.ProviderValue;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Scope;
 import javax.inject.Singleton;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 // todo: test resolution for method and field
 public class ScopeTest {
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Inherited
-    @Scope
-    @interface S1 { }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Inherited
-    @Scope
-    @interface S2 { }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Scope
-    @interface NonInheritedScope { }
-
-    @S1
-    class Parent { }
-    class ChildA extends Parent { }
-
-    @S1 @S2
-    class ChildMultipleInheritedScopes extends Parent { }
-    class ChildB extends ChildMultipleInheritedScopes { }
-
-    @NonInheritedScope
-    class ChildNonInheritedScope extends Parent { }
-    class ChildC extends ChildNonInheritedScope { }
-
-    @S1
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface StereotypeWithScope1 { }
-
-    @S2
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface StereotypeWithScope2 { }
-
-    @StereotypeWithScope1
-    class ClassWithScopedStereotype { }
-
-    @Singleton @StereotypeWithScope1
-    class ScopedClassWithScopedStereotype { }
-
-    @StereotypeWithScope1 @StereotypeWithScope2
-    class ClassWithMultipleScopedStereotypes { }
-
     @Test
-    public void testScopeId_1() {
+    public void testScopeIdsMatchWhenCreatedFromClass() {
         assertEquals(ScopeIdentifier.of(NotScoped.class), ScopeIdentifier.of(NotScoped.class));
         assertEquals(ScopeIdentifier.of(Singleton.class), ScopeIdentifier.of(Singleton.class));
         assertNotEquals(ScopeIdentifier.of(Singleton.class), ScopeIdentifier.of(NotScoped.class));
     }
 
     @Test
-    public void testScopeId_2() {
+    public void testScopeIdsMatchWhenCreatedFromAnnotations() {
         @Singleton
         @NotScoped
         class Test { }
@@ -86,13 +39,13 @@ public class ScopeTest {
     }
 
     @Test
-    public void testNotScoped_1() {
+    public void testNotScopedReturnsCorrentId() {
         DefaultScope scope = new DefaultScope();
         assertEquals(ScopeIdentifier.of(NotScoped.class), scope.id());
     }
 
     @Test
-    public void testNotScoped_2() {
+    public void testNotScopedReturnsNewInstanceEveryTime() {
         class Test { }
 
         ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
@@ -104,13 +57,13 @@ public class ScopeTest {
     }
 
     @Test
-    public void testSingleton_1() {
+    public void testSingletonReturnsCorrentId() {
         SingletonScope scope = new SingletonScope();
         assertEquals(ScopeIdentifier.of(Singleton.class), scope.id());
     }
 
     @Test
-    public void testSingleton_2() {
+    public void testSingletonReturnsSameInstanceEveryTime() {
         class Test { }
 
         ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
@@ -122,93 +75,80 @@ public class ScopeTest {
     }
 
     @Test
-    public void testScopeResolution_1() {
-        class Test { }
-
+    public void testClassScopeResolutionNoScopeDeclared() {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedClass.class));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
-                resolution.resolve(Test.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
+                resolution.resolve(NotScopedClass.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
     }
 
     @Test
-    public void testScopeResolution_2() {
-        @NotScoped
-        class Test { }
-
+    public void testClassScopeResolutionNotScoped() {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedByAnnotation.class));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
-                resolution.resolve(Test.class, Collections::emptySet, ScopeIdentifier.of(Singleton.class)));
+                resolution.resolve(NotScopedByAnnotation.class, Collections::emptySet, ScopeIdentifier.of(Singleton.class)));
     }
 
     @Test
-    public void testScopeResolution_3() {
-        @Singleton
-        class Test { }
-
+    public void testClassScopeResolutionSingleton() {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonClass.class));
         assertEquals(ScopeIdentifier.of(Singleton.class),
-                resolution.resolve(Test.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
+                resolution.resolve(SingletonClass.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
     }
 
     @Test
-    public void testScopeResolution_4() throws Exception {
-        @NotScoped
-        class Test {
-
-            @Singleton
-            void method() { }
-        }
-
+    public void testMethodScopeResolutionSingleton() throws Exception {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(Test.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonMethod.class.getDeclaredMethod("method")));
         assertEquals(ScopeIdentifier.of(Singleton.class),
                 resolution.resolve(
-                        Test.class.getDeclaredMethod("method"),
+                        SingletonMethod.class.getDeclaredMethod("method"),
                         Collections::emptySet,
                         ScopeIdentifier.of(NotScoped.class)));
     }
 
     @Test
-    public void testScopeResolution_5() throws Exception {
-        @Singleton
-        class Test {
-
-            @NotScoped
-            void method() { }
-        }
-
+    public void testMethodScopeResolutionNotScoped() throws Exception {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(Test.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedMethod.class.getDeclaredMethod("method")));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
                 resolution.resolve(
-                        Test.class.getDeclaredMethod("method"),
+                        NotScopedMethod.class.getDeclaredMethod("method"),
                         Collections::emptySet,
                         ScopeIdentifier.of(Singleton.class)));
     }
 
     @Test
-    public void testScopeResolution_6() {
+    public void testMethodMultipleScopesFromStereotypes() throws Exception {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ChildA.class));
+        AnnotatedStereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
+        Method m = MultipleScopedMethod.class.getDeclaredMethod("multipleScopesFromStereotypes");
+        assertThrows(ScopeResolutionException.class,
+                () -> resolution.resolve(m, () -> stereotypeResolution.resolve(m), ScopeIdentifier.NOT_SCOPED));
+    }
+
+    @Test
+    public void testClassScopeResolutionInherited() {
+        AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
+        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ClassWithInheritedScope.class));
         assertEquals(ScopeIdentifier.of(S1.class),
-                resolution.resolve(ChildA.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
+                resolution.resolve(ClassWithInheritedScope.class, Collections::emptySet, ScopeIdentifier.of(NotScoped.class)));
     }
 
     @Test
-    public void testScopeResolution_7() {
+    public void testClassScopeResolutionErrorIfMultipleScopesDeclared() {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertThrows(ScopeResolutionException.class, () -> resolution.resolve(ChildB.class));
+        assertThrows(ScopeResolutionException.class, () -> resolution.resolve(ClassWithMultipleInheritedScopes.class));
     }
 
     @Test
-    public void testScopeResolution_8() {
+    public void testClassScopeResolutionIgnoringNotInheritedScope() {
         AnnotatedScopeResolution resolution = new AnnotatedScopeResolution();
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(ChildC.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(ClassIgnoringNotInheritedScope.class));
         assertEquals(ScopeIdentifier.of(Singleton.class),
-                resolution.resolve(ChildC.class, Collections::emptySet, ScopeIdentifier.of(Singleton.class)));
+                resolution.resolve(ClassIgnoringNotInheritedScope.class, Collections::emptySet, ScopeIdentifier.of(Singleton.class)));
     }
 
     @Test
@@ -224,7 +164,7 @@ public class ScopeTest {
     }
 
     @Test
-    public void testScopedClassWithScopedStereotype() {
+    public void testClassScopedClassWithScopedStereotype() {
         AnnotatedScopeResolution scopeResolution = new AnnotatedScopeResolution();
         AnnotatedStereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
 

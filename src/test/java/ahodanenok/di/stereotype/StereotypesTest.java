@@ -1,13 +1,9 @@
-package ahodanenok.di;
+package ahodanenok.di.stereotype;
 
-import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
-import ahodanenok.di.stereotype.Stereotype;
+import ahodanenok.di.stereotype.classes.*;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,65 +11,6 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StereotypesTest {
-
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface A { }
-
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface B { }
-
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface C { }
-
-    @M2
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface M1 { }
-
-    @M3
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface M2 { }
-
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface M3 { }
-
-    @Stereotype
-    @Inherited
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface P { }
-
-    @Loop2
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface Loop1 { }
-
-    @Loop1
-    @Stereotype
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface Loop2 { }
-
-
-    public static class ClassNoStereotypes { }
-
-    @A
-    public static class ClassSingleStereotype { }
-
-    @P @C
-    public static class ParentWithInheritedStereotype { }
-
-    @A @B
-    public static class ClassInheritedStereotype extends ParentWithInheritedStereotype { }
-
-    @M1
-    public static class ClassWithStereotypesWithStereotypes { }
-
-    @Loop1
-    public static class ClassWithStereotypeLoop { }
 
     @Test
     public void testClassNoStereotypes() {
@@ -86,30 +23,30 @@ public class StereotypesTest {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
         Set<Annotation> s = resolution.resolve(ClassSingleStereotype.class);
         assertEquals(1, s.size());
-        assertEquals(A.class, s.iterator().next().annotationType());
+        assertEquals(StereotypeA.class, s.iterator().next().annotationType());
     }
 
     @Test
     public void testClassWithInheritedStereotype() {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(ClassInheritedStereotype.class)
+        Set<Class<? extends Annotation>> s = resolution.resolve(ClassWithInheritedStereotype.class)
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
         assertEquals(3, s.size());
-        assertTrue(s.containsAll(Arrays.asList(A.class, B.class, P.class)));
+        assertTrue(s.containsAll(Arrays.asList(StereotypeA.class, StereotypeB.class, InheritedStereotype.class)));
     }
 
     @Test
     public void testClassWithStereotypeWithStereotypes() {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(ClassWithStereotypesWithStereotypes.class)
+        Set<Class<? extends Annotation>> s = resolution.resolve(ClassWithStereotypedStereotype.class)
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
 
         assertEquals(3, s.size());
-        assertTrue(s.containsAll(Arrays.asList(M1.class, M2.class, M3.class)));
+        assertTrue(s.containsAll(Arrays.asList(StereotypeWithStereotypeA.class, StereotypeWithStereotypeB.class, StereotypeWithStereotypeC.class)));
     }
 
     @Test
@@ -124,52 +61,37 @@ public class StereotypesTest {
         assertTrue(s.containsAll(Arrays.asList(Loop1.class, Loop2.class)));
     }
 
-    public static class FieldNoStereotypes {
-        String f;
-    }
-
-    public static class FieldSingleStereotype {
-        @A String f;
-    }
-
-    public static class FieldWithStereotypesWithStereotypes {
-        @M1 String f;
-    }
-
-    public static class FieldWithStereotypesLoop {
-        @Loop1 String f;
-    }
-
     @Test
     public void testFieldNoStereotypes() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        assertTrue(resolution.resolve(FieldNoStereotypes.class.getDeclaredField("f")).isEmpty());
+        assertTrue(resolution.resolve(FieldStereotypes.class.getDeclaredField("noStereotypes")).isEmpty());
     }
 
     @Test
     public void testFieldSingleStereotype() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Annotation> s = resolution.resolve(FieldSingleStereotype.class.getDeclaredField("f"));
+        Set<Annotation> s = resolution.resolve(FieldStereotypes.class.getDeclaredField("singleStereotype"));
         assertEquals(1, s.size());
-        assertEquals(A.class, s.iterator().next().annotationType());
+        assertEquals(StereotypeA.class, s.iterator().next().annotationType());
     }
 
     @Test
     public void testFieldWithStereotypeWithStereotypes() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(FieldWithStereotypesWithStereotypes.class.getDeclaredField("f"))
+        Set<Class<? extends Annotation>> s = resolution.resolve(FieldStereotypes.class.getDeclaredField("stereotypesWithStereotypes"))
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
 
         assertEquals(3, s.size());
-        assertTrue(s.containsAll(Arrays.asList(M1.class, M2.class, M3.class)));
+        assertTrue(s.containsAll(Arrays.asList(
+                StereotypeWithStereotypeA.class, StereotypeWithStereotypeB.class, StereotypeWithStereotypeC.class)));
     }
 
     @Test
     public void testFieldWithStereotypesLoop() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(FieldWithStereotypesLoop.class.getDeclaredField("f"))
+        Set<Class<? extends Annotation>> s = resolution.resolve(FieldStereotypes.class.getDeclaredField("stereotypesLoop"))
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
@@ -178,52 +100,37 @@ public class StereotypesTest {
         assertTrue(s.containsAll(Arrays.asList(Loop1.class, Loop2.class)));
     }
 
-    public static class MethodNoStereotypes {
-        void m() { }
-    }
-
-    public static class MethodSingleStereotype {
-        @A void m() { }
-    }
-
-    public static class MethodWithStereotypesWithStereotypes {
-        @M1 void m() { }
-    }
-
-    public static class MethodWithStereotypesLoop {
-        @Loop1 void m() { }
-    }
-
     @Test
     public void testMethodNoStereotypes() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        assertTrue(resolution.resolve(MethodNoStereotypes.class.getDeclaredMethod("m")).isEmpty());
+        assertTrue(resolution.resolve(MethodStereotypes.class.getDeclaredMethod("noStereotypes")).isEmpty());
     }
 
     @Test
     public void testMethodSingleStereotype() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Annotation> s = resolution.resolve(MethodSingleStereotype.class.getDeclaredMethod("m"));
+        Set<Annotation> s = resolution.resolve(MethodStereotypes.class.getDeclaredMethod("singleStereotype"));
         assertEquals(1, s.size());
-        assertEquals(A.class, s.iterator().next().annotationType());
+        assertEquals(StereotypeA.class, s.iterator().next().annotationType());
     }
 
     @Test
     public void testMethodWithStereotypeWithStereotypes() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(MethodWithStereotypesWithStereotypes.class.getDeclaredMethod("m"))
+        Set<Class<? extends Annotation>> s = resolution.resolve(MethodStereotypes.class.getDeclaredMethod("stereotypesWithStereotypes"))
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
 
         assertEquals(3, s.size());
-        assertTrue(s.containsAll(Arrays.asList(M1.class, M2.class, M3.class)));
+        assertTrue(s.containsAll(Arrays.asList(
+                StereotypeWithStereotypeA.class, StereotypeWithStereotypeB.class, StereotypeWithStereotypeC.class)));
     }
 
     @Test
     public void testMethodWithStereotypesLoop() throws Exception {
         AnnotatedStereotypeResolution resolution = new AnnotatedStereotypeResolution();
-        Set<Class<? extends Annotation>> s = resolution.resolve(MethodWithStereotypesLoop.class.getDeclaredMethod("m"))
+        Set<Class<? extends Annotation>> s = resolution.resolve(MethodStereotypes.class.getDeclaredMethod("stereotypesLoop"))
                 .stream()
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 // todo: JSR-250
 // todo: logging
 // todo: events (like in cdi)
-// todo: injection points (could be injected)
 // todo: rethink exceptions' names
 // todo: profiles (set of values enabled by name)
 // todo: when null if valid as dependency value, when to throw unsatisfied dependency

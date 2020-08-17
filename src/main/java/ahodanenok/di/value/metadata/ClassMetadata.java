@@ -23,8 +23,9 @@ public final class ClassMetadata extends ValueMetadata implements ResolvableMeta
         stereotypes = container.instance(StereotypeResolution.class).resolve(type);
         name = container.instance(NameResolution.class).resolve(type, this::getStereotypes);
         qualifiers = container.instance(QualifierResolution.class).resolve(type);
-        scope = container.instance(ScopeResolution.class).resolve(type);
-        isDefault = type.isAnnotationPresent(DefaultValue.class);
+        scope = container.instance(ScopeResolution.class).resolve(type, this::getStereotypes, ScopeIdentifier.NOT_SCOPED);
+        isDefault = type.isAnnotationPresent(DefaultValue.class)
+                || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(DefaultValue.class));
         eager = type.isAnnotationPresent(Eager.class);
 
         InterceptorMetadataResolution interceptorMetadataResolution =

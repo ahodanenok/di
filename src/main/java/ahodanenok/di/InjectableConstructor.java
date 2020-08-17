@@ -5,6 +5,8 @@ import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.AroundConstruct;
+import ahodanenok.di.interceptor.AroundInject;
+import ahodanenok.di.interceptor.InjectionPointImpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -16,6 +18,7 @@ public class InjectableConstructor<T> implements Injectable<T> {
     private DIContainer container;
     private Constructor<? extends T> constructor;
     private Consumer<AroundConstruct<T>> onConstruct;
+    private Consumer<AroundInject> onInject;
 
     public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {
         this.container = container;
@@ -24,6 +27,10 @@ public class InjectableConstructor<T> implements Injectable<T> {
 
     public void onConstruct(Consumer<AroundConstruct<T>> onConstruct) {
         this.onConstruct = onConstruct;
+    }
+
+    public void onInject(Consumer<AroundInject> onInject) {
+        this.onInject = onInject;
     }
 
     @Override
@@ -50,22 +57,38 @@ public class InjectableConstructor<T> implements Injectable<T> {
         int paramCount = constructor.getParameterCount();
         while (i < paramCount) {
             Class<?> type = types[i];
-
             Set<Annotation> qualifiers = container.instance(QualifierResolution.class).resolve(constructor, i);
-            DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
-            Object arg = container.instance(id);
-            if (arg == null && !optional[i]) {
-                throw new UnsatisfiedDependencyException(this, id, "not found");
+
+            if (onInject != null) {
+                int idx = i;
+
+                InjectionPointImpl injectionPoint = new InjectionPointImpl();
+                injectionPoint.setType(type);
+                injectionPoint.setQualifiers(qualifiers);
+                injectionPoint.setTarget(constructor);
+                injectionPoint.setParameterIndex(idx);
+                onInject.accept(new AroundInject(injectionPoint, arg -> {
+                    if (arg == null && !optional[idx]) {
+                        throw new UnsatisfiedDependencyException(this, DependencyIdentifier.of(type, qualifiers), "not found");
+                    }
+
+                    args[idx] = arg;
+                }));
+            } else {
+                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
+                Object arg = container.instance(id);
+                if (arg == null && !optional[i]) {
+                    throw new UnsatisfiedDependencyException(this, id, "not found");
+                }
+
+                args[i] = arg;
             }
 
-            args[i++] = arg;
+            i++;
         }
 
-
-        AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args);
-
         try {
-
+            AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args);
             if (onConstruct != null) {
                 //events.fire(new AroundConstructEvent<>(aroundConstruct));
                 onConstruct.accept(aroundConstruct);

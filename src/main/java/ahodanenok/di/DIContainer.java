@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.event.AroundConstructEvent;
+import ahodanenok.di.event.AroundInjectEvent;
 import ahodanenok.di.event.Event;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.UnknownScopeException;
@@ -12,13 +13,13 @@ import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.value.InstanceValue;
+import ahodanenok.di.value.ProviderValue;
 import ahodanenok.di.value.Value;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,10 +54,14 @@ public final class DIContainer {
 
     private Map<Member, InterceptorChain> resolvedInterceptorChains;
 
+    private InjectionPoint currentInjectionPoint;
+    private LinkedList<InjectionPoint> injectionPoints;
+
     private DIContainer() {
         this.values = new HashSet<>();
         this.interceptors = new HashSet<>();
         this.scopes = new HashMap<>();
+        this.injectionPoints = new LinkedList<>();
     }
 
     private Scope lookupScope(ScopeIdentifier id) {
@@ -128,7 +133,21 @@ public final class DIContainer {
     private <T> Provider<? extends T> provider(Value<T> value) {
         Objects.requireNonNull(value, "value is null")    ;
         Scope scope = lookupScope(value.metadata().getScope());
-        return () -> scope.get(value);
+        return () -> {
+            // InjectionPoint doesn't affect injection points stack,
+            // because otherwise it will contain information about the place
+            // where injection point being injected
+            if (InjectionPoint.class.isAssignableFrom(value.type())) {
+                return scope.get(value);
+            }
+
+            try {
+                injectionPoints.push(currentInjectionPoint);
+                return scope.get(value);
+            } finally {
+                injectionPoints.pop();
+            }
+        };
     }
 
     public <T> T instance(Class<T> type) {
@@ -150,6 +169,11 @@ public final class DIContainer {
     }
 
     public void inject(Object instance) {
+        inject(null, instance);
+    }
+
+    // todo: where to get value
+    private void inject(Value<?> value, Object instance) {
         if (instance == null) {
             throw new IllegalArgumentException("instance is null");
         }
@@ -159,7 +183,9 @@ public final class DIContainer {
         ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
             // todo: cache
             // todo: which fields should be skipped (i.e inherited)
-            new InjectableField(this, f).inject(instance);
+            InjectableField injectableField = new InjectableField(this, f);
+            injectableField.setOnInject(ai -> interceptAroundInject(new AroundInjectEvent(value, ai)));
+            injectableField.inject(instance);
         });
 
         // todo: conform to spec
@@ -168,15 +194,34 @@ public final class DIContainer {
         ReflectionAssistant.methods(instance.getClass()).stream().filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
             // todo: cache
             // todo: which methods should be skipped (i.e inherited)
-            new InjectableMethod(this, m).inject(instance);
+            InjectableMethod injectableMethod = new InjectableMethod(this, m);
+            injectableMethod.setOnInject(ai -> interceptAroundInject(new AroundInjectEvent(value, ai)));
+            injectableMethod.inject(instance);
         });
     }
 
     private void handleEvent(Event event) {
-        // todo: simple handling for now just to implement aroundConstruct
         if (event instanceof AroundConstructEvent) {
             interceptAroundConstruct((AroundConstructEvent<?>) event);
+        } else if (event instanceof AroundInjectEvent) {
+            interceptAroundInject((AroundInjectEvent) event);
         }
+    }
+
+    private void interceptAroundInject(AroundInjectEvent event) {
+        AroundInject aroundInject = event.getAroundInject();
+        InjectionPoint injectionPoint = aroundInject.getInjectionPoint();
+
+
+        DependencyIdentifier<?> id = DependencyIdentifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
+        // todo: @AroundInject interceptor?
+        try {
+            currentInjectionPoint = injectionPoint;
+            aroundInject.setResolvedDependency(instance(id));
+        } finally {
+            currentInjectionPoint = null;
+        }
+        aroundInject.proceed();
     }
 
     private void interceptAroundConstruct(AroundConstructEvent<?> aroundConstructEvent) {
@@ -222,6 +267,17 @@ public final class DIContainer {
         } catch (Exception e) {
             // todo: error
             throw new RuntimeException(e);
+        }
+    }
+
+    private class InjectionPointProvider implements Provider<InjectionPoint> {
+        @Override
+        public InjectionPoint get() {
+            // todo: check not null and throw exception
+
+            System.out.println("injectionPoints: " + injectionPoints);
+
+            return injectionPoints.peek();
         }
     }
 
@@ -342,6 +398,10 @@ public final class DIContainer {
             interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
             interceptorMetadataResolution.metadata().setDefault(true);
             container.values.add(interceptorMetadataResolution);
+
+            ProviderValue<InjectionPoint> injectionPoint =
+                    new ProviderValue<>(InjectionPoint.class, new InjectionPointProvider());
+            container.values.add(injectionPoint);
 
             container.values.add(new InstanceValue<>(Events.class, new Events() {
                 @Override

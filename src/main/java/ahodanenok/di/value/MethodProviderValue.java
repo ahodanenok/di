@@ -1,6 +1,8 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.*;
+import ahodanenok.di.event.AroundInjectEvent;
+import ahodanenok.di.event.Events;
 import ahodanenok.di.value.metadata.MethodMetadata;
 
 import javax.inject.Provider;
@@ -11,6 +13,8 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
 
     private DependencyIdentifier<?> methodInstanceId;
     private Method method;
+
+    private Events events;
 
     public MethodProviderValue(Class<T> type, Method method) {
         this(type, null, method);
@@ -28,6 +32,12 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
     }
 
     @Override
+    public void bind(DIContainer container) {
+        super.bind(container);
+        this.events = container.instance(Events.class);
+    }
+
+    @Override
     public Provider<? extends T> provider() {
         // todo: if like in ahodanenok.di.value.DependencyFieldProviderValue.provider
         return () -> {
@@ -38,7 +48,9 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
             Object instance = methodInstanceId != null ? container.instance(methodInstanceId) : null;
             // todo: if method is not static instance is required, throw unsatisfied dependency if null
             // todo: suppress warnings when type is checked in constructor
-            return (T) new InjectableMethod(container, method).inject(instance);
+            InjectableMethod injectableMethod = new InjectableMethod(container, method);
+            injectableMethod.setOnInject(ai -> events.fire(new AroundInjectEvent(this, ai)));
+            return (T) injectableMethod.inject(instance);
         };
     }
 }

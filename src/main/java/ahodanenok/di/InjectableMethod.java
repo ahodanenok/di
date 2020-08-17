@@ -2,20 +2,28 @@ package ahodanenok.di;
 
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
+import ahodanenok.di.interceptor.AroundInject;
+import ahodanenok.di.interceptor.InjectionPointImpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class InjectableMethod implements Injectable<Object> {
 
     private DIContainer container;
     private Method method;
+    private Consumer<AroundInject> onInject;
 
     public InjectableMethod(DIContainer container, Method method) {
         this.container = container;
         this.method = method;
+    }
+
+    public void setOnInject(Consumer<AroundInject> onInject) {
+        this.onInject = onInject;
     }
 
     @Override
@@ -48,13 +56,33 @@ public class InjectableMethod implements Injectable<Object> {
         Object[] args = new Object[method.getParameterCount()];
         for (Class<?> type : method.getParameterTypes()) {
             Set<Annotation> qualifiers = container.instance(QualifierResolution.class).resolve(method, i);
-            DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
-            Object arg = container.instance(id);
-            if (arg == null && !optional[i]) {
-                throw new UnsatisfiedDependencyException(this, id, "not found");
+
+            if (onInject != null) {
+                int idx = i;
+
+                InjectionPointImpl injectionPoint = new InjectionPointImpl();
+                injectionPoint.setType(type);
+                injectionPoint.setQualifiers(qualifiers);
+                injectionPoint.setTarget(method);
+                injectionPoint.setParameterIndex(idx);
+                onInject.accept(new AroundInject(injectionPoint, arg -> {
+                    if (arg == null && !optional[idx]) {
+                        throw new UnsatisfiedDependencyException(this, DependencyIdentifier.of(type, qualifiers), "not found");
+                    }
+
+                    args[idx] = arg;
+                }));
+            } else {
+                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
+                Object arg = container.instance(id);
+                if (arg == null && !optional[i]) {
+                    throw new UnsatisfiedDependencyException(this, id, "not found");
+                }
+
+                args[i] = arg;
             }
 
-            args[i++] = arg;
+            i++;
         }
 
         boolean accessible = method.isAccessible();

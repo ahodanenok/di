@@ -2,6 +2,7 @@ package ahodanenok.di.value;
 
 import ahodanenok.di.*;
 import ahodanenok.di.event.AroundConstructEvent;
+import ahodanenok.di.event.AroundInjectEvent;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.value.metadata.ClassMetadata;
 
@@ -41,6 +42,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         Constructor<? extends T> constructor = resolveConstructor();
         targetConstructor = new InjectableConstructor<>(container, constructor);
         targetConstructor.onConstruct(ac -> events.fire(new AroundConstructEvent<>(this, ac)));
+        targetConstructor.onInject(ai -> events.fire(new AroundInjectEvent(this, ai)));
     }
 
     @Override
@@ -86,6 +88,9 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             constructor = c;
         } else {
             try {
+
+                // todo: if there is only one public constructor, pick it if not annotated with @Inject
+
                 // @Inject is optional for public, no-argument constructors
                 if (!Modifier.isStatic(instanceClass.getModifiers())
                         // todo: leave only support for member classes

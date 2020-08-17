@@ -38,6 +38,11 @@ import java.util.stream.Collectors;
 // todo: documentation
 // todo: generics
 // todo: yaml config
+// todo: @Priority
+// todo: support injecting Optional
+// todo: @PrimaryValue - if multiple pick primary
+// todo: &name - syntax to get value provider
+// todo: overriding meta-annotations attributes in annotated annotation
 
 /**
  * Container is a coordinator between providers

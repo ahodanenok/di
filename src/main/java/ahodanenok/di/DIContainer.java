@@ -15,6 +15,7 @@ import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.ProviderValue;
 import ahodanenok.di.value.Value;
+import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -211,7 +212,7 @@ public final class DIContainer {
     private void interceptAroundInject(AroundInjectEvent event) {
         AroundInject aroundInject = event.getAroundInject();
         InjectionPoint injectionPoint = aroundInject.getInjectionPoint();
-
+        assert event.getApplicant() != null;
 
         DependencyIdentifier<?> id = DependencyIdentifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         // todo: @AroundInject interceptor?
@@ -278,6 +279,39 @@ public final class DIContainer {
             System.out.println("injectionPoints: " + injectionPoints);
 
             return injectionPoints.peek();
+        }
+    }
+
+    private class ManagedValue implements Value<Object> {
+
+        private Value<?> value;
+
+        public ManagedValue(Value<?> value) {
+            this.value = value;
+        }
+
+        @Override
+        public Class<?> type() {
+            return value.type();
+        }
+
+        @Override
+        public ValueMetadata metadata() {
+            return value.metadata();
+        }
+
+        @Override
+        public void bind(DIContainer container) {
+            value.bind(container);
+        }
+
+        @Override
+        public Provider<?> provider() {
+            return () -> {
+                Object obj = value.provider().get();
+                inject(value, obj);
+                return obj;
+            };
         }
     }
 
@@ -411,14 +445,15 @@ public final class DIContainer {
             }));
 
             if (values != null) {
-                for (Value<?> value : values) {
+                Set<Value<?>> managedValues = values.stream().map(ManagedValue::new).collect(Collectors.toSet());
+                for (Value<?> value : managedValues) {
                     value.bind(container);
                     if (value.metadata().isInterceptor()) {
                         container.interceptors.add(value);
                     }
                 }
 
-                container.values.addAll(values);
+                container.values.addAll(managedValues);
             }
 
             // todo: eager init

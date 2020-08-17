@@ -49,10 +49,10 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     public Provider<? extends T> provider() {
         return () -> {
                 T instance = targetConstructor.inject();
-                if (instance != null) {
-                    container.inject(instance);
-                    // todo: post create
-                }
+//                if (instance != null) {
+//                    container.inject(instance);
+//                    // todo: post create
+//                }
 
                 return instance;
         };

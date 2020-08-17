@@ -43,6 +43,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToConstructorClassWithFieldInjectionPoint.class.getDeclaredConstructor(ClassWithInjectionPointField.class),
                 injectionPoint.getTarget());
+        assertEquals(0, injectionPoint.getParameterIndex());
     }
 
 
@@ -61,6 +62,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToConstructorClassWithMethodInjectionPoint.class.getDeclaredConstructor(ClassWithInjectionPointMethod.class),
                 injectionPoint.getTarget());
+        assertEquals(0, injectionPoint.getParameterIndex());
     }
 
     @Test
@@ -78,6 +80,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToFieldClassWithConstructorInjectionPoint.class.getDeclaredField("field"),
                 injectionPoint.getTarget());
+        assertThrows(IllegalStateException.class, injectionPoint::getParameterIndex);
     }
 
     @Test
@@ -95,6 +98,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToFieldClassWithFieldInjectionPoint.class.getDeclaredField("field"),
                 injectionPoint.getTarget());
+        assertThrows(IllegalStateException.class, injectionPoint::getParameterIndex);
     }
 
     @Test
@@ -112,6 +116,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToFieldClassWithMethodInjectionPoint.class.getDeclaredField("field"),
                 injectionPoint.getTarget());
+        assertThrows(IllegalStateException.class, injectionPoint::getParameterIndex);
     }
 
     @Test
@@ -129,6 +134,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToMethodClassWithConstructorInjectionPoint.class.getDeclaredMethod("setObj", ClassWithInjectionPointConstructorParameter.class),
                 injectionPoint.getTarget());
+        assertEquals(0, injectionPoint.getParameterIndex());
     }
 
     @Test
@@ -146,6 +152,7 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToMethodClassWithFieldInjectionPoint.class.getDeclaredMethod("setObj", ClassWithInjectionPointField.class),
                 injectionPoint.getTarget());
+        assertEquals(0, injectionPoint.getParameterIndex());
     }
 
     @Test
@@ -163,5 +170,6 @@ public class InjectionPointTest {
         assertEquals(
                 InjectingToMethodClassWithMethodInjectionPoint.class.getDeclaredMethod("setObj", ClassWithInjectionPointMethod.class),
                 injectionPoint.getTarget());
+        assertEquals(0, injectionPoint.getParameterIndex());
     }
 }

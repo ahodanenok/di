@@ -1,6 +1,7 @@
 package ahodanenok.di.value.metadata;
 
 import ahodanenok.di.*;
+import ahodanenok.di.interceptor.InterceptorMetadataResolution;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
@@ -28,7 +29,8 @@ public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadat
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(DefaultValue.class));
         eager = field.isAnnotationPresent(Eager.class);
 
-        // todo: interceptorBindings
-        interceptorBindings = Collections.emptySet();
+        InterceptorMetadataResolution interceptorMetadataResolution =
+                container.instance(InterceptorMetadataResolution.class);
+        interceptorBindings = interceptorMetadataResolution.resolveBindings(field, () -> stereotypes);
     }
 }

@@ -2,6 +2,7 @@ package ahodanenok.di.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -15,6 +16,8 @@ public interface InterceptorMetadataResolution {
     Set<Annotation> resolveBindings(Constructor<?> constructor, Supplier<Set<Annotation>> stereotypes);
 
     Set<Annotation> resolveBindings(Method constructor, Supplier<Set<Annotation>> stereotypes);
+
+    Set<Annotation> resolveBindings(Field field, Supplier<Set<Annotation>> stereotypes);
 
     Method resolveAroundConstruct(Class<?> interceptorClass);
 }

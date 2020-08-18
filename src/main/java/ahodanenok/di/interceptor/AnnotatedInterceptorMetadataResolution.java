@@ -7,10 +7,7 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -30,6 +27,11 @@ public class AnnotatedInterceptorMetadataResolution implements InterceptorMetada
     @Override
     public Set<Annotation> resolveBindings(Method method, Supplier<Set<Annotation>> stereotypes) {
         return resolveExecutableBindings(method, stereotypes);
+    }
+
+    @Override
+    public Set<Annotation> resolveBindings(Field field, Supplier<Set<Annotation>> stereotypes) {
+        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), stereotypes);
     }
 
     @Override
@@ -105,7 +107,7 @@ public class AnnotatedInterceptorMetadataResolution implements InterceptorMetada
         return m;
     }
 
-    private Set<Annotation> bindings(Class<?> clazz) {
+    private Set<Annotation> bindings(AnnotatedElement clazz) {
         return ReflectionAssistant.annotations(clazz, ReflectionAssistant.AnnotationPresence.PRESENT)
                 .filter(a -> a.annotationType().isAnnotationPresent(InterceptorBinding.class))
                 .collect(Collectors.toSet());

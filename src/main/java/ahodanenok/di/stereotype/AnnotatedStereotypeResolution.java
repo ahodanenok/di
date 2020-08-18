@@ -26,7 +26,9 @@ public class AnnotatedStereotypeResolution implements StereotypeResolution {
 
     private Set<Annotation> resolveInternal(AnnotatedElement element) {
         Set<Annotation> result = new HashSet<>();
-        LinkedList<Annotation> queue = Arrays.stream(element.getAnnotations()).collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
+        LinkedList<Annotation> queue = Arrays.stream(element.getAnnotations())
+                .filter(a -> a.annotationType().isAnnotationPresent(Stereotype.class))
+                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
         while (!queue.isEmpty()) {
             Annotation stereotype = queue.removeFirst();
             result.add(stereotype);

@@ -1,19 +1,17 @@
 package ahodanenok.di.value;
 
+import ahodanenok.di.ValueSpecifier;
 import ahodanenok.di.scope.ScopeIdentifier;
-import ahodanenok.di.value.metadata.ClassMetadata;
 import ahodanenok.di.value.metadata.ExplicitMetadata;
-import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /**
  * Provides user-supplied value as a dependency.
  *
  * Scope of the value will be singleton.
  * Qualifiers on the instance class are ignored, but the could be provided via
- * {@link InstanceValue#InstanceValue(ahodanenok.di.DependencyIdentifier, java.lang.Object)}
+ * {@link InstanceValue#InstanceValue(ValueSpecifier, java.lang.Object)}
  * constructor.
  *
  * @param <T> type of the value

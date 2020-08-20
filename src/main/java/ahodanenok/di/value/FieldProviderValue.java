@@ -40,7 +40,7 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
             return () -> {
                 Object instance = container.instance(field.getDeclaringClass());
                 if (instance == null) {
-                    throw new UnsatisfiedDependencyException(DependencyIdentifier.of(field.getDeclaringClass()), "not found");
+                    throw new UnsatisfiedDependencyException(ValueSpecifier.of(field.getDeclaringClass()), "not found");
                 }
 
                 try {

@@ -67,16 +67,16 @@ public class InjectableMethod implements Injectable<Object> {
                 injectionPoint.setParameterIndex(idx);
                 onInject.accept(new AroundInject(injectionPoint, arg -> {
                     if (arg == null && !optional[idx]) {
-                        throw new UnsatisfiedDependencyException(this, DependencyIdentifier.of(type, qualifiers), "not found");
+                        throw new UnsatisfiedDependencyException(this, ValueSpecifier.of(type, qualifiers), "not found");
                     }
 
                     args[idx] = arg;
                 }));
             } else {
-                DependencyIdentifier<?> id = DependencyIdentifier.of(type, qualifiers);
-                Object arg = container.instance(id);
+                ValueSpecifier<?> specifier = ValueSpecifier.of(type, qualifiers);
+                Object arg = container.instance(specifier);
                 if (arg == null && !optional[i]) {
-                    throw new UnsatisfiedDependencyException(this, id, "not found");
+                    throw new UnsatisfiedDependencyException(this, specifier, "not found");
                 }
 
                 args[i] = arg;

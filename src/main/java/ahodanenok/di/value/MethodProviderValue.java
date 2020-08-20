@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 // todo: @Disposes method for created instance
 public class MethodProviderValue<T> extends AbstractValue<T> {
 
-    private DependencyIdentifier<?> methodInstanceId;
+    private ValueSpecifier<?> methodInstanceId;
     private Method method;
 
     private Events events;
@@ -21,7 +21,7 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
     }
 
     // todo: don't need explicit id for declaring class, id can be created from it
-    public MethodProviderValue(Class<T> type, DependencyIdentifier<?> methodInstanceId, Method method) {
+    public MethodProviderValue(Class<T> type, ValueSpecifier<?> methodInstanceId, Method method) {
         super(type, new MethodMetadata(type, method));
 
         // todo: check if method is not static and no instance given

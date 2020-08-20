@@ -77,22 +77,15 @@ public final class DIContainer {
     }
 
     public Provider<?> provider(String name) {
-        Value<?> value = chooseValue(values.stream().filter(v -> name.equals(v.metadata().getName())).collect(Collectors.toSet()));
-        if (value == null) {
-            return null;
-        }
-
-        return provider(value);
+        return provider(ValueSpecifier.named(name));
     }
 
     public <T> Provider<? extends T> provider(Class<T> type) {
-        return provider(DependencyIdentifier.of(type));
+        return provider(ValueSpecifier.of(type));
     }
 
-    public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        Object result = valueLookup.execute(values, id);
-        // todo: learn how to use generics
-        Value<T> value = (Value<T>) chooseValue((Set<Value<?>>) result);
+    public <T> Provider<? extends T> provider(ValueSpecifier<T> id) {
+        Value<T> value = chooseValue(valueLookup.execute(values, id));
         if (value == null) {
             return null;
         }
@@ -100,7 +93,7 @@ public final class DIContainer {
         return provider(value);
     }
 
-    private Value<?> chooseValue(Set<Value<?>> values) {
+    private <T> Value<T> chooseValue(Set<Value<T>> values) {
         if (values.isEmpty()) {
             return null;
         }
@@ -109,7 +102,7 @@ public final class DIContainer {
             return values.iterator().next();
         }
 
-        Set<Value<?>> primary = values.stream().filter(v -> v.metadata().isPrimary()).collect(Collectors.toSet());
+        Set<Value<T>> primary = values.stream().filter(v -> v.metadata().isPrimary()).collect(Collectors.toSet());
         if (primary.size() > 1) {
             // todo: exception, message
             throw new IllegalStateException("multiple primary values");
@@ -119,7 +112,7 @@ public final class DIContainer {
             return primary.iterator().next();
         }
 
-        Set<Value<?>> withoutDefaults = values.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
+        Set<Value<T>> withoutDefaults = values.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
         if (withoutDefaults.size() > 1) {
             // todo: exception, message
             throw new IllegalStateException("multiple values matched");
@@ -164,8 +157,19 @@ public final class DIContainer {
         };
     }
 
+    public <T> T instance(String name) {
+        Provider<?> p = provider(ValueSpecifier.named(name));
+        if (p == null) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked") // no guarantees, lookup by name doesn't consider type
+        T obj = (T) p.get();
+        return obj;
+    }
+
     public <T> T instance(Class<T> type) {
-        Provider<? extends T> p = provider(DependencyIdentifier.of(type));
+        Provider<? extends T> p = provider(ValueSpecifier.of(type));
         if (p == null) {
             return null;
         }
@@ -173,7 +177,7 @@ public final class DIContainer {
         return p.get();
     }
 
-    public <T> T instance(DependencyIdentifier<T> id) {
+    public <T> T instance(ValueSpecifier<T> id) {
         Provider<? extends T> p = provider(id);
         if (p == null) {
             return null;
@@ -227,11 +231,11 @@ public final class DIContainer {
         InjectionPoint injectionPoint = aroundInject.getInjectionPoint();
         assert event.getApplicant() != null;
 
-        DependencyIdentifier<?> id = DependencyIdentifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
+        ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         // todo: @AroundInject interceptor?
         try {
             currentInjectionPoint = injectionPoint;
-            aroundInject.setResolvedDependency(instance(id));
+            aroundInject.setResolvedDependency(instance(specifier));
         } finally {
             currentInjectionPoint = null;
         }

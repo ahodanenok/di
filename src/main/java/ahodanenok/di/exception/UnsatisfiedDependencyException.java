@@ -1,21 +1,21 @@
 package ahodanenok.di.exception;
 
-import ahodanenok.di.DependencyIdentifier;
+import ahodanenok.di.ValueSpecifier;
 import ahodanenok.di.Injectable;
 
 public class UnsatisfiedDependencyException extends DependencyInjectionException{
 
     private Injectable injectable;
-    private DependencyIdentifier<?> id;
+    private ValueSpecifier<?> id;
     private String reason;
 
-    public UnsatisfiedDependencyException(DependencyIdentifier<?> id, String reason) {
+    public UnsatisfiedDependencyException(ValueSpecifier<?> id, String reason) {
         super("Unsatisfied dependency " + id + ": " + reason);
         this.id = id;
         this.reason = reason;
     }
 
-    public UnsatisfiedDependencyException(Injectable injectable, DependencyIdentifier<?> id, String reason) {
+    public UnsatisfiedDependencyException(Injectable injectable, ValueSpecifier<?> id, String reason) {
         super("Unsatisfied dependency " + id + " for " + injectable + ": " + reason);
         this.injectable = injectable;
         this.id = id;
@@ -26,7 +26,7 @@ public class UnsatisfiedDependencyException extends DependencyInjectionException
         return injectable;
     }
 
-    public DependencyIdentifier<?> getId() {
+    public ValueSpecifier<?> getId() {
         return id;
     }
 

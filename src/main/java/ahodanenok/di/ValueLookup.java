@@ -16,5 +16,5 @@ public interface ValueLookup {
      *
      * @return matched dependencies or empty set if none found
      */
-    <T> Set<Value<T>> execute(Set<Value<?>> values, DependencyIdentifier<T> id);
+    <T> Set<Value<T>> execute(Set<Value<?>> values, ValueSpecifier<T> id);
 }

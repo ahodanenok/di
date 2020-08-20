@@ -1,5 +1,7 @@
-package ahodanenok.di;
+package ahodanenok.di.valuelookup;
 
+import ahodanenok.di.ValueSpecifier;
+import ahodanenok.di.ValueExactLookup;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import org.junit.jupiter.api.Test;
@@ -26,74 +28,74 @@ public class PrimitivesLookupTest {
         ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
-        Set<Value<Byte>> byteResult = lookup.execute(values, DependencyIdentifier.of(byte.class));
+        Set<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
-        byteResult = lookup.execute(values, DependencyIdentifier.of(Byte.class));
+        byteResult = lookup.execute(values, ValueSpecifier.of(Byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
         // short
-        Set<Value<Short>> shortResult = lookup.execute(values, DependencyIdentifier.of(short.class));
+        Set<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
-        shortResult = lookup.execute(values, DependencyIdentifier.of(Short.class));
+        shortResult = lookup.execute(values, ValueSpecifier.of(Short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
         // int
-        Set<Value<Integer>> intResult = lookup.execute(values, DependencyIdentifier.of(int.class));
+        Set<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
         assertEquals(1, intResult.size());
         assertEquals((int) 3, intResult.iterator().next().provider().get());
 
-        intResult = lookup.execute(values, DependencyIdentifier.of(Integer.class));
+        intResult = lookup.execute(values, ValueSpecifier.of(Integer.class));
         assertEquals(1, intResult.size());
         assertEquals(3, intResult.iterator().next().provider().get());
 
         // long
-        Set<Value<Long>> longResult = lookup.execute(values, DependencyIdentifier.of(long.class));
+        Set<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
-        longResult = lookup.execute(values, DependencyIdentifier.of(Long.class));
+        longResult = lookup.execute(values, ValueSpecifier.of(Long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
         // float
-        Set<Value<Float>> floatResult = lookup.execute(values, DependencyIdentifier.of(float.class));
+        Set<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
-        floatResult = lookup.execute(values, DependencyIdentifier.of(Float.class));
+        floatResult = lookup.execute(values, ValueSpecifier.of(Float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
         // double
-        Set<Value<Double>> doubleResult = lookup.execute(values, DependencyIdentifier.of(double.class));
+        Set<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
-        doubleResult = lookup.execute(values, DependencyIdentifier.of(Double.class));
+        doubleResult = lookup.execute(values, ValueSpecifier.of(Double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
         // boolean
-        Set<Value<Boolean>> booleanResult = lookup.execute(values, DependencyIdentifier.of(boolean.class));
+        Set<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
-        booleanResult = lookup.execute(values, DependencyIdentifier.of(Boolean.class));
+        booleanResult = lookup.execute(values, ValueSpecifier.of(Boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
         // char
-        Set<Value<Character>> characterResult = lookup.execute(values, DependencyIdentifier.of(char.class));
+        Set<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
 
-        characterResult = lookup.execute(values, DependencyIdentifier.of(Character.class));
+        characterResult = lookup.execute(values, ValueSpecifier.of(Character.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
     }
@@ -113,74 +115,74 @@ public class PrimitivesLookupTest {
         ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
-        Set<Value<Byte>> byteResult = lookup.execute(values, DependencyIdentifier.of(byte.class));
+        Set<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
-        byteResult = lookup.execute(values, DependencyIdentifier.of(Byte.class));
+        byteResult = lookup.execute(values, ValueSpecifier.of(Byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
         // short
-        Set<Value<Short>> shortResult = lookup.execute(values, DependencyIdentifier.of(short.class));
+        Set<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
-        shortResult = lookup.execute(values, DependencyIdentifier.of(Short.class));
+        shortResult = lookup.execute(values, ValueSpecifier.of(Short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
         // int
-        Set<Value<Integer>> intResult = lookup.execute(values, DependencyIdentifier.of(int.class));
+        Set<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
         assertEquals(1, intResult.size());
         assertEquals((int) 3, intResult.iterator().next().provider().get());
 
-        intResult = lookup.execute(values, DependencyIdentifier.of(Integer.class));
+        intResult = lookup.execute(values, ValueSpecifier.of(Integer.class));
         assertEquals(1, intResult.size());
         assertEquals(3, intResult.iterator().next().provider().get());
 
         // long
-        Set<Value<Long>> longResult = lookup.execute(values, DependencyIdentifier.of(long.class));
+        Set<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
-        longResult = lookup.execute(values, DependencyIdentifier.of(Long.class));
+        longResult = lookup.execute(values, ValueSpecifier.of(Long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
         // float
-        Set<Value<Float>> floatResult = lookup.execute(values, DependencyIdentifier.of(float.class));
+        Set<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
-        floatResult = lookup.execute(values, DependencyIdentifier.of(Float.class));
+        floatResult = lookup.execute(values, ValueSpecifier.of(Float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
         // double
-        Set<Value<Double>> doubleResult = lookup.execute(values, DependencyIdentifier.of(double.class));
+        Set<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
-        doubleResult = lookup.execute(values, DependencyIdentifier.of(Double.class));
+        doubleResult = lookup.execute(values, ValueSpecifier.of(Double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
         // boolean
-        Set<Value<Boolean>> booleanResult = lookup.execute(values, DependencyIdentifier.of(boolean.class));
+        Set<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
-        booleanResult = lookup.execute(values, DependencyIdentifier.of(Boolean.class));
+        booleanResult = lookup.execute(values, ValueSpecifier.of(Boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
         // char
-        Set<Value<Character>> characterResult = lookup.execute(values, DependencyIdentifier.of(char.class));
+        Set<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
 
-        characterResult = lookup.execute(values, DependencyIdentifier.of(Character.class));
+        characterResult = lookup.execute(values, ValueSpecifier.of(Character.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
     }

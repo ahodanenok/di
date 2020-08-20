@@ -1,17 +1,17 @@
 package ahodanenok.di.exception;
 
-import ahodanenok.di.DependencyIdentifier;
+import ahodanenok.di.ValueSpecifier;
 
 public class DependencyInstantiatingException extends DependencyInjectionException {
 
-    private DependencyIdentifier<?> id;
+    private ValueSpecifier<?> id;
 
-    public DependencyInstantiatingException(DependencyIdentifier<?> id, Class<?> instanceClass, String reason) {
+    public DependencyInstantiatingException(ValueSpecifier<?> id, Class<?> instanceClass, String reason) {
         super(String.format("Class '%s' bound to '%s' can't be instantiated: %s", instanceClass.getName(), id, reason));
         this.id = id;
     }
 
-    public DependencyIdentifier<?> getId() {
+    public ValueSpecifier<?> getId() {
         return id;
     }
 }

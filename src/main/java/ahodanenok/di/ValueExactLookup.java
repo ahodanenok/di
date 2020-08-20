@@ -1,12 +1,9 @@
 package ahodanenok.di;
 
-import ahodanenok.di.event.Event;
-import ahodanenok.di.event.Events;
 import ahodanenok.di.value.Value;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.
@@ -16,15 +13,31 @@ import java.util.stream.Collectors;
 public class ValueExactLookup implements ValueLookup {
 
     @Override
-    public <T> Set<Value<T>> execute(Set<Value<?>> values, DependencyIdentifier<T> id) {
+    public <T> Set<Value<T>> execute(Set<Value<?>> values, ValueSpecifier<T> specifier) {
         Set<Value<T>> matching = new HashSet<>();
         for (Value<?> v : values) {
-            if (v.metadata().getQualifiers().isEmpty() == id.qualifiers().isEmpty()
-                    && (v.metadata().getQualifiers().containsAll(id.qualifiers()) || id.qualifiers().stream().anyMatch(a -> a.annotationType() == Any.class))
-                    && typesMatch(id.type(), v.type())) {
-                @SuppressWarnings("unchecked") // if ids are equals, type is T
-                        Value<T> matched = (Value<T>) v;
-                matching.add(matched);
+            if (specifier.getName() != null && !specifier.getName().equals(v.metadata().getName())) {
+                continue;
+            }
+
+            if (specifier.getType() != null && !typesMatch(specifier.getType(), v.type())) {
+                continue;
+            }
+
+            boolean matched = false;
+            if (specifier.getQualifiers().isEmpty()) {
+                matched = true;
+            } else if (specifier.getQualifiers().stream().anyMatch(a -> a.annotationType() == Any.class)) {
+                matched = true;
+            } else if (v.metadata().getQualifiers().isEmpty() == specifier.getQualifiers().isEmpty()
+                    && v.metadata().getQualifiers().containsAll(specifier.getQualifiers())) {
+                matched = true;
+            }
+
+            if (matched) {
+                @SuppressWarnings("unchecked") // if types match, type is T
+                Value<T> vv = (Value<T>) v;
+                matching.add(vv);
             }
         }
 

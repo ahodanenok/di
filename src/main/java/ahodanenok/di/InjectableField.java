@@ -50,10 +50,10 @@ public class InjectableField implements Injectable<Object> {
             injectionPoint.setTarget(field);
             onInject.accept(new AroundInject(injectionPoint, value -> doInject(instance, value)));
         } else {
-            DependencyIdentifier<?> id = DependencyIdentifier.of(field.getType(), qualifiers);
-            Object value = container.instance(id);
+            ValueSpecifier<?> specifier = ValueSpecifier.of(field.getType(), qualifiers);
+            Object value = container.instance(specifier);
             if (value == null && !field.isAnnotationPresent(OptionalDependency.class)) {
-                throw new UnsatisfiedDependencyException(this, id, "not found");
+                throw new UnsatisfiedDependencyException(this, specifier, "not found");
             }
 
             doInject(instance, value);

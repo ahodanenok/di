@@ -5,7 +5,6 @@ import ahodanenok.di.event.AroundInjectEvent;
 import ahodanenok.di.event.Event;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.UnknownScopeException;
-import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.*;
 import ahodanenok.di.name.AnnotatedNameResolution;
 import ahodanenok.di.name.NameResolution;
@@ -19,7 +18,6 @@ import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;

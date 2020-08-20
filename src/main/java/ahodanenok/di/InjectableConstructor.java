@@ -1,7 +1,5 @@
 package ahodanenok.di;
 
-import ahodanenok.di.event.AroundConstructEvent;
-import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.AroundConstruct;

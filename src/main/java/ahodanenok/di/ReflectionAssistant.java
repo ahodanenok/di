@@ -99,9 +99,9 @@ public final class ReflectionAssistant {
                 stream = stream.filter(a -> types.contains(a.annotationType()));
             }
         } else if (presence == AnnotationPresence.INDIRECTLY) {
-            List<Class<? extends Annotation>> types;
+            Set<Class<? extends Annotation>> types;
             if (annotationTypes.length > 0) {
-                types = Arrays.asList(annotationTypes);
+                types = new HashSet<>(Arrays.asList(annotationTypes));
             } else {
                 types = annotationTypes(annotatedElement.getDeclaredAnnotations());
             }
@@ -110,9 +110,9 @@ public final class ReflectionAssistant {
                 stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotationsByType(type)));
             }
         } else if (presence == AnnotationPresence.ASSOCIATED) {
-            List<Class<? extends Annotation>> types;
+            Set<Class<? extends Annotation>> types;
             if (annotationTypes.length > 0) {
-                types = Arrays.asList(annotationTypes);
+                types = new HashSet<>(Arrays.asList(annotationTypes));
             } else {
                 types = annotationTypes(annotatedElement.getAnnotations());
             }
@@ -127,7 +127,7 @@ public final class ReflectionAssistant {
         return stream;
     }
 
-    private static List<Class<? extends Annotation>> annotationTypes(Annotation[] annotations) {
+    private static Set<Class<? extends Annotation>> annotationTypes(Annotation[] annotations) {
         return Arrays.stream(annotations).map(a -> {
             try {
                 Method m = a.annotationType().getDeclaredMethod("value");
@@ -143,7 +143,7 @@ public final class ReflectionAssistant {
             }
 
             return a.annotationType();
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     private static Class<? extends Annotation> checkRepeatableContainer(Annotation a) {

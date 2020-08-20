@@ -32,14 +32,12 @@ import java.util.stream.Collectors;
 // todo: rethink exceptions' names
 // todo: profiles (set of values enabled by name)
 // todo: when null if valid as dependency value, when to throw unsatisfied dependency
-// todo: default value from stereotype
 // todo: profile from stereotype
 // todo: documentation
 // todo: generics
 // todo: yaml config
 // todo: @Priority
 // todo: support injecting Optional
-// todo: @PrimaryValue - if multiple pick primary
 // todo: &name - syntax to get value provider
 // todo: overriding meta-annotations attributes in annotated annotation
 

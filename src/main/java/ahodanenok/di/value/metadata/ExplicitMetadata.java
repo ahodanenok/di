@@ -16,6 +16,10 @@ public class ExplicitMetadata extends ValueMetadata {
         this.scope = scope;
     }
 
+    public void setPrimary(boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
+
     public void setDefault(boolean isDefault) {
         this.isDefault = isDefault;
     }

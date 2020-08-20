@@ -12,6 +12,7 @@ public abstract class ValueMetadata {
     protected Class<?> type;
     protected String name;
     protected ScopeIdentifier scope = ScopeIdentifier.NOT_SCOPED;
+    protected boolean isPrimary = false;
     protected boolean isDefault = false;
     protected boolean eager = false;
     protected Set<Annotation> qualifiers = Collections.emptySet();
@@ -35,6 +36,10 @@ public abstract class ValueMetadata {
 
     public ScopeIdentifier getScope() {
         return scope;
+    }
+
+    public boolean isPrimary() {
+        return isPrimary;
     }
 
     public boolean isDefault() {

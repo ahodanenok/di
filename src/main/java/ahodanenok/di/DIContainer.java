@@ -79,29 +79,11 @@ public final class DIContainer {
     }
 
     public Provider<?> provider(String name) {
-        Set<Value<?>> result = values.stream().filter(v -> name.equals(v.metadata().getName())).collect(Collectors.toSet());
-        if (result.isEmpty()) {
+        Value<?> value = chooseValue(values.stream().filter(v -> name.equals(v.metadata().getName())).collect(Collectors.toSet()));
+        if (value == null) {
             return null;
         }
 
-        if (result.size() > 1) {
-            Set<Value<?>> withoutDefaults = result.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
-            if (withoutDefaults.size() > 1) {
-                //throw new UnsatisfiedDependencyException(id, "multiple providers");
-                throw new RuntimeException(); // todo: errors
-            }
-
-            if (result.size() - withoutDefaults.size() > 1) {
-//                throw new IllegalStateException(
-//                        "There are multiple values marked as default for " + id + ", " +
-//                                "values are " + values.stream().map(DependencyValue::id).collect(Collectors.toList()));
-                throw new IllegalStateException(); // todo: errors
-            }
-
-            result = withoutDefaults;
-        }
-
-        Value<?> value = result.iterator().next();
         return provider(value);
     }
 
@@ -110,29 +92,58 @@ public final class DIContainer {
     }
 
     public <T> Provider<? extends T> provider(DependencyIdentifier<T> id) {
-        Set<Value<T>> result = valueLookup.execute(values, id);
-        if (result.isEmpty()) {
+        Object result = valueLookup.execute(values, id);
+        // todo: learn how to use generics
+        Value<T> value = (Value<T>) chooseValue((Set<Value<?>>) result);
+        if (value == null) {
             return null;
         }
 
-        if (result.size() > 1) {
-            Set<Value<T>> withoutDefaults = result.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
-            if (withoutDefaults.size() > 1) {
-                throw new UnsatisfiedDependencyException(id, "multiple providers"); // todo: errors
-            }
+        return provider(value);
+    }
 
-            if (result.size() - withoutDefaults.size() > 1) {
-                // todo: errors
-                throw new IllegalStateException(
-                        "There are multiple values marked as default for " + id + ", " +
-                                "values are " + result.stream().map(Value::type).collect(Collectors.toList()));
-            }
-
-            result = withoutDefaults;
+    private Value<?> chooseValue(Set<Value<?>> values) {
+        if (values.isEmpty()) {
+            return null;
         }
 
-        Value<T> value = result.iterator().next();
-        return provider(value);
+        if (values.size() == 1) {
+            return values.iterator().next();
+        }
+
+        Set<Value<?>> primary = values.stream().filter(v -> v.metadata().isPrimary()).collect(Collectors.toSet());
+        if (primary.size() > 1) {
+            // todo: exception, message
+            throw new IllegalStateException("multiple primary values");
+        }
+
+        if (primary.size() == 1) {
+            return primary.iterator().next();
+        }
+
+        Set<Value<?>> withoutDefaults = values.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
+        if (withoutDefaults.size() > 1) {
+            // todo: exception, message
+            throw new IllegalStateException("multiple values matched");
+            //throw new UnsatisfiedDependencyException(id, "multiple providers");
+        }
+
+        if (values.size() - withoutDefaults.size() > 1) {
+            // todo: errors
+            throw new IllegalStateException(
+                    "There are multiple values marked as default: "
+                            + values.stream().map(Value::type).collect(Collectors.toList()));
+        }
+
+        if (withoutDefaults.size() == 1) {
+            return withoutDefaults.iterator().next();
+        }
+
+        if (withoutDefaults.size() != values.size()) {
+            return values.stream().filter(v -> v.metadata().isDefault()).findFirst().orElse(null);
+        }
+
+        return null;
     }
 
     private <T> Provider<? extends T> provider(Value<T> value) {

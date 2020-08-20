@@ -25,6 +25,8 @@ public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadat
         name = container.instance(NameResolution.class).resolve(field, this::getStereotypes);
         qualifiers = container.instance(QualifierResolution.class).resolve(field);
         scope = container.instance(ScopeResolution.class).resolve(field, this::getStereotypes, ScopeIdentifier.NOT_SCOPED);
+        isPrimary = field.isAnnotationPresent(PrimaryValue.class)
+                || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(PrimaryValue.class));
         isDefault = field.isAnnotationPresent(DefaultValue.class)
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(DefaultValue.class));
         eager = field.isAnnotationPresent(Eager.class);

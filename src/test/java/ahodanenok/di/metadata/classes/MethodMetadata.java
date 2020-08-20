@@ -2,6 +2,7 @@ package ahodanenok.di.metadata.classes;
 
 import ahodanenok.di.DefaultValue;
 import ahodanenok.di.Eager;
+import ahodanenok.di.PrimaryValue;
 
 import javax.interceptor.Interceptor;
 
@@ -14,6 +15,11 @@ public class MethodMetadata {
     @Eager
     public String eager() {
         return "eager";
+    }
+
+    @PrimaryValue
+    public String primaryValue() {
+        return "pv";
     }
 
     @DefaultValue

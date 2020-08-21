@@ -8,6 +8,7 @@ import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.interceptor.*;
 import ahodanenok.di.name.AnnotatedNameResolution;
 import ahodanenok.di.name.NameResolution;
+import ahodanenok.di.profile.ProfileMatcher;
 import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
@@ -28,9 +29,7 @@ import java.util.stream.Collectors;
 // todo: logging
 // todo: events (like in cdi)
 // todo: rethink exceptions' names
-// todo: profiles (set of values enabled by name)
 // todo: when null if valid as dependency value, when to throw unsatisfied dependency
-// todo: profile from stereotype
 // todo: documentation
 // todo: generics
 // todo: yaml config
@@ -338,6 +337,7 @@ public final class DIContainer {
 
         private List<Scope> scopes;
         private List<Value<?>> values;
+        private String[] activeProfiles;
 
         public Builder addValue(Value<?> value) {
             if (values == null) {
@@ -392,6 +392,11 @@ public final class DIContainer {
 
         public Builder withStereotypeResolution(StereotypeResolution stereotypeResolution) {
             //this.stereotypeResolution = stereotypeResolution; todo
+            return this;
+        }
+
+        public Builder activeProfiles(String... profiles) {
+            this.activeProfiles = profiles;
             return this;
         }
 
@@ -458,13 +463,26 @@ public final class DIContainer {
                 }
             }));
 
+            if (activeProfiles == null) {
+                activeProfiles = new String[0];
+            }
+
+            ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
+
             if (values != null) {
-                Set<Value<?>> managedValues = values.stream().map(ManagedValue::new).collect(Collectors.toSet());
-                for (Value<?> value : managedValues) {
+                Set<Value<?>> managedValues = new HashSet<>();
+                for (Value<?> value : values) {
+                    String valueProfiles = value.metadata().getProfilesCondition();
+                    if (valueProfiles != null && !profileMatcher.matches(valueProfiles.trim())) {
+                        continue;
+                    }
+
                     value.bind(container);
                     if (value.metadata().isInterceptor()) {
                         container.interceptors.add(value);
                     }
+
+                    managedValues.add(new ManagedValue(value));
                 }
 
                 container.values.addAll(managedValues);

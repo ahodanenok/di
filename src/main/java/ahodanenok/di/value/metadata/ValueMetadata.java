@@ -12,6 +12,7 @@ public abstract class ValueMetadata {
     protected Class<?> type;
     protected String name;
     protected ScopeIdentifier scope = ScopeIdentifier.NOT_SCOPED;
+    protected String profilesCondition;
     protected boolean isPrimary = false;
     protected boolean isDefault = false;
     protected boolean eager = false;
@@ -36,6 +37,10 @@ public abstract class ValueMetadata {
 
     public ScopeIdentifier getScope() {
         return scope;
+    }
+
+    public String getProfilesCondition() {
+        return profilesCondition;
     }
 
     public boolean isPrimary() {

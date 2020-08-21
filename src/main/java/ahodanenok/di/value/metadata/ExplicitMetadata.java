@@ -20,6 +20,10 @@ public class ExplicitMetadata extends ValueMetadata {
         this.scope = scope;
     }
 
+    public void setProfilesCondition(String profilesCondition) {
+        this.profilesCondition = profilesCondition;
+    }
+
     public void setQualifiers(Annotation... qualifiers) {
         this.qualifiers = new HashSet<>(Arrays.asList(qualifiers));
     }

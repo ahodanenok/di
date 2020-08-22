@@ -3,6 +3,7 @@ package ahodanenok.di;
 import ahodanenok.di.event.AroundConstructEvent;
 import ahodanenok.di.event.AroundInjectEvent;
 import ahodanenok.di.event.Event;
+import ahodanenok.di.event.EventListener;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.interceptor.*;
@@ -12,6 +13,7 @@ import ahodanenok.di.profile.ProfileMatcher;
 import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
+import ahodanenok.di.util.Pair;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.ProviderValue;
 import ahodanenok.di.value.Value;
@@ -46,6 +48,7 @@ public final class DIContainer {
     private Map<ScopeIdentifier, Scope> scopes;
 
     private Set<Value<?>> values;
+    private Set<ManagedValue> managedValues;
     private ValueLookup valueLookup;
 
     private Set<Value<?>> interceptors;
@@ -58,6 +61,7 @@ public final class DIContainer {
 
     private DIContainer() {
         this.values = new HashSet<>();
+        this.managedValues = new HashSet<>();
         this.interceptors = new HashSet<>();
         this.scopes = new HashMap<>();
         this.injectionPoints = new LinkedList<>();
@@ -220,6 +224,30 @@ public final class DIContainer {
         } else if (event instanceof AroundInjectEvent) {
             interceptAroundInject((AroundInjectEvent) event);
         }
+
+        List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
+        for (ManagedValue v : managedValues) {
+            for (Method m : v.getEventListeners()) {
+                if (m.getParameterCount() != 1) {
+                    // todo: error, msg
+                    throw new IllegalStateException();
+                }
+
+                if (m.getParameterTypes()[0].isAssignableFrom(event.getClass())) {
+                    eventListeners.add(new Pair<>(v, m));
+                }
+            }
+        }
+
+        // todo: sort event listeners according priority (and maybe some other conditions)
+        for (Pair<Value<?>, Method> p : eventListeners) {
+            try {
+                p.getValue().invoke(provider(p.getKey()).get(), event);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                // todo: error, msg
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void interceptAroundInject(AroundInjectEvent event) {
@@ -325,6 +353,12 @@ public final class DIContainer {
                 inject(value, obj);
                 return obj;
             };
+        }
+
+        public List<Method> getEventListeners() {
+            return Arrays.stream(value.metadata().valueType().getDeclaredMethods())
+                    .filter(m -> m.isAnnotationPresent(EventListener.class))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -470,7 +504,7 @@ public final class DIContainer {
             ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
 
             if (values != null) {
-                Set<Value<?>> managedValues = new HashSet<>();
+                Set<ManagedValue> managedValues = new HashSet<>();
                 for (Value<?> value : values) {
                     String valueProfiles = value.metadata().getProfilesCondition();
                     if (valueProfiles != null && !profileMatcher.matches(valueProfiles.trim())) {
@@ -486,6 +520,7 @@ public final class DIContainer {
                 }
 
                 container.values.addAll(managedValues);
+                container.managedValues.addAll(managedValues);
             }
 
             // todo: eager init

@@ -1,7 +1,7 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.*;
-import ahodanenok.di.event.AroundInjectEvent;
+import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.value.metadata.MethodMetadata;
 
@@ -49,7 +49,7 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
             // todo: if method is not static instance is required, throw unsatisfied dependency if null
             // todo: suppress warnings when type is checked in constructor
             InjectableMethod injectableMethod = new InjectableMethod(container, method);
-            injectableMethod.setOnInject(ai -> events.fire(new AroundInjectEvent(this, ai)));
+            injectableMethod.setOnProvision(ai -> events.fire(new AroundProvisionEvent(this, ai)));
             return (T) injectableMethod.inject(instance);
         };
     }

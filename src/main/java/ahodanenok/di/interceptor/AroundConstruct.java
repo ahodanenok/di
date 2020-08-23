@@ -2,6 +2,7 @@ package ahodanenok.di.interceptor;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.function.Function;
 
 public final class AroundConstruct<T> {
 
@@ -9,9 +10,12 @@ public final class AroundConstruct<T> {
     private Object[] args;
     private T instance;
 
-    public AroundConstruct(Constructor<? extends T> constructor, Object[] args) {
+    private Function<Object[], T> proceedFunction;
+
+    public AroundConstruct(Constructor<? extends T> constructor, Object[] args, Function<Object[], T> proceedFunction) {
         this.constructor = constructor;
         this.args = args;
+        this.proceedFunction = proceedFunction;
     }
 
     public Constructor<? extends T> getConstructor() {
@@ -35,14 +39,12 @@ public final class AroundConstruct<T> {
         return instance;
     }
 
-    public T proceed() throws ReflectiveOperationException {
-        boolean accessible = constructor.isAccessible();
-        try {
-            constructor.setAccessible(true);
-            instance = constructor.newInstance(args);
+    public T proceed() {
+        if (instance != null) {
             return instance;
-        } finally {
-            constructor.setAccessible(accessible);
         }
+
+        instance = proceedFunction.apply(args);
+        return instance;
     }
 }

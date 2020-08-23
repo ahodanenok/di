@@ -2,13 +2,13 @@ package ahodanenok.di.interceptor;
 
 import java.util.function.Consumer;
 
-public class AroundInject {
+public class AroundProvision {
 
     private final InjectionPoint injectionPoint;
     private final Consumer<Object> dependencyConsumer;
     private Object resolvedDependency;
 
-    public AroundInject(InjectionPoint injectionPoint, Consumer<Object> dependencyConsumer) {
+    public AroundProvision(InjectionPoint injectionPoint, Consumer<Object> dependencyConsumer) {
         this.injectionPoint = injectionPoint;
         this.dependencyConsumer = dependencyConsumer;
     }

@@ -1,29 +1,19 @@
 package ahodanenok.di;
 
 import ahodanenok.di.exception.InjectionFailedException;
-import ahodanenok.di.exception.UnsatisfiedDependencyException;
-import ahodanenok.di.interceptor.AroundInject;
-import ahodanenok.di.interceptor.InjectionPointImpl;
+import ahodanenok.di.interceptor.AroundProvision;
+import ahodanenok.di.interceptor.InjectionPoint;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
-import java.util.function.Consumer;
 
-public class InjectableMethod implements Injectable<Object> {
+public class InjectableMethod extends AbstractInjectable<Object> {
 
-    private DIContainer container;
     private Method method;
-    private Consumer<AroundInject> onInject;
 
     public InjectableMethod(DIContainer container, Method method) {
-        this.container = container;
+        super(container);
         this.method = method;
-    }
-
-    public void setOnInject(Consumer<AroundInject> onInject) {
-        this.onInject = onInject;
     }
 
     @Override
@@ -40,46 +30,20 @@ public class InjectableMethod implements Injectable<Object> {
         // may have any otherwise valid name.
         // accept zero or more dependencies as arguments.
 
-        // todo: cache
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        boolean[] optional = new boolean[method.getParameterCount()];
-        for (int i = 0; i < parameterAnnotations.length; i++) {
-            for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j].annotationType().equals(OptionalDependency.class)) {
-                    optional[i] = true;
-                    break;
-                }
-            }
-        }
-
-        int i = 0;
         Object[] args = new Object[method.getParameterCount()];
-        for (Class<?> type : method.getParameterTypes()) {
-            Set<Annotation> qualifiers = container.instance(QualifierResolution.class).resolve(method, i);
-
-            if (onInject != null) {
+        for (int i = 0; i < method.getParameterCount(); i++) {
+            InjectionPoint injectionPoint = new InjectionPoint(method, i);
+            if (onProvision != null) {
                 int idx = i;
-
-                InjectionPointImpl injectionPoint = new InjectionPointImpl();
-                injectionPoint.setType(type);
-                injectionPoint.setQualifiers(qualifiers);
-                injectionPoint.setTarget(method);
-                injectionPoint.setParameterIndex(idx);
-                onInject.accept(new AroundInject(injectionPoint, arg -> {
-                    if (arg == null && !optional[idx]) {
-                        throw new UnsatisfiedDependencyException(this, ValueSpecifier.of(type, qualifiers), "not found");
+                onProvision.accept(new AroundProvision(injectionPoint, arg -> {
+                    if (arg == null) {
+                        arg = resolveDependency(injectionPoint);
                     }
 
                     args[idx] = arg;
                 }));
             } else {
-                ValueSpecifier<?> specifier = ValueSpecifier.of(type, qualifiers);
-                Object arg = container.instance(specifier);
-                if (arg == null && !optional[i]) {
-                    throw new UnsatisfiedDependencyException(this, specifier, "not found");
-                }
-
-                args[i] = arg;
+                args[i] = resolveDependency(injectionPoint);
             }
 
             i++;

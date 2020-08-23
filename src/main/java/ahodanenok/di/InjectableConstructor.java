@@ -1,34 +1,25 @@
 package ahodanenok.di;
 
 import ahodanenok.di.exception.InjectionFailedException;
-import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.AroundConstruct;
-import ahodanenok.di.interceptor.AroundInject;
-import ahodanenok.di.interceptor.InjectionPointImpl;
+import ahodanenok.di.interceptor.AroundProvision;
+import ahodanenok.di.interceptor.InjectionPoint;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.Set;
 import java.util.function.Consumer;
 
-public class InjectableConstructor<T> implements Injectable<T> {
+public class InjectableConstructor<T> extends AbstractInjectable<T> {
 
-    private DIContainer container;
     private Constructor<? extends T> constructor;
     private Consumer<AroundConstruct<T>> onConstruct;
-    private Consumer<AroundInject> onInject;
 
     public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {
-        this.container = container;
+        super(container);
         this.constructor = constructor;
     }
 
     public void onConstruct(Consumer<AroundConstruct<T>> onConstruct) {
         this.onConstruct = onConstruct;
-    }
-
-    public void onInject(Consumer<AroundInject> onInject) {
-        this.onInject = onInject;
     }
 
     @Override
@@ -38,15 +29,7 @@ public class InjectableConstructor<T> implements Injectable<T> {
         // todo: handle generic types
         // todo: common code here and in InjectableMethod
 
-        // todo: cache
-        boolean[] optional = new boolean[constructor.getParameterCount()];
-        for (int i = 0; i < constructor.getParameterCount(); i++) {
-            optional[i] = ReflectionAssistant.parameterAnnotations(constructor, i, ReflectionAssistant.AnnotationPresence.DIRECTLY)
-                    .anyMatch(a -> a.annotationType().equals(OptionalDependency.class));
-        }
-
         Object[] args = new Object[constructor.getParameterCount()];
-        Class<?>[] types = constructor.getParameterTypes();
 
         // todo: research if local and anonymous classes could be injected and used
         // todo: if container doesn't have instances for enclosing class, create them for current member class only
@@ -54,49 +37,41 @@ public class InjectableConstructor<T> implements Injectable<T> {
         int i = 0;
         int paramCount = constructor.getParameterCount();
         while (i < paramCount) {
-            Class<?> type = types[i];
-            Set<Annotation> qualifiers = container.instance(QualifierResolution.class).resolve(constructor, i);
-
-            if (onInject != null) {
+            InjectionPoint injectionPoint = new InjectionPoint(constructor, i);
+            if (onProvision != null) {
                 int idx = i;
-
-                InjectionPointImpl injectionPoint = new InjectionPointImpl();
-                injectionPoint.setType(type);
-                injectionPoint.setQualifiers(qualifiers);
-                injectionPoint.setTarget(constructor);
-                injectionPoint.setParameterIndex(idx);
-                onInject.accept(new AroundInject(injectionPoint, arg -> {
-                    if (arg == null && !optional[idx]) {
-                        throw new UnsatisfiedDependencyException(this, ValueSpecifier.of(type, qualifiers), "not found");
+                onProvision.accept(new AroundProvision(injectionPoint, arg -> {
+                    if (arg == null) {
+                        arg = resolveDependency(injectionPoint);
                     }
 
                     args[idx] = arg;
                 }));
             } else {
-                ValueSpecifier<?> id = ValueSpecifier.of(type, qualifiers);
-                Object arg = container.instance(id);
-                if (arg == null && !optional[i]) {
-                    throw new UnsatisfiedDependencyException(this, id, "not found");
-                }
-
-                args[i] = arg;
+                args[i] = resolveDependency(injectionPoint);
             }
 
             i++;
         }
 
-        try {
-            AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args);
-            if (onConstruct != null) {
-                //events.fire(new AroundConstructEvent<>(aroundConstruct));
-                onConstruct.accept(aroundConstruct);
-                return aroundConstruct.getInstance();
-            } else {
-                return aroundConstruct.proceed();
-            }
-        } catch (Exception e) {
+        if (onConstruct != null) {
+            AroundConstruct<T> aroundConstruct = new AroundConstruct<>(constructor, args, this::doInject);
+            onConstruct.accept(aroundConstruct);
+            return aroundConstruct.getInstance();
+        } else {
+            return doInject(args);
+        }
+    }
 
+    private T doInject(Object[] args) {
+        boolean accessible = constructor.isAccessible();
+        try {
+            constructor.setAccessible(true);
+            return constructor.newInstance(args);
+        } catch (Exception e) {
             throw new InjectionFailedException(constructor, e);
+        } finally {
+            constructor.setAccessible(accessible);
         }
     }
 

@@ -1,7 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.event.AroundConstructEvent;
-import ahodanenok.di.event.AroundInjectEvent;
+import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Event;
 import ahodanenok.di.event.EventListener;
 import ahodanenok.di.event.Events;
@@ -202,7 +202,7 @@ public final class DIContainer {
             // todo: cache
             // todo: which fields should be skipped (i.e inherited)
             InjectableField injectableField = new InjectableField(this, f);
-            injectableField.setOnInject(ai -> interceptAroundInject(new AroundInjectEvent(value, ai)));
+            injectableField.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
             injectableField.inject(instance);
         });
 
@@ -213,7 +213,7 @@ public final class DIContainer {
             // todo: cache
             // todo: which methods should be skipped (i.e inherited)
             InjectableMethod injectableMethod = new InjectableMethod(this, m);
-            injectableMethod.setOnInject(ai -> interceptAroundInject(new AroundInjectEvent(value, ai)));
+            injectableMethod.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
             injectableMethod.inject(instance);
         });
     }
@@ -221,8 +221,8 @@ public final class DIContainer {
     private void handleEvent(Event event) {
         if (event instanceof AroundConstructEvent) {
             interceptAroundConstruct((AroundConstructEvent<?>) event);
-        } else if (event instanceof AroundInjectEvent) {
-            interceptAroundInject((AroundInjectEvent) event);
+        } else if (event instanceof AroundProvisionEvent) {
+            interceptAroundInject((AroundProvisionEvent) event);
         }
 
         List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
@@ -250,31 +250,23 @@ public final class DIContainer {
         }
     }
 
-    private void interceptAroundInject(AroundInjectEvent event) {
-        AroundInject aroundInject = event.getAroundInject();
-        InjectionPoint injectionPoint = aroundInject.getInjectionPoint();
+    private void interceptAroundInject(AroundProvisionEvent event) {
+        AroundProvision aroundProvision = event.getAroundProvision();
+        InjectionPoint injectionPoint = aroundProvision.getInjectionPoint();
         assert event.getApplicant() != null;
 
-        ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         // todo: @AroundInject interceptor?
         try {
             currentInjectionPoint = injectionPoint;
-            aroundInject.setResolvedDependency(instance(specifier));
+            aroundProvision.proceed();
         } finally {
             currentInjectionPoint = null;
         }
-        aroundInject.proceed();
     }
 
     private void interceptAroundConstruct(AroundConstructEvent<?> aroundConstructEvent) {
         if (aroundConstructEvent.getOwnerValue().metadata().isInterceptor() || interceptors.isEmpty()) {
-            try {
-                aroundConstructEvent.getAroundConstruct().proceed();
-            } catch (ReflectiveOperationException e) {
-                // todo: error
-                throw new RuntimeException(e);
-            }
-
+            aroundConstructEvent.getAroundConstruct().proceed();
             return;
         }
 

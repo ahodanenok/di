@@ -2,7 +2,7 @@ package ahodanenok.di.value;
 
 import ahodanenok.di.*;
 import ahodanenok.di.event.AroundConstructEvent;
-import ahodanenok.di.event.AroundInjectEvent;
+import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.value.metadata.ClassMetadata;
 
@@ -42,7 +42,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         Constructor<? extends T> constructor = resolveConstructor();
         targetConstructor = new InjectableConstructor<>(container, constructor);
         targetConstructor.onConstruct(ac -> events.fire(new AroundConstructEvent<>(this, ac)));
-        targetConstructor.onInject(ai -> events.fire(new AroundInjectEvent(this, ai)));
+        targetConstructor.setOnProvision(ai -> events.fire(new AroundProvisionEvent(this, ai)));
     }
 
     @Override

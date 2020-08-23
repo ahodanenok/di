@@ -7,6 +7,9 @@ import ahodanenok.di.interceptor.InjectionPoint;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -33,8 +36,19 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
             qualifiers = container.instance(QualifierResolution.class).resolve((Executable) injectionPoint.getTarget(), injectionPoint.getParameterIndex());
         }
 
-        ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), qualifiers);
+        Class<?> lookupType = injectionPoint.getType();
+        if (injectionPoint.getType() == Optional.class) {
+            System.out.println("OPTIONAL");
+            lookupType = (Class<?>) injectionPoint.getParameterizedType().getActualTypeArguments()[0];
+            System.out.println(lookupType);
+        }
+
+        ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, qualifiers);
         Object value = container.instance(specifier);
+        if (injectionPoint.getType() == Optional.class) {
+            value = Optional.ofNullable(value);
+        }
+
         if (value == null && !injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class)) {
             throw new UnsatisfiedDependencyException(this, specifier, "not found");
         }

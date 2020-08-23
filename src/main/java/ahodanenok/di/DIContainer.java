@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 // todo: generics
 // todo: yaml config
 // todo: @Priority
-// todo: support injecting Optional
 // todo: overriding meta-annotations attributes in annotated annotation
 
 /**

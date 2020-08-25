@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.value.*;
 import ahodanenok.di.value.classes.ClassWithPostConstruct;
+import ahodanenok.di.value.classes.ClassWithPreDestroy;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import javax.inject.Singleton;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+
 public class ContainerTest {
 
     @Singleton
@@ -23,7 +24,7 @@ public class ContainerTest {
         }
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_1() {
         InstantiatingValue<EagerSingleton> v = new InstantiatingValue<>(EagerSingleton.class);
 //        v.setInitOnStartup(true);
@@ -32,9 +33,10 @@ public class ContainerTest {
         assertTrue(EagerSingleton.init);
     }
 
-    static class EagerNotScoped { }
+    static class EagerNotScoped {
+    }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_2() {
         InstantiatingValue<EagerNotScoped> v = new InstantiatingValue<>(EagerNotScoped.class);
 //        v.setInitOnStartup(true);
@@ -44,9 +46,10 @@ public class ContainerTest {
 
     @Eager
     @Singleton
-    public static class EagerClass { }
+    public static class EagerClass {
+    }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_4() throws Exception {
         InstantiatingValue<EagerClass> v = new InstantiatingValue<>(EagerClass.class);
 //        v.setInitOnStartup(false);
@@ -55,7 +58,7 @@ public class ContainerTest {
 //        assertFalse(v.isInitOnStartup());
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_5() throws Exception {
         InstantiatingValue<EagerClass> v = new InstantiatingValue<>(EagerClass.class);
 
@@ -69,7 +72,7 @@ public class ContainerTest {
         static String f = "1";
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_6() throws Exception {
         FieldProviderValue<String> v = new FieldProviderValue<>(String.class, EagerField.class.getDeclaredField("f"));
 //        v.setInitOnStartup(false);
@@ -78,7 +81,7 @@ public class ContainerTest {
 //        assertFalse(v.isInitOnStartup());
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_7() throws Exception {
         FieldProviderValue<String> v = new FieldProviderValue<>(String.class, EagerField.class.getDeclaredField("f"));
 
@@ -89,10 +92,12 @@ public class ContainerTest {
     public static class EagerMethod {
         @Eager
         @Singleton
-        static String m() { return "test"; }
+        static String m() {
+            return "test";
+        }
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_8() throws Exception {
         MethodProviderValue<String> v = new MethodProviderValue<>(String.class, EagerMethod.class.getDeclaredMethod("m"));
 //        v.setInitOnStartup(false);
@@ -101,7 +106,7 @@ public class ContainerTest {
 //        assertFalse(v.isInitOnStartup());
     }
 
-    @Test
+    @Test @Disabled
     public void testEagerInit_9() throws Exception {
         MethodProviderValue<String> v = new MethodProviderValue<>(String.class, EagerMethod.class.getDeclaredMethod("m"));
 
@@ -118,8 +123,8 @@ public class ContainerTest {
         }
     }
 
-    @Test
-    public void testEagerInit_10() throws Exception {
+    @Test @Disabled
+    public void  testEagerInit_10() throws Exception {
         ProviderValue<String> v = new ProviderValue<>(String.class, EagerProvider.class);
 //        v.setInitOnStartup(false);
 
@@ -127,7 +132,7 @@ public class ContainerTest {
 //        assertFalse(v.isInitOnStartup());
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_1() {
         InstanceValue<Integer> v = new InstanceValue<Integer>(10);
 //        v.setDefault(true);
@@ -136,7 +141,7 @@ public class ContainerTest {
         assertEquals(10, container.instance(int.class));
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_2() {
         InstanceValue<Integer> v1 = new InstanceValue<>(10);
 //        v1.setDefault(true);
@@ -147,7 +152,7 @@ public class ContainerTest {
         assertEquals(20, container.instance(int.class));
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_3() {
         InstanceValue<Integer> v1 = new InstanceValue<>(10);
 //        v1.setDefault(true);
@@ -159,7 +164,7 @@ public class ContainerTest {
         assertThrows(IllegalStateException.class, () -> container.instance(int.class));
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_4() {
         InstanceValue<Integer> v1 = new InstanceValue<>(10);
 //        v1.setDefault(true);
@@ -174,9 +179,10 @@ public class ContainerTest {
     }
 
     @DefaultValue
-    public static class Default_1 { }
+    public static class Default_1 {
+    }
 
-    @Test
+    @Test @Disabled
     public void testDefault_5() {
         InstantiatingValue<Default_1> v = new InstantiatingValue<>(Default_1.class);
 
@@ -184,12 +190,17 @@ public class ContainerTest {
         assertNotNull(container.instance(Default_1.class));
     }
 
-    public static class DefaultParent { }
-    @DefaultValue
-    public static class DefaultChildA extends DefaultParent { }
-    public static class DefaultChildB extends DefaultParent { }
+    public static class DefaultParent {
+    }
 
-    @Test
+    @DefaultValue
+    public static class DefaultChildA extends DefaultParent {
+    }
+
+    public static class DefaultChildB extends DefaultParent {
+    }
+
+    @Test @Disabled
     public void testDefault_6() {
         InstantiatingValue<DefaultParent> v1 = new InstantiatingValue<>(DefaultParent.class, DefaultChildA.class);
         InstantiatingValue<DefaultParent> v2 = new InstantiatingValue<>(DefaultParent.class, DefaultChildB.class);
@@ -206,7 +217,7 @@ public class ContainerTest {
         }
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_7() {
         ProviderValue<String> v = new ProviderValue<>(String.class, DefaultProvider.class);
 
@@ -214,7 +225,7 @@ public class ContainerTest {
 //        assertTrue(v.isDefault());
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_8() {
         ProviderValue<String> v = new ProviderValue<>(String.class, DefaultProvider.class);
 //        v.setDefault(false);
@@ -225,10 +236,11 @@ public class ContainerTest {
 
     public static class DefaultMethod {
         @DefaultValue
-        public void m() { }
+        public void m() {
+        }
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_9() throws Exception {
         MethodProviderValue<String> v = new MethodProviderValue<>(String.class, DefaultMethod.class.getDeclaredMethod("m"));
 
@@ -236,7 +248,7 @@ public class ContainerTest {
 //        assertTrue(v.isDefault());
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_10() throws Exception {
         MethodProviderValue<String> v = new MethodProviderValue<>(String.class, DefaultMethod.class.getDeclaredMethod("m"));
 //        v.setDefault(false);
@@ -250,7 +262,7 @@ public class ContainerTest {
         String f;
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_11() throws Exception {
         FieldProviderValue<String> v = new FieldProviderValue<>(String.class, DefaultField.class.getDeclaredField("f"));
 
@@ -258,7 +270,7 @@ public class ContainerTest {
 //        assertTrue(v.isDefault());
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_12() throws Exception {
         FieldProviderValue<String> v = new FieldProviderValue<>(String.class, DefaultField.class.getDeclaredField("f"));
 //        v.setDefault(false);
@@ -267,7 +279,7 @@ public class ContainerTest {
 //        assertFalse(v.isDefault());
     }
 
-    @Test
+    @Test @Disabled
     public void testDefault_13() {
         InstantiatingValue<Default_1> v = new InstantiatingValue<>(Default_1.class);
 //        v.setDefault(false);
@@ -276,7 +288,7 @@ public class ContainerTest {
 //        assertFalse(v.isDefault());
     }
 
-    @Test
+    @Test @Disabled
     public void testProviderByName() {
         InstanceValue<String> v1 = new InstanceValue<>("1");
 //        v1.setName("v-1");
@@ -307,7 +319,7 @@ public class ContainerTest {
         assertNull(v);
     }
 
-    @Test
+    @Test @Disabled
     public void testProviderByNameWithDefault() {
         InstanceValue<String> v1 = new InstanceValue<>("1");
 //        v1.setName("v");
@@ -323,7 +335,7 @@ public class ContainerTest {
         assertEquals("2", v.get());
     }
 
-    @Test
+    @Test @Disabled
     public void testProviderByNameAmbiguous() {
         InstanceValue<String> v1 = new InstanceValue<>("1");
 //        v1.setName("v");
@@ -349,5 +361,17 @@ public class ContainerTest {
         assertEquals(10, obj.objects[0]);
         assertEquals("1", obj.objects[1]);
         assertEquals(3.14, obj.objects[2]);
+    }
+
+    @Test
+    public void testPreDestroyInvoked() throws Exception {
+        DIContainer container = DIContainer.builder()
+                .addValue(new InstantiatingValue<>(ClassWithPreDestroy.class))
+                .build();
+
+        ClassWithPreDestroy obj = container.instance(ClassWithPreDestroy.class);
+        System.out.println("PreDestroy: " + obj.destroyed);
+        container.close();
+        assertTrue(obj.destroyed);
     }
 }

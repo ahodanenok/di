@@ -15,11 +15,13 @@ import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.util.Pair;
 import ahodanenok.di.value.InstanceValue;
+import ahodanenok.di.value.ManagedValue;
 import ahodanenok.di.value.ProviderValue;
 import ahodanenok.di.value.Value;
 import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.reflect.*;
@@ -43,12 +45,12 @@ import java.util.stream.Collectors;
  * Container is a coordinator between providers
  * Each of them manages some dependency which can be injected in other objects.
  */
-public final class DIContainer {
+public final class DIContainer implements AutoCloseable {
 
     private Map<ScopeIdentifier, Scope> scopes;
 
     private Set<Value<?>> values;
-    private Set<ManagedValue> managedValues;
+    private Set<ManagedValueImpl> managedValues;
     private ValueLookup valueLookup;
 
     private Set<Value<?>> interceptors;
@@ -218,6 +220,13 @@ public final class DIContainer {
         });
     }
 
+    @Override
+    public void close() throws Exception {
+        for (Scope scope :scopes.values()) {
+            scope.destroy();
+        }
+    }
+
     private void handleEvent(Event event) {
         if (event instanceof AroundConstructEvent) {
             interceptAroundConstruct((AroundConstructEvent<?>) event);
@@ -226,7 +235,7 @@ public final class DIContainer {
         }
 
         List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
-        for (ManagedValue v : managedValues) {
+        for (ManagedValueImpl v : managedValues) {
             for (Method m : v.getEventListeners()) {
                 if (m.getParameterCount() != 1) {
                     // todo: error, msg
@@ -315,11 +324,11 @@ public final class DIContainer {
         }
     }
 
-    private class ManagedValue implements Value<Object> {
+    private class ManagedValueImpl implements ManagedValue {
 
         private Value<?> value;
 
-        public ManagedValue(Value<?> value) {
+        public ManagedValueImpl(Value<?> value) {
             this.value = value;
         }
 
@@ -347,6 +356,7 @@ public final class DIContainer {
                 Method postConstructMethod = getPostConstructMethod();
                 if (postConstructMethod != null) {
                     try {
+                        // todo: accessible
                         postConstructMethod.invoke(obj);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         // todo: error, message
@@ -363,12 +373,14 @@ public final class DIContainer {
             };
         }
 
+        @Override
         public List<Method> getEventListeners() {
             return Arrays.stream(value.metadata().valueType().getDeclaredMethods())
                     .filter(m -> m.isAnnotationPresent(EventListener.class))
                     .collect(Collectors.toList());
         }
 
+        @Override
         public Method getPostConstructMethod() {
             List<Method> methods = ReflectionAssistant.methods(value.metadata().valueType())
                     .stream()
@@ -387,6 +399,27 @@ public final class DIContainer {
             Method postConstructMethod = methods.get(0);
             // todo: validate post construct method
             return postConstructMethod;
+        }
+
+        @Override
+        public Method getPreDestroyMethod() {
+            List<Method> methods = ReflectionAssistant.methods(value.metadata().valueType())
+                    .stream()
+                    .filter(m -> m.isAnnotationPresent(PreDestroy.class))
+                    .collect(Collectors.toList());
+
+            if (methods.isEmpty()) {
+                return null;
+            }
+
+            if (methods.size() > 1) {
+                // todo: error, message
+                throw new IllegalStateException("multiple pre destroy methods");
+            }
+
+            Method preDestroyMethod = methods.get(0);
+            // todo: validate pre destroy method
+            return preDestroyMethod;
         }
     }
 
@@ -532,7 +565,7 @@ public final class DIContainer {
             ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
 
             if (values != null) {
-                Set<ManagedValue> managedValues = new HashSet<>();
+                Set<ManagedValueImpl> managedValues = new HashSet<>();
                 for (Value<?> value : values) {
                     String valueProfiles = value.metadata().getProfilesCondition();
                     if (valueProfiles != null && !profileMatcher.matches(valueProfiles.trim())) {
@@ -544,7 +577,7 @@ public final class DIContainer {
                         container.interceptors.add(value);
                     }
 
-                    managedValues.add(new ManagedValue(value));
+                    managedValues.add(new ManagedValueImpl(value));
                 }
 
                 container.values.addAll(managedValues);

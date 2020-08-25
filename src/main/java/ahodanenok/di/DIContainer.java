@@ -19,6 +19,7 @@ import ahodanenok.di.value.ProviderValue;
 import ahodanenok.di.value.Value;
 import ahodanenok.di.value.metadata.ValueMetadata;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.reflect.*;
@@ -342,6 +343,22 @@ public final class DIContainer {
             return () -> {
                 Object obj = value.provider().get();
                 inject(value, obj);
+
+                Method postConstructMethod = getPostConstructMethod();
+                if (postConstructMethod != null) {
+                    try {
+                        postConstructMethod.invoke(obj);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        // todo: error, message
+                        throw new IllegalStateException(e);
+                    } catch (RuntimeException e) {
+                        e.printStackTrace();
+                        // If the method throws an unchecked exception the class MUST NOT be put into service.
+                        // todo: throw exception?
+                        return null;
+                    }
+                }
+
                 return obj;
             };
         }
@@ -350,6 +367,26 @@ public final class DIContainer {
             return Arrays.stream(value.metadata().valueType().getDeclaredMethods())
                     .filter(m -> m.isAnnotationPresent(EventListener.class))
                     .collect(Collectors.toList());
+        }
+
+        public Method getPostConstructMethod() {
+            List<Method> methods = ReflectionAssistant.methods(value.metadata().valueType())
+                    .stream()
+                    .filter(m -> m.isAnnotationPresent(PostConstruct.class))
+                    .collect(Collectors.toList());
+
+            if (methods.isEmpty()) {
+                return null;
+            }
+
+            if (methods.size() > 1) {
+                // todo: error, message
+                throw new IllegalStateException("multiple post construct methods");
+            }
+
+            Method postConstructMethod = methods.get(0);
+            // todo: validate post construct method
+            return postConstructMethod;
         }
     }
 

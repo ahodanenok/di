@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.value.*;
+import ahodanenok.di.value.classes.ClassWithPostConstruct;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -332,5 +333,21 @@ public class ContainerTest {
 
         DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
         assertThrows(RuntimeException.class, () -> container.provider("v"));
+    }
+
+    @Test
+    public void testPostConstructInvokedAfterDependenciesInjected() {
+        DIContainer container = DIContainer.builder()
+                .addValue(new InstanceValue<>("1"))
+                .addValue(new InstanceValue<>(3.14))
+                .addValue(new InstanceValue<>(10))
+                .addValue(new InstantiatingValue<>(ClassWithPostConstruct.class))
+                .build();
+
+        ClassWithPostConstruct obj = container.instance(ClassWithPostConstruct.class);
+        assertNotNull(obj.objects);
+        assertEquals(10, obj.objects[0]);
+        assertEquals("1", obj.objects[1]);
+        assertEquals(3.14, obj.objects[2]);
     }
 }

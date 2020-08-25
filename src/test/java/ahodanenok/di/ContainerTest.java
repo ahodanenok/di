@@ -351,7 +351,7 @@ public class ContainerTest {
     public void testPostConstructInvokedAfterDependenciesInjected() {
         DIContainer container = DIContainer.builder()
                 .addValue(new InstanceValue<>("1"))
-                .addValue(new InstanceValue<>(3.14))
+                .addValue(new InstanceValue<>(3.14f))
                 .addValue(new InstanceValue<>(10))
                 .addValue(new InstantiatingValue<>(ClassWithPostConstruct.class))
                 .build();
@@ -360,7 +360,7 @@ public class ContainerTest {
         assertNotNull(obj.objects);
         assertEquals(10, obj.objects[0]);
         assertEquals("1", obj.objects[1]);
-        assertEquals(3.14, obj.objects[2]);
+        assertEquals(3.14f, obj.objects[2]);
     }
 
     @Test

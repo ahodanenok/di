@@ -23,7 +23,7 @@ public class ClassWithPostConstruct {
     }
 
     @PostConstruct
-    private void init() {
+    public void init() {
         objects = new Object[] { n, s, f};
     }
 }

@@ -1,4 +1,4 @@
-package ahodanenok.di.value.classes;
+package ahodanenok.di.container.classes;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

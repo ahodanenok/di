@@ -584,16 +584,15 @@ public final class DIContainer implements AutoCloseable {
                 container.managedValues.addAll(managedValues);
             }
 
-            // todo: eager init
-//            for (Value<?> value : container.values) {
-//                if (value.isInitOnStartup()) {
-//                    if (value.scope().equals(ScopeIdentifier.of(Singleton.class))) {
-//                        instance(value.id());
-//                    } else {
-//                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
-//                    }
-//                }
-//            }
+            for (Value<?> value : container.values) {
+                if (value.metadata().isEager()) {
+                    if (ScopeIdentifier.SINGLETON.equals(value.metadata().getScope())) {
+                        provider(value).get();
+                    } else {
+                        throw new IllegalStateException("Eager initialization is only applicable to singleton values");
+                    }
+                }
+            }
 
             return container;
         }

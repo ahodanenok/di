@@ -1,11 +1,13 @@
 package ahodanenok.di.name;
 
+import javax.annotation.ManagedBean;
 import javax.inject.Named;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -65,13 +67,24 @@ public class AnnotatedNameResolution implements NameResolution {
             }
         }
 
-        // if there is no named annotation, element doesn't have a name, even a default one
-        if (named == null) {
-            return null;
+        // if there is no Named or ManagedBean annotations, element doesn't have a name, even a default one
+
+        String name = null;
+        if (named != null) {
+            name = named.value().trim();
         }
 
-        String name = named.value().trim();
-        if (name.isEmpty()) {
+        ManagedBean managedBean = element.getAnnotation(ManagedBean.class);
+        if (managedBean != null) {
+            String managedBeanName = managedBean.value().trim();
+            if (name == null || name.isEmpty()) {
+                name = managedBeanName;
+            } else if (!managedBeanName.isEmpty() && !Objects.equals(name, managedBeanName)) {
+                throw new IllegalStateException("@Named and @ManagedBean provide different names for value: " + name + ", " + managedBean);
+            }
+        }
+
+        if (name != null && name.isEmpty()) {
             return defaultName.get();
         }
 

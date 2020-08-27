@@ -42,6 +42,18 @@ public class NamesTest {
     }
 
     @Test
+    public void testClassManagedBeanDefaultNamed() {
+        AnnotatedNameResolution resolution = new AnnotatedNameResolution();
+        assertEquals("classManagedBeanDefaultName", resolution.resolve(ClassManagedBeanDefaultName.class, Collections::emptySet));
+    }
+
+    @Test
+    public void testClassManagedBeanNamesMismatch() {
+        AnnotatedNameResolution resolution = new AnnotatedNameResolution();
+        assertThrows(IllegalStateException.class, () -> resolution.resolve(ClassNamesMismatch.class, Collections::emptySet));
+    }
+
+    @Test
     public void testClassNamedStereotypeWithName() {
         AnnotatedNameResolution nameResolution = new AnnotatedNameResolution();
         StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();

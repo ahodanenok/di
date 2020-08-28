@@ -30,9 +30,8 @@ import java.util.stream.Collectors;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
 // todo: implement decorators
-// todo: JSR-250
+// todo: @Resource
 // todo: logging
-// todo: events (like in cdi)
 // todo: rethink exceptions' names
 // todo: when null if valid as dependency value, when to throw unsatisfied dependency
 // todo: documentation

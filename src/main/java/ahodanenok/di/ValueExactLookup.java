@@ -2,7 +2,9 @@ package ahodanenok.di;
 
 import ahodanenok.di.value.Value;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,8 +15,8 @@ import java.util.Set;
 public class ValueExactLookup implements ValueLookup {
 
     @Override
-    public <T> Set<Value<T>> execute(Set<Value<?>> values, ValueSpecifier<T> specifier) {
-        Set<Value<T>> matching = new HashSet<>();
+    public <T> List<Value<T>> execute(List<Value<?>> values, ValueSpecifier<T> specifier) {
+        List<Value<T>> matching = new ArrayList<>();
         for (Value<?> v : values) {
             if (specifier.getName() != null && !specifier.getName().equals(v.metadata().getName())) {
                 continue;

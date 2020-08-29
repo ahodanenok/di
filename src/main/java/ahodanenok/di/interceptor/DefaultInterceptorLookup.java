@@ -12,18 +12,15 @@ import java.util.Set;
 public class DefaultInterceptorLookup implements InterceptorLookup {
 
     @Override
-    public List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, Set<Value<?>> interceptors) {
+    public List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, List<Value<?>> interceptors) {
         InterceptorMetadataResolution metadataResolution = container.instance(InterceptorMetadataResolution.class);
 
         List<Value<?>> matched = new ArrayList<>();
-        Set<Annotation> bindings = metadataResolution.resolveBindings(
-                interceptedValue.metadata().valueType(),
-                () -> interceptedValue.metadata().getStereotypes());
+        Set<Annotation> bindings = metadataResolution.resolveBindings(interceptedValue.metadata().valueType());
         if (!bindings.isEmpty()) {
             for (Value<?> interceptor : interceptors) {
                 if (metadataResolution.resolveBindings(
-                        interceptor.metadata().valueType(),
-                        () -> interceptor.metadata().getStereotypes()).stream().anyMatch(bindings::contains)) {
+                        interceptor.metadata().valueType()).stream().anyMatch(bindings::contains)) {
                     matched.add(interceptor);
                 }
             }

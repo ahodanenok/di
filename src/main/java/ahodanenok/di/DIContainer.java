@@ -14,10 +14,7 @@ import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.util.Pair;
-import ahodanenok.di.value.InstanceValue;
-import ahodanenok.di.value.ManagedValue;
-import ahodanenok.di.value.ProviderValue;
-import ahodanenok.di.value.Value;
+import ahodanenok.di.value.*;
 import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.annotation.PostConstruct;
@@ -48,11 +45,11 @@ public final class DIContainer implements AutoCloseable {
 
     private Map<ScopeIdentifier, Scope> scopes;
 
-    private Set<Value<?>> values;
-    private Set<ManagedValueImpl> managedValues;
+    private List<Value<?>> values;
+    private List<ManagedValueImpl> managedValues;
     private ValueLookup valueLookup;
 
-    private Set<Value<?>> interceptors;
+    private List<Value<?>> interceptors;
     private InterceptorLookup interceptorLookup;
 
     private Map<Member, InterceptorChain> resolvedInterceptorChains;
@@ -61,9 +58,9 @@ public final class DIContainer implements AutoCloseable {
     private LinkedList<InjectionPoint> injectionPoints;
 
     private DIContainer() {
-        this.values = new HashSet<>();
-        this.managedValues = new HashSet<>();
-        this.interceptors = new HashSet<>();
+        this.values = new ArrayList<>();
+        this.managedValues = new ArrayList<>();
+        this.interceptors = new ArrayList<>();
         this.scopes = new HashMap<>();
         this.injectionPoints = new LinkedList<>();
     }
@@ -94,13 +91,13 @@ public final class DIContainer implements AutoCloseable {
         return provider(value);
     }
 
-    private <T> Value<T> chooseValue(Set<Value<T>> values) {
+    private <T> Value<T> chooseValue(List<Value<T>> values) {
         if (values.isEmpty()) {
             return null;
         }
 
         if (values.size() == 1) {
-            return values.iterator().next();
+            return values.get(0);
         }
 
         Set<Value<T>> primary = values.stream().filter(v -> v.metadata().isPrimary()).collect(Collectors.toSet());
@@ -465,31 +462,12 @@ public final class DIContainer implements AutoCloseable {
             return this;
         }
 
-        /**
-         * Provide a custom implementation of scope resolution.
-         * Default implementation is {@link AnnotatedScopeResolution}
-         */
-        public Builder withScopeResolution(ScopeResolution scopeResolution) {
-            //this.scopeResolution = scopeResolution; // todo
+        public Builder withInterceptorLookup(InterceptorLookup interceptorLookup) {
+            DIContainer.this.interceptorLookup = interceptorLookup;
             return this;
         }
 
-        public Builder withQualifierResolution(QualifierResolution qualifierResolution) {
-            //this.qualifierResolution = qualifierResolution; // todo
-            return this;
-        }
-
-        public Builder withNameResolution(NameResolution nameResolution) {
-            //this.nameResolution = nameResolution; todo
-            return this;
-        }
-
-        public Builder withStereotypeResolution(StereotypeResolution stereotypeResolution) {
-            //this.stereotypeResolution = stereotypeResolution; todo
-            return this;
-        }
-
-        public Builder activeProfiles(String... profiles) {
+        public Builder withActiveProfiles(String... profiles) {
             this.activeProfiles = profiles;
             return this;
         }
@@ -508,6 +486,9 @@ public final class DIContainer implements AutoCloseable {
                 container.scopes.putIfAbsent(scope.id(), scope);
             }
 
+            InstanceValue<DIContainer> containerValue = new InstanceValue<>(container);
+            container.values.add(containerValue);
+
             if (container.valueLookup == null) {
                 container.valueLookup = new ValueExactLookup();
             }
@@ -516,34 +497,39 @@ public final class DIContainer implements AutoCloseable {
                 container.interceptorLookup = new DefaultInterceptorLookup();
             }
 
-            InstanceValue<ScopeResolution> scopeResolution =
-                    new InstanceValue<>(ScopeResolution.class, new AnnotatedScopeResolution());
-            scopeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            scopeResolution.metadata().setDefault(true);
+            InstantiatingValue<InterceptorLookup> interceptorLookup =
+                    new InstantiatingValue<>(InterceptorLookup.class, DefaultInterceptorLookup.class);
+            interceptorLookup.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            interceptorLookup.withExplicitMetadata().setDefault(true);
+            container.values.add(interceptorLookup);
+
+            InstantiatingValue<ScopeResolution> scopeResolution =
+                    new InstantiatingValue<>(ScopeResolution.class, AnnotatedScopeResolution.class);
+            scopeResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            scopeResolution.withExplicitMetadata().setDefault(true);
             container.values.add(scopeResolution);
 
-            InstanceValue<QualifierResolution> qualifierResolution =
-                    new InstanceValue<>(QualifierResolution.class, new AnnotatedQualifierResolution());
-            qualifierResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            qualifierResolution.metadata().setDefault(true);
+            InstantiatingValue<QualifierResolution> qualifierResolution =
+                    new InstantiatingValue<>(QualifierResolution.class, AnnotatedQualifierResolution.class);
+            qualifierResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            qualifierResolution.withExplicitMetadata().setDefault(true);
             container.values.add(qualifierResolution);
 
-            InstanceValue<NameResolution> nameResolution =
-                    new InstanceValue<>(NameResolution.class, new AnnotatedNameResolution());
-            nameResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            nameResolution.metadata().setDefault(true);
+            InstantiatingValue<NameResolution> nameResolution = new InstantiatingValue<>(NameResolution.class, AnnotatedNameResolution.class);
+            nameResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            nameResolution.withExplicitMetadata().setDefault(true);
             container.values.add(nameResolution);
 
-            InstanceValue<StereotypeResolution> stereotypeResolution =
-                    new InstanceValue<>(StereotypeResolution.class, new AnnotatedStereotypeResolution());
-            stereotypeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            stereotypeResolution.metadata().setDefault(true);
+            InstantiatingValue<StereotypeResolution> stereotypeResolution =
+                    new InstantiatingValue<>(StereotypeResolution.class, AnnotatedStereotypeResolution.class);
+            stereotypeResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            stereotypeResolution.withExplicitMetadata().setDefault(true);
             container.values.add(stereotypeResolution);
 
-            InstanceValue<InterceptorMetadataResolution> interceptorMetadataResolution =
-                    new InstanceValue<>(InterceptorMetadataResolution.class, new AnnotatedInterceptorMetadataResolution());
-            interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            interceptorMetadataResolution.metadata().setDefault(true);
+            InstantiatingValue<InterceptorMetadataResolution> interceptorMetadataResolution =
+                    new InstantiatingValue<>(InterceptorMetadataResolution.class, AnnotatedInterceptorMetadataResolution.class);
+            interceptorMetadataResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+            interceptorMetadataResolution.withExplicitMetadata().setDefault(true);
             container.values.add(interceptorMetadataResolution);
 
             ProviderValue<InjectionPoint> injectionPoint =
@@ -561,9 +547,13 @@ public final class DIContainer implements AutoCloseable {
                 activeProfiles = new String[0];
             }
 
-            ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
+            // todo: collect all values and do bind (order by priority)
+            for (Value<?> value : container.values) {
+                value.bind(container);
+            }
 
             if (values != null) {
+                ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
                 Set<ManagedValueImpl> managedValues = new HashSet<>();
                 for (Value<?> value : values) {
                     String valueProfiles = value.metadata().getProfilesCondition();
@@ -576,7 +566,11 @@ public final class DIContainer implements AutoCloseable {
                         container.interceptors.add(value);
                     }
 
-                    managedValues.add(new ManagedValueImpl(value));
+                    if (value instanceof ManagedValue) {
+                        managedValues.add((ManagedValueImpl) value);
+                    } else {
+                        managedValues.add(new ManagedValueImpl(value));
+                    }
                 }
 
                 container.values.addAll(managedValues);

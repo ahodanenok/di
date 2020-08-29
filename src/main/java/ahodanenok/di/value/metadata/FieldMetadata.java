@@ -22,9 +22,9 @@ public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadat
     @Override
     public void resolve(DIContainer container) {
         stereotypes = container.instance(StereotypeResolution.class).resolve(field);
-        name = container.instance(NameResolution.class).resolve(field, this::getStereotypes);
+        name = container.instance(NameResolution.class).resolve(field);
         qualifiers = container.instance(QualifierResolution.class).resolve(field);
-        scope = container.instance(ScopeResolution.class).resolve(field, this::getStereotypes, ScopeIdentifier.NOT_SCOPED);
+        scope = container.instance(ScopeResolution.class).resolve(field, ScopeIdentifier.NOT_SCOPED);
         isPrimary = field.isAnnotationPresent(PrimaryValue.class)
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(PrimaryValue.class));
         isDefault = field.isAnnotationPresent(DefaultValue.class)
@@ -33,6 +33,6 @@ public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadat
 
         InterceptorMetadataResolution interceptorMetadataResolution =
                 container.instance(InterceptorMetadataResolution.class);
-        interceptorBindings = interceptorMetadataResolution.resolveBindings(field, () -> stereotypes);
+        interceptorBindings = interceptorMetadataResolution.resolveBindings(field);
     }
 }

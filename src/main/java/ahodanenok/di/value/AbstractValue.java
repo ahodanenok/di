@@ -1,6 +1,7 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.value.metadata.ExplicitMetadata;
 import ahodanenok.di.value.metadata.ResolvableMetadata;
 import ahodanenok.di.value.metadata.ValueMetadata;
 
@@ -23,6 +24,18 @@ public abstract class AbstractValue<T> implements Value<T> {
     @Override
     public ValueMetadata metadata() {
         return metadata;
+    }
+
+    public ExplicitMetadata withExplicitMetadata() {
+        if (!(metadata instanceof ExplicitMetadata)) {
+            metadata = new ExplicitMetadata(metadata.valueType());
+        }
+
+        return (ExplicitMetadata) metadata;
+    }
+
+    public void setMetadata(ValueMetadata metadata) {
+        this.metadata = metadata;
     }
 
     @Override

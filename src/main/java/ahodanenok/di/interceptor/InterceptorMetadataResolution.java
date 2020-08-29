@@ -11,13 +11,13 @@ public interface InterceptorMetadataResolution {
 
     boolean isInterceptor(Class<?> clazz);
 
-    Set<Annotation> resolveBindings(Class<?> clazz, Supplier<Set<Annotation>> stereotypes);
+    Set<Annotation> resolveBindings(Class<?> clazz);
 
-    Set<Annotation> resolveBindings(Constructor<?> constructor, Supplier<Set<Annotation>> stereotypes);
+    Set<Annotation> resolveBindings(Constructor<?> constructor);
 
-    Set<Annotation> resolveBindings(Method constructor, Supplier<Set<Annotation>> stereotypes);
+    Set<Annotation> resolveBindings(Method constructor);
 
-    Set<Annotation> resolveBindings(Field field, Supplier<Set<Annotation>> stereotypes);
+    Set<Annotation> resolveBindings(Field field);
 
     Method resolveAroundConstruct(Class<?> interceptorClass);
 }

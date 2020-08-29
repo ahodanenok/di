@@ -6,7 +6,9 @@ import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +17,7 @@ public class PrimitivesLookupTest {
 
     @Test
     public void testPrimitives_1() {
-        Set<Value<?>> values = new HashSet<>();
+        List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>((byte) 1));
         values.add(new InstanceValue<>((short) 2));
         values.add(new InstanceValue<>(3));
@@ -28,7 +30,7 @@ public class PrimitivesLookupTest {
         ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
-        Set<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
+        List<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
@@ -37,7 +39,7 @@ public class PrimitivesLookupTest {
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
         // short
-        Set<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
+        List<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
@@ -46,7 +48,7 @@ public class PrimitivesLookupTest {
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
         // int
-        Set<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
+        List<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
         assertEquals(1, intResult.size());
         assertEquals((int) 3, intResult.iterator().next().provider().get());
 
@@ -55,7 +57,7 @@ public class PrimitivesLookupTest {
         assertEquals(3, intResult.iterator().next().provider().get());
 
         // long
-        Set<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
+        List<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
@@ -64,7 +66,7 @@ public class PrimitivesLookupTest {
         assertEquals(4, longResult.iterator().next().provider().get());
 
         // float
-        Set<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
+        List<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
@@ -73,7 +75,7 @@ public class PrimitivesLookupTest {
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
         // double
-        Set<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
+        List<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
@@ -82,7 +84,7 @@ public class PrimitivesLookupTest {
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
         // boolean
-        Set<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
+        List<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
@@ -91,7 +93,7 @@ public class PrimitivesLookupTest {
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
         // char
-        Set<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
+        List<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
 
@@ -102,7 +104,7 @@ public class PrimitivesLookupTest {
 
     @Test
     public void testPrimitives_2() {
-        Set<Value<?>> values = new HashSet<>();
+        List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>(byte.class, (byte) 1));
         values.add(new InstanceValue<>(short.class, (short) 2));
         values.add(new InstanceValue<>(int.class, 3));
@@ -115,7 +117,7 @@ public class PrimitivesLookupTest {
         ValueExactLookup lookup = new ValueExactLookup();
 
         // byte
-        Set<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
+        List<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
         assertEquals(1, byteResult.size());
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
@@ -124,7 +126,7 @@ public class PrimitivesLookupTest {
         assertEquals((byte) 1, byteResult.iterator().next().provider().get());
 
         // short
-        Set<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
+        List<Value<Short>> shortResult = lookup.execute(values, ValueSpecifier.of(short.class));
         assertEquals(1, shortResult.size());
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
@@ -133,7 +135,7 @@ public class PrimitivesLookupTest {
         assertEquals((short) 2, shortResult.iterator().next().provider().get());
 
         // int
-        Set<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
+        List<Value<Integer>> intResult = lookup.execute(values, ValueSpecifier.of(int.class));
         assertEquals(1, intResult.size());
         assertEquals((int) 3, intResult.iterator().next().provider().get());
 
@@ -142,7 +144,7 @@ public class PrimitivesLookupTest {
         assertEquals(3, intResult.iterator().next().provider().get());
 
         // long
-        Set<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
+        List<Value<Long>> longResult = lookup.execute(values, ValueSpecifier.of(long.class));
         assertEquals(1, longResult.size());
         assertEquals(4, longResult.iterator().next().provider().get());
 
@@ -151,7 +153,7 @@ public class PrimitivesLookupTest {
         assertEquals(4, longResult.iterator().next().provider().get());
 
         // float
-        Set<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
+        List<Value<Float>> floatResult = lookup.execute(values, ValueSpecifier.of(float.class));
         assertEquals(1, floatResult.size());
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
@@ -160,7 +162,7 @@ public class PrimitivesLookupTest {
         assertEquals((float) 5, floatResult.iterator().next().provider().get());
 
         // double
-        Set<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
+        List<Value<Double>> doubleResult = lookup.execute(values, ValueSpecifier.of(double.class));
         assertEquals(1, doubleResult.size());
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
@@ -169,7 +171,7 @@ public class PrimitivesLookupTest {
         assertEquals((double) 6, doubleResult.iterator().next().provider().get());
 
         // boolean
-        Set<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
+        List<Value<Boolean>> booleanResult = lookup.execute(values, ValueSpecifier.of(boolean.class));
         assertEquals(1, booleanResult.size());
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
@@ -178,7 +180,7 @@ public class PrimitivesLookupTest {
         assertEquals(true, booleanResult.iterator().next().provider().get());
 
         // char
-        Set<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
+        List<Value<Character>> characterResult = lookup.execute(values, ValueSpecifier.of(char.class));
         assertEquals(1, characterResult.size());
         assertEquals('z', characterResult.iterator().next().provider().get());
 

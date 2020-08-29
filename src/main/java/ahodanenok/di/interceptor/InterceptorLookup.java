@@ -8,5 +8,5 @@ import java.util.Set;
 
 public interface InterceptorLookup {
 
-    List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, Set<Value<?>> interceptors);
+    List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, List<Value<?>> interceptors);
 }

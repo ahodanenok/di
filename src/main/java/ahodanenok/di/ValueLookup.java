@@ -2,7 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.value.Value;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Behaviour for determining how dependencies are selected by id from all available.
@@ -16,5 +16,5 @@ public interface ValueLookup {
      *
      * @return matched dependencies or empty set if none found
      */
-    <T> Set<Value<T>> execute(Set<Value<?>> values, ValueSpecifier<T> id);
+    <T> List<Value<T>> execute(List<Value<?>> values, ValueSpecifier<T> id);
 }

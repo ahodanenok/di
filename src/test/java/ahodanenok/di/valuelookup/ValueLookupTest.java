@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,13 +43,13 @@ public class ValueLookupTest {
     public void testExactLookupByClassAllFound() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>("1"));
         values.add(new InstanceValue<>("2"));
         values.add(new InstanceValue<>(new QualifiedClass()));
         values.add(new InstanceValue<>(CharSequence.class, "3"));
 
-        Set<Value<String>> value = lookup.execute(values, ValueSpecifier.of(String.class));
+        List<Value<String>> value = lookup.execute(values, ValueSpecifier.of(String.class));
         assertEquals(2, value.size());
 
         Set<String> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toSet());
@@ -59,13 +61,13 @@ public class ValueLookupTest {
     public void testExactLookupByClassNoneFound() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>(1));
         values.add(new InstanceValue<>(2));
         values.add(new InstanceValue<>(new QualifiedClass()));
         values.add(new InstanceValue<>(Number.class, 3));
 
-        Set<Value<Long>> value = lookup.execute(values, ValueSpecifier.of(Long.class));
+        List<Value<Long>> value = lookup.execute(values, ValueSpecifier.of(Long.class));
         assertEquals(0, value.size());
     }
 
@@ -73,7 +75,7 @@ public class ValueLookupTest {
     public void testExactLookupByClassAndQualifiersAllFound() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierA.class));
@@ -91,10 +93,10 @@ public class ValueLookupTest {
         values.add(new InstanceValue<>(new QualifiedClass()));
         values.add(new InstanceValue<>(CharSequence.class, "4"));
 
-        Set<Value<String>> value = lookup.execute(values, ValueSpecifier.of(String.class, QualifiedClass.class.getAnnotation(QualifierA.class)));
+        List<Value<String>> value = lookup.execute(values, ValueSpecifier.of(String.class, QualifiedClass.class.getAnnotation(QualifierA.class)));
         assertEquals(2, value.size());
 
-        Set<String> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toSet());
+        List<String> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toList());
         assertTrue(strings.contains("1"));
         assertTrue(strings.contains("3"));
     }
@@ -103,7 +105,7 @@ public class ValueLookupTest {
     public void testExactLookupByClassAndQualifiersNoneFound() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierC.class));
@@ -121,7 +123,7 @@ public class ValueLookupTest {
         values.add(new InstanceValue<>(new QualifiedClass()));
         values.add(new InstanceValue<>(CharSequence.class, "4"));
 
-        Set<Value<String>> value = lookup.execute(
+        List<Value<String>> value = lookup.execute(
                 values,
                 ValueSpecifier.of(
                         String.class,
@@ -134,7 +136,7 @@ public class ValueLookupTest {
     public void testExactLookupByAnyQualifiers() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierC.class));
@@ -149,7 +151,7 @@ public class ValueLookupTest {
                 QualifiedClass.class.getAnnotation(QualifierC.class));
         values.add(v3);
 
-        Set<Value<String>> value = lookup.execute(
+        List<Value<String>> value = lookup.execute(
                 values,
                 ValueSpecifier.of(String.class, QualifiedClass.class.getAnnotation(Any.class)));
         assertEquals(3, value.size());
@@ -164,7 +166,7 @@ public class ValueLookupTest {
     public void testExactLookupByQualifiers() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierA.class));
@@ -182,7 +184,7 @@ public class ValueLookupTest {
         ValueSpecifier<?> s = new ValueSpecifier<>();
         s.setQualifiers(QualifiedClass.class.getAnnotation(QualifierA.class));
 
-        Set<? extends Value<?>> value = lookup.execute(values, s);
+        List<? extends Value<?>> value = lookup.execute(values, s);
         assertEquals(2, value.size());
 
         Set<?> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toSet());
@@ -194,7 +196,7 @@ public class ValueLookupTest {
     public void testExactLookupByNameAndType() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierA.class));
@@ -213,7 +215,7 @@ public class ValueLookupTest {
         s.setName("test");
         s.setType(String.class);
 
-        Set<? extends Value<?>> value = lookup.execute(values, s);
+        List<? extends Value<?>> value = lookup.execute(values, s);
         assertEquals(1, value.size());
 
         Set<?> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toSet());
@@ -224,7 +226,7 @@ public class ValueLookupTest {
     public void testExactLookupByNameAndTypeAndQualifiers() {
         ValueExactLookup lookup = new ValueExactLookup();
 
-        Set<Value<?>> values = new LinkedHashSet<>();
+        List<Value<?>> values = new ArrayList<>();
 
         InstanceValue<String> v1 = new InstanceValue<>("1");
         v1.metadata().setQualifiers(QualifiedClass.class.getAnnotation(QualifierA.class));
@@ -244,7 +246,7 @@ public class ValueLookupTest {
         s.setType(int.class);
         s.setQualifiers(QualifiedClass.class.getAnnotation(QualifierB.class));
 
-        Set<? extends Value<?>> value = lookup.execute(values, s);
+        List<? extends Value<?>> value = lookup.execute(values, s);
         assertEquals(1, value.size());
 
         Set<?> strings = value.stream().map(v -> v.provider().get()).collect(Collectors.toSet());

@@ -1,7 +1,10 @@
 package ahodanenok.di.interceptor;
 
+import ahodanenok.di.DIContainer;
 import ahodanenok.di.ReflectionAssistant;
+import ahodanenok.di.stereotype.StereotypeResolution;
 
+import javax.inject.Inject;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBinding;
@@ -14,39 +17,49 @@ import java.util.stream.Collectors;
 
 public class AnnotatedInterceptorMetadataResolution implements InterceptorMetadataResolution {
 
+    private DIContainer container;
+    private StereotypeResolution stereotypeResolution;
+
+    @Inject
+    public AnnotatedInterceptorMetadataResolution(DIContainer container) {
+        this.container = container;
+    }
+
+    private StereotypeResolution getStereotypeResolution() {
+        if (stereotypeResolution == null) {
+            stereotypeResolution = container.instance(StereotypeResolution.class);
+        }
+
+        return stereotypeResolution;
+    }
+
     @Override
     public boolean isInterceptor(Class<?> clazz) {
         return clazz.isAnnotationPresent(Interceptor.class);
     }
 
     @Override
-    public Set<Annotation> resolveBindings(Constructor<?> constructor, Supplier<Set<Annotation>> stereotypes) {
-        return resolveExecutableBindings(constructor, stereotypes);
+    public Set<Annotation> resolveBindings(Constructor<?> constructor) {
+        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(constructor)), () -> getStereotypeResolution().resolve(constructor));
+        bindings.addAll(resolveBindings(constructor.getDeclaringClass()));
+        return bindings;
     }
 
     @Override
-    public Set<Annotation> resolveBindings(Method method, Supplier<Set<Annotation>> stereotypes) {
-        return resolveExecutableBindings(method, stereotypes);
+    public Set<Annotation> resolveBindings(Method method) {
+        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(method)), () -> getStereotypeResolution().resolve(method));
+        bindings.addAll(resolveBindings(method.getDeclaringClass()));
+        return bindings;
     }
 
     @Override
-    public Set<Annotation> resolveBindings(Field field, Supplier<Set<Annotation>> stereotypes) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), stereotypes);
+    public Set<Annotation> resolveBindings(Field field) {
+        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), () -> getStereotypeResolution().resolve(field));
     }
 
     @Override
-    public Set<Annotation> resolveBindings(Class<?> clazz, Supplier<Set<Annotation>> stereotypes) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(clazz)), stereotypes);
-    }
-
-    private Set<Annotation> resolveExecutableBindings(Executable executable, Supplier<Set<Annotation>> stereotypes) {
-        LinkedList<Annotation> queue = new LinkedList<>();
-        queue.addAll(Arrays.stream(executable.getDeclaredAnnotations())
-                .filter(a -> a.annotationType().isAnnotationPresent(InterceptorBinding.class))
-                .collect(Collectors.toSet()));
-        queue.addAll(bindings(executable.getDeclaringClass()));
-
-        return resolveBindingsFromQueue(queue, stereotypes);
+    public Set<Annotation> resolveBindings(Class<?> clazz) {
+        return resolveBindingsFromQueue(new LinkedList<>(bindings(clazz)), () -> getStereotypeResolution().resolve(clazz));
     }
 
     private Set<Annotation> resolveBindingsFromQueue(LinkedList<Annotation> queue, Supplier<Set<Annotation>> stereotypes) {

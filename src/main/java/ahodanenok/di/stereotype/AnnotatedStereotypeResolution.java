@@ -1,10 +1,7 @@
 package ahodanenok.di.stereotype;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class AnnotatedStereotypeResolution implements StereotypeResolution {
@@ -22,6 +19,11 @@ public class AnnotatedStereotypeResolution implements StereotypeResolution {
     @Override
     public Set<Annotation> resolve(Method method) {
         return resolveInternal(method);
+    }
+
+    @Override
+    public Set<Annotation> resolve(Constructor<?> constructor) {
+        return resolveInternal(constructor);
     }
 
     private Set<Annotation> resolveInternal(AnnotatedElement element) {

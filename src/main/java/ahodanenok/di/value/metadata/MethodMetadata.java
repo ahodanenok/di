@@ -22,9 +22,9 @@ public final class MethodMetadata extends ValueMetadata implements ResolvableMet
     @Override
     public void resolve(DIContainer container) {
         stereotypes = container.instance(StereotypeResolution.class).resolve(method);
-        name = container.instance(NameResolution.class).resolve(method, this::getStereotypes);
+        name = container.instance(NameResolution.class).resolve(method);
         qualifiers = container.instance(QualifierResolution.class).resolve(method);
-        scope = container.instance(ScopeResolution.class).resolve(method, this::getStereotypes, ScopeIdentifier.NOT_SCOPED);
+        scope = container.instance(ScopeResolution.class).resolve(method, ScopeIdentifier.NOT_SCOPED);
         isPrimary = method.isAnnotationPresent(PrimaryValue.class)
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(PrimaryValue.class));
         isDefault = method.isAnnotationPresent(DefaultValue.class)
@@ -33,6 +33,6 @@ public final class MethodMetadata extends ValueMetadata implements ResolvableMet
 
         InterceptorMetadataResolution interceptorMetadataResolution =
                 container.instance(InterceptorMetadataResolution.class);
-        interceptorBindings = interceptorMetadataResolution.resolveBindings(method, () -> stereotypes);
+        interceptorBindings = interceptorMetadataResolution.resolveBindings(method);
     }
 }

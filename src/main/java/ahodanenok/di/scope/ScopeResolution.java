@@ -13,28 +13,28 @@ import java.util.function.Supplier;
 public interface ScopeResolution {
 
     default ScopeIdentifier resolve(Class<?> clazz) {
-        return resolve(clazz, Collections::emptySet, ScopeIdentifier.of(NotScoped.class));
+        return resolve(clazz, ScopeIdentifier.of(NotScoped.class));
     }
 
     /**
      * Determine scope of the instances of given class.
      * @param defaultScope returned if scope wasn't resolved
      */
-    ScopeIdentifier resolve(Class<?> clazz, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope);
+    ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope);
 
     default ScopeIdentifier resolve(Method method) {
-        return resolve(method, Collections::emptySet, ScopeIdentifier.of(NotScoped.class));
+        return resolve(method, ScopeIdentifier.of(NotScoped.class));
     }
 
     /**
      * Determine scope of the instances created by given method
      * @param defaultScope returned if scope wasn't resolved
      */
-    ScopeIdentifier resolve(Method method, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope);
+    ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope);
 
     default ScopeIdentifier resolve(Field field) {
-        return resolve(field, Collections::emptySet, ScopeIdentifier.of(NotScoped.class));
+        return resolve(field, ScopeIdentifier.of(NotScoped.class));
     }
 
-    ScopeIdentifier resolve(Field field, Supplier<Set<Annotation>> stereotypes, ScopeIdentifier defaultScope);
+    ScopeIdentifier resolve(Field field, ScopeIdentifier defaultScope);
 }

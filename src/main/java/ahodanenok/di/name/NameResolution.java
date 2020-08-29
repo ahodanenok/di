@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 
 public interface NameResolution {
 
-    String resolve(Class<?> clazz, Supplier<Set<Annotation>> stereotypes);
+    String resolve(Class<?> clazz);
 
-    String resolve(Field field, Supplier<Set<Annotation>> stereotypes);
+    String resolve(Field field);
 
-    String resolve(Method method, Supplier<Set<Annotation>> stereotypes);
+    String resolve(Method method);
 }

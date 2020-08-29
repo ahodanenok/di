@@ -1,6 +1,11 @@
 package ahodanenok.di.name;
 
+import ahodanenok.di.DIContainer;
+import ahodanenok.di.stereotype.Stereotype;
+import ahodanenok.di.stereotype.StereotypeResolution;
+
 import javax.annotation.ManagedBean;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
@@ -13,9 +18,25 @@ import java.util.function.Supplier;
 
 public class AnnotatedNameResolution implements NameResolution {
 
+    private DIContainer container;
+    private StereotypeResolution stereotypeResolution;
+
+    @Inject
+    public AnnotatedNameResolution(DIContainer container) {
+        this.container = container;
+    }
+
+    private StereotypeResolution getStereotypeResolution() {
+        if (stereotypeResolution == null) {
+            stereotypeResolution = container.instance(StereotypeResolution.class);
+        }
+
+        return stereotypeResolution;
+    }
+
     @Override
-    public String resolve(Class<?> clazz, Supplier<Set<Annotation>> stereotypes) {
-        return named(clazz, stereotypes, () -> {
+    public String resolve(Class<?> clazz) {
+        return named(clazz, () -> getStereotypeResolution().resolve(clazz), () -> {
             String name = clazz.getSimpleName();
             // todo: check how to use code points
             return Introspector.decapitalize(name);
@@ -23,13 +44,13 @@ public class AnnotatedNameResolution implements NameResolution {
     }
 
     @Override
-    public String resolve(Field field, Supplier<Set<Annotation>> stereotypes) {
-        return named(field, stereotypes, field::getName);
+    public String resolve(Field field) {
+        return named(field, () -> getStereotypeResolution().resolve(field), field::getName);
     }
 
     @Override
-    public String resolve(Method method, Supplier<Set<Annotation>> stereotypes) {
-        return named(method, stereotypes, () -> {
+    public String resolve(Method method) {
+        return named(method, () -> getStereotypeResolution().resolve(method), () -> {
             String name = method.getName();
             if (name.length() > 2
                     && method.getReturnType().equals(boolean.class)

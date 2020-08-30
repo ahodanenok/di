@@ -43,4 +43,8 @@ public class ExplicitMetadata extends ValueMetadata {
     public void setInitializationPhase(int phase) {
         this.initializationPhase = phase;
     }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 }

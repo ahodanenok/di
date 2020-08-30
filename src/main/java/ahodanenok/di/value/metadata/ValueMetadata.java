@@ -23,6 +23,7 @@ public abstract class ValueMetadata {
     protected boolean interceptor = false;
     protected Set<Annotation> interceptorBindings = Collections.emptySet();
 
+    protected int priority;
 
     public ValueMetadata(Class<?> type) {
         this.type = type;
@@ -46,6 +47,10 @@ public abstract class ValueMetadata {
 
     public int getInitializationPhase() {
         return initializationPhase;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     public boolean isPrimary() {

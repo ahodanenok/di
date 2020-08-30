@@ -7,6 +7,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
+import javax.annotation.Priority;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -33,6 +34,11 @@ public final class ClassMetadata extends ValueMetadata implements ResolvableMeta
         if (eagerAnnotation != null) {
             eager = true;
             initializationPhase = eagerAnnotation.phase();
+        }
+
+        Priority p = type.getAnnotation(Priority.class);
+        if (p != null) {
+            priority = p.value();
         }
 
         InterceptorMetadataResolution interceptorMetadataResolution =

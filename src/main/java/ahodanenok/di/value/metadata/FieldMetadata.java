@@ -8,7 +8,6 @@ import ahodanenok.di.scope.ScopeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 
 public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadata {
 

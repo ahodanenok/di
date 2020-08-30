@@ -4,6 +4,7 @@ import ahodanenok.di.DefaultValue;
 import ahodanenok.di.Eager;
 import ahodanenok.di.PrimaryValue;
 
+import javax.annotation.Priority;
 import javax.interceptor.Interceptor;
 
 public class MethodMetadata {

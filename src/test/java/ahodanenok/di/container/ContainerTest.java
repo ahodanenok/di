@@ -52,7 +52,7 @@ public class ContainerTest {
         assertEquals("eagerMethod", EagerInitialedSequence.seq.get(1));
     }
 
-    @Test @Disabled
+    @Test
     public void testOnlyDefaultResolved() {
         InstanceValue<Integer> v = new InstanceValue<>(10);
         v.metadata().setDefault(true);

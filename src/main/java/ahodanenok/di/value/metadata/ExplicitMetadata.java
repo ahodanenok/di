@@ -35,4 +35,12 @@ public class ExplicitMetadata extends ValueMetadata {
     public void setDefault(boolean isDefault) {
         this.isDefault = isDefault;
     }
+
+    public void setEager(boolean eager) {
+        this.eager = eager;
+    }
+
+    public void setInitializationPhase(int phase) {
+        this.initializationPhase = phase;
+    }
 }

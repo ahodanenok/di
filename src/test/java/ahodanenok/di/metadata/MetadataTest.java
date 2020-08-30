@@ -26,6 +26,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -43,6 +44,25 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
+        assertTrue(metadata.isEager());
+        assertFalse(metadata.isPrimary());
+        assertFalse(metadata.isDefault());
+        assertFalse(metadata.isInterceptor());
+    }
+
+    @Test
+    public void testClassEagerPhased() {
+        InstantiatingValue<EagerClassPhased> v = new InstantiatingValue<>(EagerClassPhased.class);
+        v.bind(DIContainer.builder().build());
+        ValueMetadata metadata = v.metadata();
+
+        assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
+        assertNull(metadata.getName());
+        assertEquals(Collections.emptySet(), metadata.getQualifiers());
+        assertEquals(Collections.emptySet(), metadata.getStereotypes());
+        assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(20, metadata.getInitializationPhase());
         assertTrue(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -60,6 +80,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertTrue(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -77,6 +98,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());
@@ -94,6 +116,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.singleton(InterceptorClass.class.getAnnotation(InterceptStuff.class)), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -112,6 +135,7 @@ public class MetadataTest {
         assertTrue(metadata.getQualifiers().contains(LotOfMetadataClass.class.getAnnotation(QualifierB.class)));
         assertEquals(Collections.singleton(LotOfMetadataClass.class.getAnnotation(PackedStereotype.class)), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertTrue(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());
@@ -130,6 +154,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -148,6 +173,26 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
+        assertTrue(metadata.isEager());
+        assertFalse(metadata.isPrimary());
+        assertFalse(metadata.isDefault());
+        assertFalse(metadata.isInterceptor());
+    }
+
+    @Test
+    public void testMethodEagerPhase() throws Exception {
+        MethodProviderValue<String> v = new MethodProviderValue<>(
+                String.class, MethodMetadata.class.getDeclaredMethod("eagerPhased"));
+        v.bind(DIContainer.builder().build());
+        ValueMetadata metadata = v.metadata();
+
+        assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
+        assertNull(metadata.getName());
+        assertEquals(Collections.emptySet(), metadata.getQualifiers());
+        assertEquals(Collections.emptySet(), metadata.getStereotypes());
+        assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(10, metadata.getInitializationPhase());
         assertTrue(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -166,6 +211,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertTrue(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -184,6 +230,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());
@@ -205,6 +252,7 @@ public class MetadataTest {
                 Collections.singleton(
                     MethodMetadata.class.getDeclaredMethod("intercepted").getAnnotation(InterceptStuff.class)),
                 metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -227,6 +275,7 @@ public class MetadataTest {
                 Collections.singleton(
                         MethodMetadata.class.getDeclaredMethod("lotOfMetadata").getAnnotation(InterceptStuff.class)),
                 metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertTrue(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());
@@ -245,6 +294,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -263,6 +313,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertTrue(metadata.isPrimary());
         assertFalse(metadata.isDefault());
@@ -281,6 +332,7 @@ public class MetadataTest {
         assertEquals(Collections.emptySet(), metadata.getQualifiers());
         assertEquals(Collections.emptySet(), metadata.getStereotypes());
         assertEquals(Collections.emptySet(), metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertFalse(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());
@@ -303,6 +355,7 @@ public class MetadataTest {
                 Collections.singleton(
                         MethodMetadata.class.getDeclaredMethod("intercepted").getAnnotation(InterceptStuff.class)),
                 metadata.getInterceptorBindings());
+        assertEquals(0, metadata.getInitializationPhase());
         assertTrue(metadata.isEager());
         assertFalse(metadata.isPrimary());
         assertTrue(metadata.isDefault());

@@ -29,7 +29,12 @@ public class FieldMetadata<T> extends ValueMetadata implements ResolvableMetadat
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(PrimaryValue.class));
         isDefault = field.isAnnotationPresent(DefaultValue.class)
                 || stereotypes.stream().anyMatch(s -> s.annotationType().isAnnotationPresent(DefaultValue.class));
-        eager = field.isAnnotationPresent(Eager.class);
+
+        Eager eagerAnnotation = field.getAnnotation(Eager.class);
+        if (eagerAnnotation != null) {
+            eager = true;
+            initializationPhase = eagerAnnotation.phase();
+        }
 
         InterceptorMetadataResolution interceptorMetadataResolution =
                 container.instance(InterceptorMetadataResolution.class);

@@ -10,4 +10,11 @@ import java.lang.annotation.*;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Eager { }
+public @interface Eager {
+
+    /**
+     * Defines a phase during which eager value should be initialized
+     * Values with a lower phase initialized before values with a higher phase
+     */
+    int phase() default 0;
+}

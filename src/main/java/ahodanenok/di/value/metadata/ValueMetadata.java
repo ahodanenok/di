@@ -16,6 +16,7 @@ public abstract class ValueMetadata {
     protected boolean isPrimary = false;
     protected boolean isDefault = false;
     protected boolean eager = false;
+    protected int initializationPhase;
     protected Set<Annotation> qualifiers = Collections.emptySet();
     protected Set<Annotation> stereotypes = Collections.emptySet();
 
@@ -41,6 +42,10 @@ public abstract class ValueMetadata {
 
     public String getProfilesCondition() {
         return profilesCondition;
+    }
+
+    public int getInitializationPhase() {
+        return initializationPhase;
     }
 
     public boolean isPrimary() {

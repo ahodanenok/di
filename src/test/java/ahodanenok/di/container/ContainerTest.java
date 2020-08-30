@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ContainerTest {
 
     @Test
-    public void testEagerSingletonInitializedOnContainerStartup() {
+    public void testEagerClassInitialization() {
         DIContainer.builder().addValue(new InstantiatingValue<>(EagerSingleton.class)).build();
         assertTrue(EagerSingleton.init);
     }
@@ -29,17 +29,27 @@ public class ContainerTest {
     }
 
     @Test
-    public void testEagerInit_8() throws Exception {
+    public void testEagerMethodProviderInitialization() throws Exception {
         MethodProviderValue<String> v = new MethodProviderValue<>(String.class, EagerMethod.class.getDeclaredMethod("m"));
         DIContainer.builder().addValue(v).build();
         assertTrue(EagerMethod.init);
     }
 
     @Test
-    public void  testEagerInit_10() throws Exception {
+    public void  testEagerProviderInitialization() throws Exception {
         ProviderValue<String> v = new ProviderValue<>(String.class, EagerProvider.class);
         DIContainer.builder().addValue(v).build();
         assertTrue(EagerProvider.init);
+    }
+
+    @Test
+    public void testEagerInitialization() throws Exception {
+        DIContainer.builder()
+                .addValue(new MethodProviderValue<>(String.class, EagerInitialedSequence.class.getDeclaredMethod("eagerMethod")))
+                .addValue(new InstantiatingValue<>(EagerInitialedSequence.EagerClass.class))
+                .build();
+        assertEquals("eagerClass", EagerInitialedSequence.seq.get(0));
+        assertEquals("eagerMethod", EagerInitialedSequence.seq.get(1));
     }
 
     @Test @Disabled

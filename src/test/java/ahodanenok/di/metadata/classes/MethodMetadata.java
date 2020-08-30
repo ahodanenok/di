@@ -17,6 +17,11 @@ public class MethodMetadata {
         return "eager";
     }
 
+    @Eager(phase = 10)
+    public String eagerPhased() {
+        return "eagerPhased";
+    }
+
     @PrimaryValue
     public String primaryValue() {
         return "pv";

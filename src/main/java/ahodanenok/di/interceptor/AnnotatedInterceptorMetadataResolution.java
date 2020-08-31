@@ -1,10 +1,12 @@
 package ahodanenok.di.interceptor;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.Later;
 import ahodanenok.di.ReflectionAssistant;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBinding;
@@ -18,19 +20,12 @@ import java.util.stream.Collectors;
 public class AnnotatedInterceptorMetadataResolution implements InterceptorMetadataResolution {
 
     private DIContainer container;
-    private StereotypeResolution stereotypeResolution;
+    private Provider<StereotypeResolution> stereotypeResolution;
 
     @Inject
-    public AnnotatedInterceptorMetadataResolution(DIContainer container) {
+    public AnnotatedInterceptorMetadataResolution(DIContainer container, @Later Provider<StereotypeResolution> stereotypeResolution) {
         this.container = container;
-    }
-
-    private StereotypeResolution getStereotypeResolution() {
-        if (stereotypeResolution == null) {
-            stereotypeResolution = container.instance(StereotypeResolution.class);
-        }
-
-        return stereotypeResolution;
+        this.stereotypeResolution = stereotypeResolution;
     }
 
     @Override
@@ -40,26 +35,26 @@ public class AnnotatedInterceptorMetadataResolution implements InterceptorMetada
 
     @Override
     public Set<Annotation> resolveBindings(Constructor<?> constructor) {
-        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(constructor)), () -> getStereotypeResolution().resolve(constructor));
+        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(constructor)), () -> stereotypeResolution.get().resolve(constructor));
         bindings.addAll(resolveBindings(constructor.getDeclaringClass()));
         return bindings;
     }
 
     @Override
     public Set<Annotation> resolveBindings(Method method) {
-        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(method)), () -> getStereotypeResolution().resolve(method));
+        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(method)), () -> stereotypeResolution.get().resolve(method));
         bindings.addAll(resolveBindings(method.getDeclaringClass()));
         return bindings;
     }
 
     @Override
     public Set<Annotation> resolveBindings(Field field) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), () -> getStereotypeResolution().resolve(field));
+        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), () -> stereotypeResolution.get().resolve(field));
     }
 
     @Override
     public Set<Annotation> resolveBindings(Class<?> clazz) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(clazz)), () -> getStereotypeResolution().resolve(clazz));
+        return resolveBindingsFromQueue(new LinkedList<>(bindings(clazz)), () -> stereotypeResolution.get().resolve(clazz));
     }
 
     private Set<Annotation> resolveBindingsFromQueue(LinkedList<Annotation> queue, Supplier<Set<Annotation>> stereotypes) {

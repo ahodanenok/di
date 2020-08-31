@@ -1,10 +1,12 @@
 package ahodanenok.di.scope;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.Later;
 import ahodanenok.di.exception.ScopeResolutionException;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
@@ -24,19 +26,12 @@ import java.util.stream.Collectors;
 public class AnnotatedScopeResolution implements ScopeResolution{
 
     private DIContainer container;
-    private StereotypeResolution stereotypeResolution;
+    private Provider<StereotypeResolution> stereotypeResolution;
 
     @Inject
-    public AnnotatedScopeResolution(DIContainer container) {
+    public AnnotatedScopeResolution(DIContainer container, @Later Provider<StereotypeResolution> stereotypeResolution) {
         this.container = container;
-    }
-
-    private StereotypeResolution getStereotypeResolution() {
-        if (stereotypeResolution == null) {
-            stereotypeResolution = container.instance(StereotypeResolution.class);
-        }
-
-        return stereotypeResolution;
+        this.stereotypeResolution = stereotypeResolution;
     }
 
     @Override
@@ -66,7 +61,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         }
 
         if (scope == null) {
-            Set<ScopeIdentifier> s = scopesFromStereotypes(getStereotypeResolution().resolve(clazz));
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(clazz));
             if (s.size() > 1) {
                 // todo: exception type, message
                 throw new IllegalStateException("Multiple stereotypes declare a scope");
@@ -95,7 +90,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         if (scopes.size() == 1) {
             return ScopeIdentifier.of(scopes.iterator().next());
         } else {
-            Set<ScopeIdentifier> s = scopesFromStereotypes(getStereotypeResolution().resolve(method));
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(method));
             if (s.size() > 1) {
                 // todo: exception type, message
                 throw new ScopeResolutionException(method, "Multiple stereotypes declare a scope");
@@ -121,7 +116,7 @@ public class AnnotatedScopeResolution implements ScopeResolution{
         if (scopes.size() == 1) {
             return ScopeIdentifier.of(scopes.iterator().next());
         } else {
-            Set<ScopeIdentifier> s = scopesFromStereotypes(getStereotypeResolution().resolve(field));
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(field));
             if (s.size() > 1) {
                 // todo: exception type, message
                 throw new IllegalStateException("Multiple stereotypes declare a scope");

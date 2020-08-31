@@ -25,14 +25,16 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testIsInterceptorResolved() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         assertTrue(resolution.isInterceptor(EmptyInterceptorClass.class));
         assertFalse(resolution.isInterceptor(ExtendingInterceptor.class));
     }
 
     @Test
     public void testAroundConstructResolved() throws Exception {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         assertEquals(
                 AroundConstructInterceptor.class.getDeclaredMethod("aroundConstructMethod", InvocationContext.class),
                 resolution.resolveAroundConstruct(AroundConstructInterceptor.class));
@@ -40,7 +42,8 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testInheritedAroundConstructResolvedForInterceptor() throws Exception {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         assertEquals(
                 AroundConstructInterceptor.class.getDeclaredMethod("aroundConstructMethod", InvocationContext.class),
                 resolution.resolveAroundConstruct(AroundConstructInherited.class));
@@ -48,21 +51,24 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testAroundConstructNotResolvedForNotInterceptor() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         // todo: error
         assertThrows(Exception.class, () -> resolution.resolveAroundConstruct(AroundConstructNotInterceptor.class));
     }
 
     @Test
     public void testErrorIfMultipleAroundConstructInAClass() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         // todo: error
         assertThrows(Exception.class, () -> resolution.resolveAroundConstruct(AroundConstructMultiple.class));
     }
 
     @Test
     public void testClassBindingsResolved() throws Exception {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         Set<Annotation> bindings = resolution.resolveBindings(ClassBindings.class);
 
         Set<Class<?>> bindingClasses = bindings.stream().map(Annotation::annotationType).collect(Collectors.toSet());
@@ -79,7 +85,8 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testConstructorBindingsResolved() throws Exception {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         Set<Annotation> bindings = resolution.resolveBindings(ConstructorBindings.class.getDeclaredConstructor());
 
         Set<Class<?>> bindingClasses = bindings.stream().map(Annotation::annotationType).collect(Collectors.toSet());
@@ -96,7 +103,8 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testMethodBindingsResolved() throws Exception {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         Set<Annotation> bindings = resolution.resolveBindings(MethodBindings.class.getDeclaredMethod("m"));
 
         Set<Class<?>> bindingClasses = bindings.stream().map(Annotation::annotationType).collect(Collectors.toSet());
@@ -113,21 +121,24 @@ public class InterceptorMetadataResolutionTest {
 
     @Test
     public void testErrorIfFinal() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         // todo: error
         assertThrows(Exception.class, () -> resolution.resolveAroundConstruct(AroundConstructFinal.class));
     }
 
     @Test
     public void testErrorIfAbstract() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         // todo: error
         assertThrows(Exception.class, () -> resolution.resolveAroundConstruct(AroundConstructAbstract.class));
     }
 
     @Test
     public void testErrorIfStatic() {
-        AnnotatedInterceptorMetadataResolution resolution = new AnnotatedInterceptorMetadataResolution(DIContainer.builder().build());
+        DIContainer container = DIContainer.builder().build();
+        InterceptorMetadataResolution resolution = container.instance(InterceptorMetadataResolution.class);
         // todo: error
         assertThrows(Exception.class, () -> resolution.resolveAroundConstruct(AroundConstructStatic.class));
     }

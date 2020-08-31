@@ -1,12 +1,14 @@
 package ahodanenok.di.name;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.Later;
 import ahodanenok.di.stereotype.Stereotype;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.annotation.ManagedBean;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -19,24 +21,17 @@ import java.util.function.Supplier;
 public class AnnotatedNameResolution implements NameResolution {
 
     private DIContainer container;
-    private StereotypeResolution stereotypeResolution;
+    private Provider<StereotypeResolution> stereotypeResolution;
 
     @Inject
-    public AnnotatedNameResolution(DIContainer container) {
+    public AnnotatedNameResolution(DIContainer container, @Later Provider<StereotypeResolution> stereotypeResolution) {
         this.container = container;
-    }
-
-    private StereotypeResolution getStereotypeResolution() {
-        if (stereotypeResolution == null) {
-            stereotypeResolution = container.instance(StereotypeResolution.class);
-        }
-
-        return stereotypeResolution;
+        this.stereotypeResolution = stereotypeResolution;
     }
 
     @Override
     public String resolve(Class<?> clazz) {
-        return named(clazz, () -> getStereotypeResolution().resolve(clazz), () -> {
+        return named(clazz, () -> stereotypeResolution.get().resolve(clazz), () -> {
             String name = clazz.getSimpleName();
             // todo: check how to use code points
             return Introspector.decapitalize(name);
@@ -45,12 +40,12 @@ public class AnnotatedNameResolution implements NameResolution {
 
     @Override
     public String resolve(Field field) {
-        return named(field, () -> getStereotypeResolution().resolve(field), field::getName);
+        return named(field, () -> stereotypeResolution.get().resolve(field), field::getName);
     }
 
     @Override
     public String resolve(Method method) {
-        return named(method, () -> getStereotypeResolution().resolve(method), () -> {
+        return named(method, () -> stereotypeResolution.get().resolve(method), () -> {
             String name = method.getName();
             if (name.length() > 2
                     && method.getReturnType().equals(boolean.class)

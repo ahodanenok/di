@@ -1,6 +1,7 @@
 package ahodanenok.di.scope;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.exception.ScopeResolutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,7 +126,7 @@ public class ScopeTest {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
         Method m = MultipleScopedMethod.class.getDeclaredMethod("multipleScopesFromStereotypes");
-        assertThrows(ScopeResolutionException.class, () -> resolution.resolve(m, ScopeIdentifier.NOT_SCOPED));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(m, ScopeIdentifier.NOT_SCOPED));
     }
 
     @Test
@@ -141,7 +142,7 @@ public class ScopeTest {
     public void testClassScopeResolutionErrorIfMultipleScopesDeclared() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertThrows(ScopeResolutionException.class, () -> resolution.resolve(ClassWithMultipleInheritedScopes.class));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(ClassWithMultipleInheritedScopes.class));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class ScopeTest {
     public void testClassWithMultipleScopedStereotypes() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertThrows(IllegalStateException.class, () -> resolution.resolve(
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(
                 ClassWithMultipleScopedStereotypes.class,
                 ScopeIdentifier.of(NotScoped.class)));
     }

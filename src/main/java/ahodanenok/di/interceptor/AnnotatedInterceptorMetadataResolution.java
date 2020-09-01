@@ -3,6 +3,7 @@ package ahodanenok.di.interceptor;
 import ahodanenok.di.DIContainer;
 import ahodanenok.di.Later;
 import ahodanenok.di.ReflectionAssistant;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.inject.Inject;
@@ -85,14 +86,14 @@ public class AnnotatedInterceptorMetadataResolution implements InterceptorMetada
             }
         }
 
-        if (!methods.isEmpty() && !isInterceptor(interceptorClass)) {
-            // todo: error, msg
-            throw new IllegalStateException();
+        if (methods.size() > 1) {
+            throw new ConfigurationException("Multiple @AroundConstruct methods are declared in the class "
+                    + interceptorClass + ": " + methods);
         }
 
-        if (methods.size() > 1) {
-            // todo: error, msg
-            throw new IllegalStateException();
+        if (!methods.isEmpty() && !isInterceptor(interceptorClass)) {
+            throw new ConfigurationException("@AroundConstruct method " + methods.iterator().next()
+                    + " is declared on a non-interceptor class " + interceptorClass);
         }
 
         if (methods.isEmpty()) {
@@ -100,16 +101,17 @@ public class AnnotatedInterceptorMetadataResolution implements InterceptorMetada
         }
 
         Method m = methods.iterator().next();
-        // aroundConstruct must have one parameter of type InvocationContext, check if there are any other variants
+        // aroundConstruct must have one parameter of type InvocationContext, todo: check if there are any other variants
         if (m.getParameterCount() != 1 ||  !InvocationContext.class.isAssignableFrom(m.getParameterTypes()[0])) {
-            // todo: error, msg
-            throw new IllegalStateException();
+            throw new ConfigurationException("@AroundConstruct method must accept one parameter "
+                    + "of type javax.interceptor.InvocationContext: " + m + " in the class " + interceptorClass);
         }
 
         int modifiers = m.getModifiers();
         if (Modifier.isStatic(modifiers) || Modifier.isAbstract(modifiers) || Modifier.isFinal(modifiers)) {
-            // todo: error
-            throw new IllegalStateException("Around construct method must not be declared as abstract, final, or static.");
+            throw new ConfigurationException(
+                    "@AroundConstruct method must not be declared as abstract, final, or static: "
+                            + m + " in the class " + interceptorClass);
         }
 
         return m;

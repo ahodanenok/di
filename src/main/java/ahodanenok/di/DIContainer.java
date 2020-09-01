@@ -5,6 +5,7 @@ import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Event;
 import ahodanenok.di.event.EventListener;
 import ahodanenok.di.event.Events;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.interceptor.*;
 import ahodanenok.di.name.AnnotatedNameResolution;
@@ -101,8 +102,8 @@ public final class DIContainer implements AutoCloseable {
 
         Set<Value<T>> primary = values.stream().filter(v -> v.metadata().isPrimary()).collect(Collectors.toSet());
         if (primary.size() > 1) {
-            // todo: exception, message
-            throw new IllegalStateException("multiple primary values");
+            throw new ConfigurationException("Multiple values are marked as @PrimaryValue: "
+                    + primary.stream().map(Value::type).collect(Collectors.toList()));
         }
 
         if (primary.size() == 1) {
@@ -111,16 +112,15 @@ public final class DIContainer implements AutoCloseable {
 
         Set<Value<T>> withoutDefaults = values.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
         if (withoutDefaults.size() > 1) {
-            // todo: exception, message
-            throw new IllegalStateException("multiple values matched");
-            //throw new UnsatisfiedDependencyException(id, "multiple providers");
+            throw new ConfigurationException(
+                    "Multiple values are applicable for dependency injection,"
+                    + " either make all except one default or make one a primary value:"
+                    + values.stream().map(Value::type).collect(Collectors.toList()));
         }
 
         if (values.size() - withoutDefaults.size() > 1) {
-            // todo: errors
-            throw new IllegalStateException(
-                    "There are multiple values marked as default: "
-                            + values.stream().map(Value::type).collect(Collectors.toList()));
+            throw new ConfigurationException("Multiple values marked as @DefaultValue: "
+                    + values.stream().map(Value::type).collect(Collectors.toList()));
         }
 
         if (withoutDefaults.size() == 1) {
@@ -232,8 +232,9 @@ public final class DIContainer implements AutoCloseable {
         for (ManagedValueImpl v : managedValues) {
             for (Method m : v.getEventListeners()) {
                 if (m.getParameterCount() != 1) {
-                    // todo: error, msg
-                    throw new IllegalStateException();
+                    throw new ConfigurationException(
+                            "Event listener method must accept a single parameter of event type: "
+                            + m + " in the class " + m.getDeclaringClass());
                 }
 
                 if (m.getParameterTypes()[0].isAssignableFrom(event.getClass())) {
@@ -386,8 +387,8 @@ public final class DIContainer implements AutoCloseable {
             }
 
             if (methods.size() > 1) {
-                // todo: error, message
-                throw new IllegalStateException("multiple post construct methods");
+                throw new ConfigurationException(
+                        "Multiple methods marked as @PostConstruct in the class " + value.metadata().valueType() + ": " + methods);
             }
 
             Method postConstructMethod = methods.get(0);
@@ -407,8 +408,8 @@ public final class DIContainer implements AutoCloseable {
             }
 
             if (methods.size() > 1) {
-                // todo: error, message
-                throw new IllegalStateException("multiple pre destroy methods");
+                throw new ConfigurationException(
+                        "Multiple methods marked as @PreDestroy in the class " + value.metadata().valueType() + ": " + methods);
             }
 
             Method preDestroyMethod = methods.get(0);
@@ -497,11 +498,11 @@ public final class DIContainer implements AutoCloseable {
                 container.interceptorLookup = new DefaultInterceptorLookup();
             }
 
-            InstantiatingValue<InterceptorLookup> interceptorLookup =
-                    new InstantiatingValue<>(InterceptorLookup.class, DefaultInterceptorLookup.class);
-            interceptorLookup.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            interceptorLookup.withExplicitMetadata().setDefault(true);
-            container.values.add(interceptorLookup);
+//            InstantiatingValue<InterceptorLookup> interceptorLookup =
+//                    new InstantiatingValue<>(InterceptorLookup.class, DefaultInterceptorLookup.class);
+//            interceptorLookup.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
+//            interceptorLookup.withExplicitMetadata().setDefault(true);
+//            container.values.add(interceptorLookup);
 
             InstantiatingValue<ScopeResolution> scopeResolution =
                     new InstantiatingValue<>(ScopeResolution.class, AnnotatedScopeResolution.class);

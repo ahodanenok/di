@@ -1,6 +1,7 @@
 package ahodanenok.di.name;
 
 import ahodanenok.di.DIContainer;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.name.classes.*;
 import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
@@ -56,7 +57,7 @@ public class NamesTest {
     public void testClassManagedBeanNamesMismatch() {
         DIContainer container = DIContainer.builder().build();
         NameResolution resolution = container.instance(NameResolution.class);
-        assertThrows(IllegalStateException.class, () -> resolution.resolve(ClassNamesMismatch.class));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(ClassNamesMismatch.class));
     }
 
     @Test
@@ -77,7 +78,7 @@ public class NamesTest {
     public void testClassDefaultNamedViaStereotype() {
         DIContainer container = DIContainer.builder().build();
         NameResolution resolution = container.instance(NameResolution.class);
-        assertThrows(IllegalStateException.class, () -> resolution.resolve(ClassWithNamedStereotype.class));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(ClassWithNamedStereotype.class));
     }
 
     @Test
@@ -138,7 +139,7 @@ public class NamesTest {
         DIContainer container = DIContainer.builder().build();
         NameResolution resolution = container.instance(NameResolution.class);
         Field f = FieldNames.class.getDeclaredField("fieldWithNamedStereotype");
-        assertThrows(IllegalStateException.class, () -> resolution.resolve(f));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(f));
     }
 
     @Test
@@ -218,6 +219,6 @@ public class NamesTest {
         DIContainer container = DIContainer.builder().build();
         NameResolution resolution = container.instance(NameResolution.class);
         Method m = MethodNames.class.getDeclaredMethod("methodWithNamedStereotype");
-        assertThrows(IllegalStateException.class, () -> resolution.resolve(m));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(m));
     }
 }

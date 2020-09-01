@@ -4,6 +4,7 @@ import ahodanenok.di.*;
 import ahodanenok.di.event.AroundConstructEvent;
 import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.value.metadata.ClassMetadata;
 
 import javax.inject.Inject;
@@ -70,12 +71,8 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
 
         // @Inject can apply to at most one constructor per class.
         if (constructors.size() > 1) {
-//            throw new DependencyInstantiatingException(id, instanceClass,
-//                    "multiple constructors are marked with @Inject," +
-//                    " to make this class available for dependency injection leave only such constructor," +
-//                    " constructors: " + constructors);
-            // todo: error, msg
-            throw new RuntimeException();
+            throw new ConfigurationException("Multiple constructors are marked with @Inject annotation in the class "
+                    + instanceClass + ": " + constructors);
         }
 
         Constructor<?> constructor = null;
@@ -84,10 +81,8 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             Constructor<? extends T> c = (Constructor<? extends T>) constructors.iterator().next();
             constructor = c;
         } else {
+            // todo: if there is only one public constructor, pick it even if it isn't annotated with @Inject
             try {
-
-                // todo: if there is only one public constructor, pick it even if it isn't annotated with @Inject
-
                 // @Inject is optional for public, no-argument constructors
                 if (!Modifier.isStatic(instanceClass.getModifiers())
                         // todo: leave only support for member classes
@@ -97,27 +92,19 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
                     constructor = instanceClass.getConstructor();
                 }
             } catch (NoSuchMethodException e) {
-//                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
-//                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
-                // todo: error, msg
-                throw new RuntimeException(e);
+                // there is no default constructor
             }
 
             // @Inject is optional for public, no-argument constructors when no other constructors are present.
             if (instanceClass.getDeclaredConstructors().length > 1) {
-//                throw new DependencyInstantiatingException(id, instanceClass, "multiple constructors are found, mark appropriate constructor with @Inject" +
-//                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
-                // todo: error, msg
-                throw new RuntimeException();
+                throw new ConfigurationException("Multiple constructors are found in the class "
+                        + instanceClass + ", mark appropriate constructor with @Inject: "
+                        + Arrays.toString(instanceClass.getDeclaredConstructors()));
             }
         }
 
-
         if (constructor == null) {
-//            throw new DependencyInstantiatingException(id, instanceClass,
-//                    "no applicable constructor found, either leave only one constructor without parameters or mark some constructor with @Inject");
-            // todo: error, msg
-            throw new RuntimeException();
+            throw new ConfigurationException("No applicable constructor found in the class " + instanceClass + ", either leave only one constructor without parameters or mark some constructor with @Inject");
         }
 
         // todo: suppress unchecked

@@ -2,6 +2,7 @@ package ahodanenok.di.name;
 
 import ahodanenok.di.DIContainer;
 import ahodanenok.di.Later;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.annotation.ManagedBean;
@@ -70,8 +71,7 @@ public class AnnotatedNameResolution implements NameResolution {
                 if (s.annotationType().isAnnotationPresent(Named.class)) {
                     Named n = s.annotationType().getAnnotation(Named.class);
                     if (!n.value().trim().isEmpty()) {
-                        // todo: exception type, message
-                        throw new IllegalStateException(
+                        throw new ConfigurationException(
                                 "@Named annotation declared on a stereotype can't provide a name," +
                                         " it can only be used on a stereotype to enable default name for values marked with this stereotype." +
                                         " Stereotype " + s + " with " + n);
@@ -96,7 +96,7 @@ public class AnnotatedNameResolution implements NameResolution {
             if (name == null || name.isEmpty()) {
                 name = managedBeanName;
             } else if (!managedBeanName.isEmpty() && !Objects.equals(name, managedBeanName)) {
-                throw new IllegalStateException("@Named and @ManagedBean provide different names for value: " + name + ", " + managedBean);
+                throw new ConfigurationException("@Named and @ManagedBean provide different names for value: " + name + ", " + managedBean);
             }
         }
 

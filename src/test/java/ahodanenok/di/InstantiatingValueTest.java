@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.DependencyInstantiatingException;
 import ahodanenok.di.scope.ScopeIdentifier;
@@ -123,38 +124,30 @@ public class InstantiatingValueTest {
     }
 
     @Test
-    @Disabled // todo: exception
-    public void testDefaultConstructor_2() {
+    public void testDefaultConstructorNotPublic() {
         InstantiatingValue<TestClass_Default_NotPublic> v =
                 new InstantiatingValue<>(TestClass_Default_NotPublic.class);
-        v.bind(container);
-
-        assertThrows(DependencyInjectionException.class, () -> v.provider().get());
+        assertThrows(ConfigurationException.class, () -> v.bind(container));
     }
 
     @Test
-    @Disabled // todo: exception
-    public void testDefaultConstructor_3() {
+    public void testMultipleConstructorsOneDefault() {
         InstantiatingValue<TestClass_Default_NotSingle> v =
                 new InstantiatingValue<>(TestClass_Default_NotSingle.class);
-        v.bind(container);
 
-        assertThrows(DependencyInjectionException.class, () -> v.provider().get());
+        assertThrows(ConfigurationException.class, () -> v.bind(container));
     }
 
     @Test
-    @Disabled // todo: exception
-    public void testMultipleConstructors_1() {
+    public void testMultipleConstructorsNoInject() {
         InstantiatingValue<TestClass_Multiple> v =
                 new InstantiatingValue<>(TestClass_Multiple.class);
-        v.bind(container);
-
-        assertThrows(DependencyInstantiatingException.class, () -> v.provider().get());
+        assertThrows(ConfigurationException.class, () -> v.bind(container));
     }
 
 
     @Test
-    public void testMultipleConstructors_2() {
+    public void testMultipleConstructorsOneInject() {
         InstantiatingValue<TestInject_MultipleInject> v =
                 new InstantiatingValue<>(TestInject_MultipleInject.class);
         v.bind(container);

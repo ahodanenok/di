@@ -4,6 +4,7 @@ import ahodanenok.di.DIContainer;
 import ahodanenok.di.DefaultValue;
 import ahodanenok.di.Eager;
 import ahodanenok.di.container.classes.*;
+import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.value.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ public class ContainerTest {
         v2.metadata().setDefault(true);
 
         DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).build();
-        assertThrows(IllegalStateException.class, () -> container.instance(int.class));
+        assertThrows(ConfigurationException.class, () -> container.instance(int.class));
     }
 
     @Test
@@ -95,7 +96,7 @@ public class ContainerTest {
         InstanceValue<Integer> v3 = new InstanceValue<>(10);
 
         DIContainer container = DIContainer.builder().addValue(v1).addValue(v2).addValue(v3).build();
-        assertThrows(IllegalStateException.class, () -> container.instance(int.class));
+        assertThrows(ConfigurationException.class, () -> container.instance(int.class));
     }
 
     @Test

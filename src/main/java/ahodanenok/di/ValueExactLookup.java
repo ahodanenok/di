@@ -3,9 +3,7 @@ package ahodanenok.di;
 import ahodanenok.di.value.Value;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.

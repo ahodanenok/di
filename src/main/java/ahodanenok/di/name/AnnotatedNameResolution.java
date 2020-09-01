@@ -2,7 +2,6 @@ package ahodanenok.di.name;
 
 import ahodanenok.di.DIContainer;
 import ahodanenok.di.Later;
-import ahodanenok.di.stereotype.Stereotype;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
 import javax.annotation.ManagedBean;

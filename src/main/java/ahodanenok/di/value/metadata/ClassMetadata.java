@@ -7,11 +7,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 
-import javax.annotation.Priority;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
+import javax.annotation.Priority;;
 
 public final class ClassMetadata extends ValueMetadata implements ResolvableMetadata {
 

@@ -13,6 +13,7 @@ public class DefaultInterceptorLookup implements InterceptorLookup {
 
     @Override
     public List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, List<Value<?>> interceptors) {
+        // todo: later provider for metadata resolution
         InterceptorMetadataResolution metadataResolution = container.instance(InterceptorMetadataResolution.class);
 
         List<Value<?>> matched = new ArrayList<>();

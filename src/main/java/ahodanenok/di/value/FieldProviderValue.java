@@ -26,11 +26,13 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
         // todo: suppress unchecked
         if (Modifier.isStatic(field.getModifiers())) {
             return () -> {
+                // todo: code reuse
                 boolean accessible = field.isAccessible();
                 try {
                     field.setAccessible(true);
                     return (T) field.get(null);
                 } catch (IllegalAccessException e) {
+                    // todo: error, msg
                     throw new RuntimeException(e);
                 } finally {
                     field.setAccessible(accessible);
@@ -52,6 +54,7 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
                         field.setAccessible(accessible);
                     }
                 } catch (IllegalAccessException e) {
+                    // todo: error, msg
                     throw new RuntimeException(e);
                 }
             };

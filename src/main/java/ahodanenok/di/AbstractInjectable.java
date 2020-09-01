@@ -69,6 +69,7 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
         boolean optional = injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class);
         if (injectionPoint.getAnnotatedTarget().isAnnotationPresent(Later.class)) {
             return (Provider<Object>) () -> {
+                // todo: cache provider in a field
                 Provider<?> p = resolveProviderInstance(specifier, optional);
                 if (p != null) {
                     return p.get();

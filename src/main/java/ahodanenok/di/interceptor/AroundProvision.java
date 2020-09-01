@@ -17,6 +17,7 @@ public class AroundProvision {
         return injectionPoint;
     }
 
+    // todo: is this property needed?
     public void setResolvedDependency(Object resolvedDependency) {
         this.resolvedDependency = resolvedDependency;
     }

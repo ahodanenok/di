@@ -40,6 +40,7 @@ public final class AroundConstruct<T> {
     }
 
     public T proceed() {
+        // todo: throw exception if called twice?
         if (instance != null) {
             return instance;
         }

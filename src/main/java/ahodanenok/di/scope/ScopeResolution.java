@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 /**
  * Determines scope of the given element.
  */
+// todo: remove default methods
 public interface ScopeResolution {
 
     default ScopeIdentifier resolve(Class<?> clazz) {

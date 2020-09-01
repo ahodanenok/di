@@ -13,17 +13,15 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Resolves element scope by inspecting its annotations.
  * Annotation marked with meta-annotation {@link Scope} is the scope of an element.
  */
-public class AnnotatedScopeResolution implements ScopeResolution{
+public class AnnotatedScopeResolution implements ScopeResolution {
 
     private DIContainer container;
     private Provider<StereotypeResolution> stereotypeResolution;

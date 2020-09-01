@@ -6,8 +6,10 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
+// todo: support for PostConstruct, PreDestroy
 public final class InvocationContextImpl implements InvocationContext {
 
+    // todo: final
     private AroundConstruct<?> aroundConstruct;
 
     public InvocationContextImpl(AroundConstruct<?> aroundConstruct) {
@@ -52,6 +54,7 @@ public final class InvocationContextImpl implements InvocationContext {
         this.aroundConstruct.setArgs(params);
     }
 
+    // todo: add a shareable map as a field for holding context data
     @Override
     public Map<String, Object> getContextData() {
         return Collections.emptyMap();
@@ -59,6 +62,7 @@ public final class InvocationContextImpl implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
+        // todo: error if called twice?
         if (aroundConstruct != null) {
             return aroundConstruct.proceed();
         }

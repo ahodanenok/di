@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 public class AnnotatedNameResolution implements NameResolution {
 
+    // todo: make final
     private DIContainer container;
     private Provider<StereotypeResolution> stereotypeResolution;
 
@@ -99,6 +100,8 @@ public class AnnotatedNameResolution implements NameResolution {
                 throw new IllegalStateException("@Named and @ManagedBean provide different names for value: " + name + ", " + managedBean);
             }
         }
+
+        // todo: infer name from @Resource annotation? when declared on a class
 
         if (name != null && name.isEmpty()) {
             return defaultName.get();

@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 
 public class InjectionPoint {
 
+    // todo: make fields final
     private Class<?> type;
     private ParameterizedType genericType;
     private Member target;

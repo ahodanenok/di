@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 // todo: @Resource
 // todo: logging
 // todo: rethink exceptions' names
-// todo: when null if valid as dependency value, when to throw unsatisfied dependency
 // todo: documentation
 // todo: generics
 // todo: yaml config
@@ -188,7 +187,6 @@ public final class DIContainer implements AutoCloseable {
         inject(null, instance);
     }
 
-    // todo: where to get value
     private void inject(Value<?> value, Object instance) {
         if (instance == null) {
             throw new IllegalArgumentException("instance is null");
@@ -417,6 +415,8 @@ public final class DIContainer implements AutoCloseable {
             // todo: validate pre destroy method
             return preDestroyMethod;
         }
+
+        // todo: around invoke
     }
 
     public static Builder builder() {

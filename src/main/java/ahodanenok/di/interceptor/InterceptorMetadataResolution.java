@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Supplier;
 
+// todo: think about collapsing resolveBindings for member elements to resolveBindings(Member)
 public interface InterceptorMetadataResolution {
 
     boolean isInterceptor(Class<?> clazz);

@@ -48,13 +48,9 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     @Override
     public Provider<? extends T> provider() {
         return () -> {
-                T instance = targetConstructor.inject();
-//                if (instance != null) {
-//                    container.inject(instance);
-//                    // todo: post create
-//                }
-
-                return instance;
+            T instance = targetConstructor.inject();
+            // todo: log
+            return instance;
         };
     }
 
@@ -78,6 +74,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
 //                    "multiple constructors are marked with @Inject," +
 //                    " to make this class available for dependency injection leave only such constructor," +
 //                    " constructors: " + constructors);
+            // todo: error, msg
             throw new RuntimeException();
         }
 
@@ -89,7 +86,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         } else {
             try {
 
-                // todo: if there is only one public constructor, pick it if not annotated with @Inject
+                // todo: if there is only one public constructor, pick it even if it isn't annotated with @Inject
 
                 // @Inject is optional for public, no-argument constructors
                 if (!Modifier.isStatic(instanceClass.getModifiers())
@@ -102,6 +99,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             } catch (NoSuchMethodException e) {
 //                throw new DependencyInstantiatingException(id, instanceClass, "default constructor is not found, mark appropriate constructor with @Inject" +
 //                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+                // todo: error, msg
                 throw new RuntimeException(e);
             }
 
@@ -109,6 +107,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
             if (instanceClass.getDeclaredConstructors().length > 1) {
 //                throw new DependencyInstantiatingException(id, instanceClass, "multiple constructors are found, mark appropriate constructor with @Inject" +
 //                        " to make this class available for dependency injection, constructors: " + Arrays.asList(instanceClass.getDeclaredConstructors()));
+                // todo: error, msg
                 throw new RuntimeException();
             }
         }
@@ -117,10 +116,11 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         if (constructor == null) {
 //            throw new DependencyInstantiatingException(id, instanceClass,
 //                    "no applicable constructor found, either leave only one constructor without parameters or mark some constructor with @Inject");
+            // todo: error, msg
             throw new RuntimeException();
         }
 
-
+        // todo: suppress unchecked
         return (Constructor<? extends T>) constructor;
     }
 }

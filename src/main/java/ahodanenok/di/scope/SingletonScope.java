@@ -39,6 +39,7 @@ public class SingletonScope implements Scope {
 
     @Override
     public void destroy() {
+        // todo: make copy of instances and assign to it empty map
         for (Map.Entry<Value<?>, Object> entry : instances.entrySet()) {
             System.out.println(entry.getKey().getClass());
             if (entry.getKey() instanceof ManagedValue) {

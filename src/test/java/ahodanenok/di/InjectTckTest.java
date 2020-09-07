@@ -13,17 +13,23 @@ import javax.inject.Named;
 
 @Drivers
 @Named("spare")
-public class InjectTck {
+public class InjectTckTest {
 
-    @org.junit.jupiter.api.Test
+    public static boolean skip = true;
+
     public static Test suite() {
+        // workaround for a bug in vintage engine, suite method is called twice
+        if (skip) {
+            skip = false;
+            return new TestSuite();
+        }
 
         InstantiatingValue<Seat> driverSeat = new InstantiatingValue<>(Seat.class, DriversSeat.class);
-        driverSeat.metadata().setQualifiers(InjectTck.class.getAnnotation(Drivers.class));
+        driverSeat.metadata().setQualifiers(InjectTckTest.class.getAnnotation(Drivers.class));
 
         InstantiatingValue<Tire> spareTire = new InstantiatingValue<>(Tire.class, SpareTire.class);
         spareTire.metadata().setName("spare");
-        spareTire.metadata().setQualifiers(InjectTck.class.getAnnotation(Named.class));
+        spareTire.metadata().setQualifiers(InjectTckTest.class.getAnnotation(Named.class));
 
         DIContainer container = DIContainer.builder()
                 .addValue(new InstantiatingValue<>(Car.class, Convertible.class))
@@ -37,7 +43,7 @@ public class InjectTck {
                 .addValue(new InstantiatingValue<>(RoundThing.class))
                 .addValue(new InstantiatingValue<>(SpareTire.class))
                 .addValue(spareTire)
-//                .allowInjectStatic(Tire.class)
+                .allowInjectStatic(Tire.class)
                 .allowInjectStatic(SpareTire.class)
                 .allowInjectStatic(Convertible.class)
                 .build();

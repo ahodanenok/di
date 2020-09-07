@@ -200,8 +200,22 @@ public final class DIContainer implements AutoCloseable {
         return p.get();
     }
 
-    public void inject(Object instance) {
-        inject(null, instance);
+    private void injectStatic(Class<?> clazz) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("class is null");
+        }
+
+        Arrays.stream(clazz.getDeclaredFields()).filter(f -> Modifier.isStatic(f.getModifiers()) && f.isAnnotationPresent(Inject.class)).forEach(f -> {
+            InjectableField injectableField = new InjectableField(this, f);
+            injectableField.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(null, ai)));
+            injectableField.inject(null);
+        });
+
+        Arrays.stream(clazz.getDeclaredMethods()).filter(m -> Modifier.isStatic(m.getModifiers()) && m.isAnnotationPresent(Inject.class)).forEach(m -> {
+            InjectableMethod injectableMethod = new InjectableMethod(this, m);
+            injectableMethod.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(null, ai)));
+            injectableMethod.inject(null);
+        });
     }
 
     // todo: cache
@@ -219,11 +233,11 @@ public final class DIContainer implements AutoCloseable {
 
         Map<Class<?>, List<Method>> methodsByClass = ReflectionAssistant.methods(instance.getClass())
                 .stream()
-                .filter(m -> m.isAnnotationPresent(Inject.class))
+                .filter(m -> !Modifier.isStatic(m.getModifiers()) && m.isAnnotationPresent(Inject.class))
                 .collect(Collectors.groupingBy(Method::getDeclaringClass));
 
         for (Class<?> clazz : ReflectionAssistant.hierarchy(instance.getClass())) {
-            Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
+            Arrays.stream(clazz.getDeclaredFields()).filter(f -> !Modifier.isStatic(f.getModifiers()) && f.isAnnotationPresent(Inject.class)).forEach(f -> {
                 InjectableField injectableField = new InjectableField(this, f);
                 injectableField.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
                 injectableField.inject(instance);
@@ -254,6 +268,8 @@ public final class DIContainer implements AutoCloseable {
             interceptAroundInject((AroundProvisionEvent) event);
         }
 
+        // todo: static listeners
+
         List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
         for (ManagedValueImpl v : managedValues) {
             for (Method m : v.getEventListeners()) {
@@ -283,7 +299,10 @@ public final class DIContainer implements AutoCloseable {
     private void interceptAroundInject(AroundProvisionEvent event) {
         AroundProvision aroundProvision = event.getAroundProvision();
         InjectionPoint injectionPoint = aroundProvision.getInjectionPoint();
-        assert event.getApplicant() != null;
+
+        if (!Modifier.isStatic(event.getAroundProvision().getInjectionPoint().getTarget().getModifiers()) && event.getApplicant() == null) {
+            throw new IllegalStateException("value is null for non-static injection target");
+        }
 
         // todo: @AroundInject interceptor?
         try {
@@ -461,6 +480,7 @@ public final class DIContainer implements AutoCloseable {
         private List<Scope> scopes;
         private List<Value<?>> values;
         private String[] activeProfiles;
+        private Set<Class<?>> injectStatic;
 
         public Builder addValue(Value<?> value) {
             if (values == null) {
@@ -482,6 +502,16 @@ public final class DIContainer implements AutoCloseable {
             }
 
             scopes.add(scope);
+            return this;
+        }
+
+        // todo: @AllowStaticInject annotation to discover such permission automatically
+        public Builder allowInjectStatic(Class<?>... classes) {
+            if (injectStatic == null) {
+                this.injectStatic = new HashSet<>();
+            }
+
+            this.injectStatic.addAll(Arrays.asList(classes));
             return this;
         }
 
@@ -613,6 +643,17 @@ public final class DIContainer implements AutoCloseable {
 
                 container.values.addAll(managedValues);
                 container.managedValues.addAll(managedValues);
+            }
+
+            if (injectStatic != null) {
+                Set<Class<?>> injected = new HashSet<>();
+                for (Class<?> clazz : injectStatic) {
+                    for (Class<?> h : ReflectionAssistant.hierarchy(clazz)) {
+                        if (injected.add(h)) {
+                            injectStatic(h);
+                        }
+                    }
+                }
             }
 
             container.values.stream()

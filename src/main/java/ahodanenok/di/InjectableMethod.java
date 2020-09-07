@@ -45,8 +45,6 @@ public class InjectableMethod extends AbstractInjectable<Object> {
             } else {
                 args[i] = resolveDependency(injectionPoint);
             }
-
-            i++;
         }
 
         boolean accessible = method.isAccessible();

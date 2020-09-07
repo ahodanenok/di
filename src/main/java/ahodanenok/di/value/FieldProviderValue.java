@@ -2,7 +2,7 @@ package ahodanenok.di.value;
 
 import ahodanenok.di.*;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
-import ahodanenok.di.value.metadata.FieldMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
 
 import javax.inject.Provider;
 import java.lang.reflect.Field;
@@ -10,14 +10,24 @@ import java.lang.reflect.Modifier;
 
 public class FieldProviderValue<T> extends AbstractValue<T> {
 
-    private Field field;
+    private final Field field;
 
     // todo: check field's type is assignable to type
 
     public FieldProviderValue(Class<T> type, Field field) {
-        super(type, new FieldMetadata<>(type, field));
+        super(type);
         this.field = field;
         ReflectionAssistant.checkFieldTypeAssignable(type, field);
+    }
+
+    @Override
+    public Class<? extends T> realType() {
+        return (Class<? extends T>) field.getType();
+    }
+
+    @Override
+    protected MutableValueMetadata resolveMetadata() {
+        return container.instance(ValueMetadataResolution.class).resolve(field);
     }
 
     @Override

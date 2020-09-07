@@ -12,7 +12,7 @@ public class InstanceValueTest {
     public void test_1() {
         InstanceValue<String> v = new InstanceValue<>("test");
         assertEquals(String.class, v.type());
-        assertEquals(String.class, v.metadata().valueType());
+        assertEquals(String.class, v.realType());
         assertEquals(ScopeIdentifier.SINGLETON, v.metadata().getScope());
         assertEquals("test", v.provider().get());
     }
@@ -21,7 +21,7 @@ public class InstanceValueTest {
     public void test_2() {
         InstanceValue<Number> v = new InstanceValue<Number>(Number.class, 10);
         assertEquals(Number.class, v.type());
-        assertEquals(Integer.class, v.metadata().valueType());
+        assertEquals(Integer.class, v.realType());
         assertEquals(ScopeIdentifier.SINGLETON, v.metadata().getScope());
         assertEquals(10, v.provider().get());
     }

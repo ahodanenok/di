@@ -1,19 +1,19 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.DIContainer;
-import ahodanenok.di.value.metadata.ExplicitMetadata;
-import ahodanenok.di.value.metadata.ResolvableMetadata;
-import ahodanenok.di.value.metadata.ValueMetadata;
+import ahodanenok.di.value.metadata.*;
 
 public abstract class AbstractValue<T> implements Value<T> {
 
     protected Class<T> type;
-    protected ValueMetadata metadata;
+    protected MutableValueMetadata metadata;
     protected DIContainer container;
+    protected boolean resolveMetadata;
 
-    public AbstractValue(Class<T> type, ValueMetadata metadata) {
+    public AbstractValue(Class<T> type) {
         this.type = type;
-        this.metadata = metadata;
+        this.metadata = new MutableValueMetadata();
+        this.resolveMetadata = true;
     }
 
     @Override
@@ -22,27 +22,31 @@ public abstract class AbstractValue<T> implements Value<T> {
     }
 
     @Override
-    public ValueMetadata metadata() {
+    public MutableValueMetadata metadata() {
         return metadata;
     }
 
-    public ExplicitMetadata withExplicitMetadata() {
-        if (!(metadata instanceof ExplicitMetadata)) {
-            metadata = new ExplicitMetadata(metadata.valueType());
-        }
-
-        return (ExplicitMetadata) metadata;
-    }
-
-    public void setMetadata(ValueMetadata metadata) {
-        this.metadata = metadata;
+    public void setResolveMetadata(boolean resolveMetadata) {
+        this.resolveMetadata = resolveMetadata;
     }
 
     @Override
     public void bind(DIContainer container) {
         this.container = container;
-        if (this.metadata instanceof ResolvableMetadata) {
-            ((ResolvableMetadata) this.metadata).resolve(container);
+        if (resolveMetadata) {
+            MutableValueMetadata resolved = resolveMetadata();
+            if (resolved != null) {
+                MutableValueMetadata current = metadata();
+                while (current.getParent() != null) {
+                    current = current.getParent();
+                }
+
+                current.setParent(resolved);
+            }
         }
+    }
+
+    protected MutableValueMetadata resolveMetadata() {
+        return null;
     }
 }

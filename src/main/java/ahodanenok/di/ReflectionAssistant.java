@@ -11,23 +11,42 @@ public final class ReflectionAssistant {
 
     private ReflectionAssistant() { }
 
-    public static Stream<Field> fields(Class<?> clazz) {
-        if (clazz.getSuperclass() == null) {
-            return Arrays.stream(clazz.getDeclaredFields());
-        } else {
-            return Stream.concat(fields(clazz.getSuperclass()), Arrays.stream(clazz.getDeclaredFields()));
+    public static List<Class<?>> hierarchy(Class<?> clazz) {
+        LinkedList<Class<?>> classes = new LinkedList<>();
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            classes.addFirst(currentClass);
+            currentClass = currentClass.getSuperclass();
         }
+
+        return classes;
+    }
+
+    public static List<Field> fields(Class<?> clazz) {
+        LinkedList<Field> fields = new LinkedList<>();
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            for (Field f : currentClass.getDeclaredFields()) {
+                fields.addFirst(f);
+            }
+
+            currentClass = currentClass.getSuperclass();
+        }
+
+        return fields;
     }
 
     public static List<Method> methods(Class<?> clazz) {
         Set<MethodKey> keys = new HashSet<>();
-        List<Method> methods = new ArrayList<>();
+        LinkedList<Method> methods = new LinkedList<>();
 
         Class<?> currentClass = clazz;
         while (currentClass != null) {
             for (Method m : currentClass.getDeclaredMethods()) {
-                if (keys.add(new MethodKey(m))) {
-                    methods.add(m);
+                if (Modifier.isStatic(m.getModifiers()) || Modifier.isPrivate(m.getModifiers())) {
+                    methods.addFirst(m);
+                } else if (keys.add(new MethodKey(m))) {
+                    methods.addFirst(m);
                 }
             }
 
@@ -35,11 +54,10 @@ public final class ReflectionAssistant {
         }
 
         return methods;
-//        if (clazz.getSuperclass() == null) {
-//            return Arrays.stream(clazz.getDeclaredMethods());
-//        } else {
-//            return Stream.concat(methods(clazz.getSuperclass()), Arrays.stream(clazz.getDeclaredMethods()));
-//        }
+    }
+
+    public static boolean isPackagePrivate(int modifiers) {
+        return !Modifier.isProtected(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isPublic(modifiers);
     }
 
     public static Stream<? extends Annotation> parameterAnnotations(Executable executable, int parameterIndex, AnnotationPresence presence) {
@@ -253,7 +271,7 @@ public final class ReflectionAssistant {
 
         @Override
         public int hashCode() {
-            return method.getName().hashCode() * 31 + Arrays.hashCode(method.getParameterTypes());
+            return method.getName().hashCode() * 31 + Arrays.hashCode(method.getParameterTypes()) + (isPackagePrivate(method.getModifiers()) ? 1 : 0);
         }
 
         @Override
@@ -263,7 +281,15 @@ public final class ReflectionAssistant {
             }
 
             MethodKey other = (MethodKey) obj;
-            return methodsEqual(this.method, other.method);
+            if (!methodsEqual(this.method, other.method)) {
+                return false;
+            }
+
+            if (isPackagePrivate(method.getModifiers()) && isPackagePrivate(other.method.getModifiers())) {
+                return method.getDeclaringClass().getPackage().getName().equals(other.method.getDeclaringClass().getPackage().getName());
+            }
+
+            return true;
         }
     }
 

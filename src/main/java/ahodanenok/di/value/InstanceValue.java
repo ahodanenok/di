@@ -2,7 +2,8 @@ package ahodanenok.di.value;
 
 import ahodanenok.di.ValueSpecifier;
 import ahodanenok.di.scope.ScopeIdentifier;
-import ahodanenok.di.value.metadata.ExplicitMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
+import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Provider;
 
@@ -18,7 +19,8 @@ import javax.inject.Provider;
  */
 public class InstanceValue<T> extends AbstractValue<T> {
 
-    private Provider<? extends T> instance;
+    private Class<? extends T> instanceClass;
+    private Provider<? extends T> provider;
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> InstanceValue(V instance) {
@@ -27,19 +29,20 @@ public class InstanceValue<T> extends AbstractValue<T> {
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> InstanceValue(Class<T> clazz, V instance) {
-        super(clazz, new ExplicitMetadata(instance.getClass()));
+        super(clazz);
         metadata().setScope(ScopeIdentifier.SINGLETON);
 
-        this.instance = () -> instance;
+        this.instanceClass = (Class<? extends T>) instance.getClass();
+        this.provider = () -> instance;
     }
 
     @Override
-    public ExplicitMetadata metadata() {
-        return (ExplicitMetadata) super.metadata();
+    public Class<? extends T> realType() {
+        return instanceClass;
     }
 
     @Override
     public Provider<? extends T> provider() {
-        return instance;
+        return provider;
     }
 }

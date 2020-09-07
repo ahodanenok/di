@@ -3,7 +3,7 @@ package ahodanenok.di.value;
 import ahodanenok.di.*;
 import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
-import ahodanenok.di.value.metadata.MethodMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
 
 import javax.inject.Provider;
 import java.lang.reflect.Method;
@@ -20,9 +20,10 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
         this(type, null, method);
     }
 
+    // todo: pass metadata
     // todo: don't need explicit id for declaring class, id can be created from it
     public MethodProviderValue(Class<T> type, ValueSpecifier<?> methodInstanceId, Method method) {
-        super(type, new MethodMetadata(type, method));
+        super(type);
 
         // todo: check if method is not static and no instance given
         this.methodInstanceId = methodInstanceId;
@@ -32,9 +33,19 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
     }
 
     @Override
+    public Class<? extends T> realType() {
+        return (Class<? extends T>) method.getReturnType();
+    }
+
+    @Override
     public void bind(DIContainer container) {
         super.bind(container);
         this.events = container.instance(Events.class);
+    }
+
+    @Override
+    protected MutableValueMetadata resolveMetadata() {
+        return container.instance(ValueMetadataResolution.class).resolve(method);
     }
 
     @Override

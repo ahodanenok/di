@@ -16,7 +16,7 @@ import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.util.Pair;
 import ahodanenok.di.value.*;
-import ahodanenok.di.value.metadata.ValueMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -83,7 +83,7 @@ public final class DIContainer implements AutoCloseable {
     }
 
     public <T> Provider<? extends T> provider(ValueSpecifier<T> id) {
-        Value<T> value = chooseValue(valueLookup.execute(values, id));
+        Value<T> value = chooseValue(id, valueLookup.execute(values, id));
         if (value == null) {
             return null;
         }
@@ -91,7 +91,7 @@ public final class DIContainer implements AutoCloseable {
         return provider(value);
     }
 
-    private <T> Value<T> chooseValue(List<Value<T>> values) {
+    private <T> Value<T> chooseValue(ValueSpecifier specifier, List<Value<T>> values) {
         if (values.isEmpty()) {
             return null;
         }
@@ -111,12 +111,6 @@ public final class DIContainer implements AutoCloseable {
         }
 
         Set<Value<T>> withoutDefaults = values.stream().filter(v -> !v.metadata().isDefault()).collect(Collectors.toSet());
-        if (withoutDefaults.size() > 1) {
-            throw new ConfigurationException(
-                    "Multiple values are applicable for dependency injection,"
-                    + " either make all except one default or make one a primary value:"
-                    + values.stream().map(Value::type).collect(Collectors.toList()));
-        }
 
         if (values.size() - withoutDefaults.size() > 1) {
             throw new ConfigurationException("Multiple values marked as @DefaultValue: "
@@ -125,6 +119,29 @@ public final class DIContainer implements AutoCloseable {
 
         if (withoutDefaults.size() == 1) {
             return withoutDefaults.iterator().next();
+        }
+
+        // if name is not specified, search for a value without name first
+        if (specifier.getName() == null) {
+            Set<Value<T>> unnamed = withoutDefaults.stream().filter(v -> v.metadata().getName() == null).collect(Collectors.toSet());
+            if (unnamed.size() == 1) {
+                return unnamed.iterator().next();
+            }
+        }
+
+        // if qualifiers are not specified, search for an unqualified value first
+        if (specifier.getQualifiers().isEmpty()) {
+            Set<Value<T>> unqualified = withoutDefaults.stream().filter(v -> v.metadata().getQualifiers().isEmpty()).collect(Collectors.toSet());
+            if (unqualified.size() == 1) {
+                return unqualified.iterator().next();
+            }
+        }
+
+        if (withoutDefaults.size() > 1) {
+            throw new ConfigurationException(
+                    "Multiple values are applicable for specifier " + specifier
+                    + ", either make all except one default or make one a primary value:"
+                    + withoutDefaults.stream().map(Value::type).collect(Collectors.toList()));
         }
 
         if (withoutDefaults.size() != values.size()) {
@@ -187,31 +204,40 @@ public final class DIContainer implements AutoCloseable {
         inject(null, instance);
     }
 
+    // todo: cache
+    // todo: Fields and methods in superclasses are injected before those in subclasses.
+    // todo: check circular references
     private void inject(Value<?> value, Object instance) {
-        if (instance == null) {
-            throw new IllegalArgumentException("instance is null");
-        }
-
-        // todo: Fields and methods in superclasses are injected before those in subclasses.
-        // todo: check circular references
-        ReflectionAssistant.fields(instance.getClass()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
-            // todo: cache
-            // todo: which fields should be skipped (i.e inherited)
-            InjectableField injectableField = new InjectableField(this, f);
-            injectableField.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
-            injectableField.inject(instance);
-        });
 
         // todo: conform to spec
         // A method annotated with @Inject that overrides another method annotated with @Inject will only be injected once per injection request per instance.
         // A method with no @Inject annotation that overrides a method annotated with @Inject will not be injected.
-        ReflectionAssistant.methods(instance.getClass()).stream().filter(m -> m.isAnnotationPresent(Inject.class)).forEach(m -> {
-            // todo: cache
-            // todo: which methods should be skipped (i.e inherited)
-            InjectableMethod injectableMethod = new InjectableMethod(this, m);
-            injectableMethod.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
-            injectableMethod.inject(instance);
-        });
+
+        if (instance == null) {
+            throw new IllegalArgumentException("instance is null");
+        }
+
+        Map<Class<?>, List<Method>> methodsByClass = ReflectionAssistant.methods(instance.getClass())
+                .stream()
+                .filter(m -> m.isAnnotationPresent(Inject.class))
+                .collect(Collectors.groupingBy(Method::getDeclaringClass));
+
+        for (Class<?> clazz : ReflectionAssistant.hierarchy(instance.getClass())) {
+            Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Inject.class)).forEach(f -> {
+                InjectableField injectableField = new InjectableField(this, f);
+                injectableField.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
+                injectableField.inject(instance);
+            });
+
+            List<Method> methods = methodsByClass.get(clazz);
+            if (methods != null) {
+                for (Method m : methods) {
+                    InjectableMethod injectableMethod = new InjectableMethod(this, m);
+                    injectableMethod.setOnProvision(ai -> interceptAroundInject(new AroundProvisionEvent(value, ai)));
+                    injectableMethod.inject(instance);
+                }
+            }
+        }
     }
 
     @Override
@@ -284,7 +310,7 @@ public final class DIContainer implements AutoCloseable {
             List<Value<?>> classInterceptors = interceptorLookup.lookup(this, aroundConstructEvent.getOwnerValue(), interceptors);
             for (Value<?> interceptor : classInterceptors) {
                 Method aroundConstructMethod = instance(InterceptorMetadataResolution.class)
-                        .resolveAroundConstruct(interceptor.metadata().valueType());
+                        .resolveAroundConstruct(interceptor.realType());
                 if (aroundConstructMethod != null) {
                     chain.add(ctx -> {
                         try {
@@ -333,7 +359,12 @@ public final class DIContainer implements AutoCloseable {
         }
 
         @Override
-        public ValueMetadata metadata() {
+        public Class<?> realType() {
+            return value.realType();
+        }
+
+        @Override
+        public MutableValueMetadata metadata() {
             return value.metadata();
         }
 
@@ -370,14 +401,14 @@ public final class DIContainer implements AutoCloseable {
 
         @Override
         public List<Method> getEventListeners() {
-            return Arrays.stream(value.metadata().valueType().getDeclaredMethods())
+            return Arrays.stream(value.realType().getDeclaredMethods())
                     .filter(m -> m.isAnnotationPresent(EventListener.class))
                     .collect(Collectors.toList());
         }
 
         @Override
         public Method getPostConstructMethod() {
-            List<Method> methods = ReflectionAssistant.methods(value.metadata().valueType())
+            List<Method> methods = ReflectionAssistant.methods(value.realType())
                     .stream()
                     .filter(m -> m.isAnnotationPresent(PostConstruct.class))
                     .collect(Collectors.toList());
@@ -388,7 +419,7 @@ public final class DIContainer implements AutoCloseable {
 
             if (methods.size() > 1) {
                 throw new ConfigurationException(
-                        "Multiple methods marked as @PostConstruct in the class " + value.metadata().valueType() + ": " + methods);
+                        "Multiple methods marked as @PostConstruct in the class " + value.realType() + ": " + methods);
             }
 
             Method postConstructMethod = methods.get(0);
@@ -398,7 +429,7 @@ public final class DIContainer implements AutoCloseable {
 
         @Override
         public Method getPreDestroyMethod() {
-            List<Method> methods = ReflectionAssistant.methods(value.metadata().valueType())
+            List<Method> methods = ReflectionAssistant.methods(value.realType())
                     .stream()
                     .filter(m -> m.isAnnotationPresent(PreDestroy.class))
                     .collect(Collectors.toList());
@@ -409,7 +440,7 @@ public final class DIContainer implements AutoCloseable {
 
             if (methods.size() > 1) {
                 throw new ConfigurationException(
-                        "Multiple methods marked as @PreDestroy in the class " + value.metadata().valueType() + ": " + methods);
+                        "Multiple methods marked as @PreDestroy in the class " + value.realType() + ": " + methods);
             }
 
             Method preDestroyMethod = methods.get(0);
@@ -456,7 +487,7 @@ public final class DIContainer implements AutoCloseable {
 
         /**
          * Provide a custom implementation of dependencies lookup.
-         * Default implementation is {@link ValueExactLookup}
+         * Default implementation is {@link DefaultValueLookup}
          */
         public Builder withValuesLookup(ValueLookup valueLookup) {
             DIContainer.this.valueLookup = valueLookup;
@@ -491,46 +522,52 @@ public final class DIContainer implements AutoCloseable {
             container.values.add(containerValue);
 
             if (container.valueLookup == null) {
-                container.valueLookup = new ValueExactLookup();
+                container.valueLookup = new DefaultValueLookup();
             }
 
             if (container.interceptorLookup == null) {
                 container.interceptorLookup = new DefaultInterceptorLookup();
             }
 
-//            InstantiatingValue<InterceptorLookup> interceptorLookup =
-//                    new InstantiatingValue<>(InterceptorLookup.class, DefaultInterceptorLookup.class);
-//            interceptorLookup.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-//            interceptorLookup.withExplicitMetadata().setDefault(true);
-//            container.values.add(interceptorLookup);
+            InstantiatingValue<ValueMetadataResolution> valueMetadataResolution =
+                    new InstantiatingValue<>(ValueMetadataResolution.class, DefaultValueMetadataResolution.class);
+            valueMetadataResolution.setResolveMetadata(false);
+            valueMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            valueMetadataResolution.metadata().setDefault(true);
+            container.values.add(new ManagedValueImpl(valueMetadataResolution));
 
             InstantiatingValue<ScopeResolution> scopeResolution =
                     new InstantiatingValue<>(ScopeResolution.class, AnnotatedScopeResolution.class);
-            scopeResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            scopeResolution.withExplicitMetadata().setDefault(true);
+            scopeResolution.setResolveMetadata(false);
+            scopeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            scopeResolution.metadata().setDefault(true);
             container.values.add(scopeResolution);
 
             InstantiatingValue<QualifierResolution> qualifierResolution =
                     new InstantiatingValue<>(QualifierResolution.class, AnnotatedQualifierResolution.class);
-            qualifierResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            qualifierResolution.withExplicitMetadata().setDefault(true);
+            qualifierResolution.setResolveMetadata(false);
+            qualifierResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            qualifierResolution.metadata().setDefault(true);
             container.values.add(qualifierResolution);
 
             InstantiatingValue<NameResolution> nameResolution = new InstantiatingValue<>(NameResolution.class, AnnotatedNameResolution.class);
-            nameResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            nameResolution.withExplicitMetadata().setDefault(true);
+            nameResolution.setResolveMetadata(false);
+            nameResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            nameResolution.metadata().setDefault(true);
             container.values.add(nameResolution);
 
             InstantiatingValue<StereotypeResolution> stereotypeResolution =
                     new InstantiatingValue<>(StereotypeResolution.class, AnnotatedStereotypeResolution.class);
-            stereotypeResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            stereotypeResolution.withExplicitMetadata().setDefault(true);
+            stereotypeResolution.setResolveMetadata(false);
+            stereotypeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            stereotypeResolution.metadata().setDefault(true);
             container.values.add(stereotypeResolution);
 
             InstantiatingValue<InterceptorMetadataResolution> interceptorMetadataResolution =
                     new InstantiatingValue<>(InterceptorMetadataResolution.class, AnnotatedInterceptorMetadataResolution.class);
-            interceptorMetadataResolution.withExplicitMetadata().setScope(ScopeIdentifier.SINGLETON);
-            interceptorMetadataResolution.withExplicitMetadata().setDefault(true);
+            interceptorMetadataResolution.setResolveMetadata(false);
+            interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+            interceptorMetadataResolution.metadata().setDefault(true);
             container.values.add(interceptorMetadataResolution);
 
             ProviderValue<InjectionPoint> injectionPoint =

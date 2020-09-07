@@ -4,13 +4,14 @@ import ahodanenok.di.value.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Matches dependencies by equality of their types and qualifiers, types relationships are ignored.
  * Primitives and corresponding wrappers are considered identical.
  * Arrays are considered identical if element types are identical.
  */
-public class ValueExactLookup implements ValueLookup {
+public class DefaultValueLookup implements ValueLookup {
 
     @Override
     public <T> List<Value<T>> execute(List<Value<?>> values, ValueSpecifier<T> specifier) {
@@ -29,7 +30,7 @@ public class ValueExactLookup implements ValueLookup {
                 matched = true;
             } else if (specifier.getQualifiers().stream().anyMatch(a -> a.annotationType() == Any.class)) {
                 matched = true;
-            } else if (v.metadata().getQualifiers().isEmpty() == specifier.getQualifiers().isEmpty()
+            } else if (!v.metadata().getQualifiers().isEmpty()
                     && v.metadata().getQualifiers().containsAll(specifier.getQualifiers())) {
                 matched = true;
             }

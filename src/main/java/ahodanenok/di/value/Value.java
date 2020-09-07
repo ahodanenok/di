@@ -1,7 +1,7 @@
 package ahodanenok.di.value;
 
 import ahodanenok.di.DIContainer;
-import ahodanenok.di.value.metadata.ValueMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
 
 import javax.inject.Provider;
 
@@ -16,9 +16,12 @@ public interface Value<T> {
     // todo: validate values are correct (scopes, qualifiers, types, etc)
     default void bind(DIContainer container) { }
 
+    // todo: allow multiple types (or use all implemented interfaces and extended classes)
     Class<? extends T> type();
 
-    ValueMetadata metadata();
+    Class<? extends T> realType();
+
+    MutableValueMetadata metadata();
 
     Provider<? extends T> provider();
 

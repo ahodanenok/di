@@ -5,7 +5,8 @@ import ahodanenok.di.event.AroundConstructEvent;
 import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.ConfigurationException;
-import ahodanenok.di.value.metadata.ClassMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
+import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class InstantiatingValue<T> extends AbstractValue<T> {
 
+    private final Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;
 
     public InstantiatingValue(Class<T> instanceClass) {
@@ -24,11 +26,17 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     }
 
     public InstantiatingValue(Class<T> type, Class<? extends T> instanceClass) {
-        super(type, new ClassMetadata(instanceClass));
+        super(type);
+        this.instanceClass = instanceClass;
 
         if (!ReflectionAssistant.isInstantiable(instanceClass)) {
             throw new IllegalArgumentException("Can't create an instance of a class: " +  instanceClass.getName());
         }
+    }
+
+    @Override
+    public Class<? extends T> realType() {
+        return instanceClass;
     }
 
     @Override
@@ -47,6 +55,11 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
     }
 
     @Override
+    protected MutableValueMetadata resolveMetadata() {
+        return container.instance(ValueMetadataResolution.class).resolve(realType());
+    }
+
+    @Override
     public Provider<? extends T> provider() {
         return () -> {
             T instance = targetConstructor.inject();
@@ -62,7 +75,7 @@ public class InstantiatingValue<T> extends AbstractValue<T> {
         // @Inject is optional for public, no-argument constructors when no other constructors are present.
         // This enables injectors to invoke default constructors.
 
-        Class<?> instanceClass = metadata().valueType();
+        Class<?> instanceClass = realType();
 
         // Injectable constructors are annotated with @Inject
         Set<Constructor<?>> constructors = Arrays.stream(instanceClass.getDeclaredConstructors())

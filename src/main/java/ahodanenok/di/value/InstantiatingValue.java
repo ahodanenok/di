@@ -6,7 +6,6 @@ import ahodanenok.di.event.AroundProvisionEvent;
 import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.value.metadata.MutableValueMetadata;
-import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

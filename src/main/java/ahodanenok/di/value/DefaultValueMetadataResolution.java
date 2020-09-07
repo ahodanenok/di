@@ -7,9 +7,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.value.metadata.MutableValueMetadata;
-import ahodanenok.di.value.metadata.ValueMetadata;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.inject.Provider;

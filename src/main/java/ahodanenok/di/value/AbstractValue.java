@@ -33,17 +33,17 @@ public abstract class AbstractValue<T> implements Value<T> {
     @Override
     public void bind(DIContainer container) {
         this.container = container;
+
+        MutableValueMetadata m = new MutableValueMetadata();
         if (resolveMetadata) {
             MutableValueMetadata resolved = resolveMetadata();
             if (resolved != null) {
-                MutableValueMetadata current = metadata();
-                while (current.getParent() != null) {
-                    current = current.getParent();
-                }
-
-                current.setParent(resolved);
+                m.overrideWith(resolved);
             }
         }
+
+        m.overrideWith(metadata);
+        metadata = new UnmodifiableValueMetadata(m);
     }
 
     protected MutableValueMetadata resolveMetadata() {

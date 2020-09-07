@@ -6,7 +6,7 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.value.FieldProviderValue;
 import ahodanenok.di.value.InstantiatingValue;
 import ahodanenok.di.value.MethodProviderValue;
-import ahodanenok.di.value.metadata.ValueMetadata;
+import ahodanenok.di.value.metadata.MutableValueMetadata;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -19,7 +19,7 @@ public class MetadataTest {
     public void testClassDefaultMetadata() {
         InstantiatingValue<DefaultClassMetadata> v = new InstantiatingValue<>(DefaultClassMetadata.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -38,7 +38,7 @@ public class MetadataTest {
     public void testClassEager() {
         InstantiatingValue<EagerClass> v = new InstantiatingValue<>(EagerClass.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -57,7 +57,7 @@ public class MetadataTest {
     public void testClassEagerPhased() {
         InstantiatingValue<EagerClassPhased> v = new InstantiatingValue<>(EagerClassPhased.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -76,7 +76,7 @@ public class MetadataTest {
     public void testClassPrimary() {
         InstantiatingValue<PrimaryClass> v = new InstantiatingValue<>(PrimaryClass.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -95,7 +95,7 @@ public class MetadataTest {
     public void testClassDefault() {
         InstantiatingValue<DefaultClass> v = new InstantiatingValue<>(DefaultClass.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -114,7 +114,7 @@ public class MetadataTest {
     public void testClassInterceptor() {
         InstantiatingValue<InterceptorClass> v = new InstantiatingValue<>(InterceptorClass.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -133,7 +133,7 @@ public class MetadataTest {
     public void testClassFull() {
         InstantiatingValue<LotOfMetadataClass> v = new InstantiatingValue<>(LotOfMetadataClass.class);
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.SINGLETON, metadata.getScope());
         assertEquals("lotOfMetadataClass", metadata.getName());
@@ -154,7 +154,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("defaultMetadata"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -174,7 +174,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("eager"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -194,7 +194,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("eagerPhased"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -214,7 +214,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("primaryValue"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -234,7 +234,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("defaultValue"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -254,7 +254,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("intercepted"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -277,7 +277,7 @@ public class MetadataTest {
         MethodProviderValue<String> v = new MethodProviderValue<>(
                 String.class, MethodMetadata.class.getDeclaredMethod("lotOfMetadata"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.SINGLETON, metadata.getScope());
         assertEquals("lotOfMetadata", metadata.getName());
@@ -301,7 +301,7 @@ public class MetadataTest {
         FieldProviderValue<String> v = new FieldProviderValue<>(
                 String.class, FieldMetadata.class.getDeclaredField("defaultMetadata"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -321,7 +321,7 @@ public class MetadataTest {
         FieldProviderValue<String> v = new FieldProviderValue<>(
                 String.class, FieldMetadata.class.getDeclaredField("primaryValue"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -341,7 +341,7 @@ public class MetadataTest {
         FieldProviderValue<String> v = new FieldProviderValue<>(
                 String.class, FieldMetadata.class.getDeclaredField("defaultValue"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.NOT_SCOPED, metadata.getScope());
         assertNull(metadata.getName());
@@ -361,7 +361,7 @@ public class MetadataTest {
         FieldProviderValue<Object> v = new FieldProviderValue<>(
                 Object.class, FieldMetadata.class.getDeclaredField("lotOfMetadata"));
         v.bind(DIContainer.builder().build());
-        ValueMetadata metadata = v.metadata();
+        MutableValueMetadata metadata = v.metadata();
 
         assertEquals(ScopeIdentifier.SINGLETON, metadata.getScope());
         assertEquals("lotOfMetadata", metadata.getName());

@@ -190,7 +190,6 @@ public class ContainerTest {
                 .build();
 
         ClassWithPreDestroy obj = container.instance(ClassWithPreDestroy.class);
-        System.out.println("PreDestroy: " + obj.destroyed);
         container.close();
         assertTrue(obj.destroyed);
     }

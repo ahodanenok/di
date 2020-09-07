@@ -33,7 +33,6 @@ public class InterceptorInvocationTest {
 
         assertNotNull(container.instance(InterceptedConstruction.class));
         assertNotNull(ctx);
-        System.out.println(ctx.getTarget());
         assertTrue(ctx.getTarget() instanceof InterceptedConstruction);
         assertEquals(InterceptedConstruction.class.getDeclaredConstructor(int.class), ctx.getConstructor());
         assertArrayEquals(new Object[] { 10 }, ctx.getParameters());

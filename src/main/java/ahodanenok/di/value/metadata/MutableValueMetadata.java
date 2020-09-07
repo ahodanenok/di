@@ -5,39 +5,73 @@ import ahodanenok.di.scope.ScopeIdentifier;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-public class MutableValueMetadata implements ValueMetadata {
-
-    private MutableValueMetadata parent;
+public class MutableValueMetadata {
 
     protected String name;
-    protected ScopeIdentifier scope = ScopeIdentifier.NOT_SCOPED;
+    protected ScopeIdentifier scope;
     protected String profilesCondition;
-    protected boolean isPrimary = false;
-    protected boolean isDefault = false;
-    protected boolean eager = false;
-    protected int initializationPhase;
-    protected Set<Annotation> qualifiers = Collections.emptySet();
-    protected Set<Annotation> stereotypes = Collections.emptySet();
-    protected boolean interceptor = false;
-    protected Set<Annotation> interceptorBindings = Collections.emptySet();
-    protected int priority;
+    protected Boolean isPrimary;
+    protected Boolean isDefault;
+    protected Boolean eager;
+    protected Integer initializationPhase;
+    protected Set<Annotation> qualifiers;
+    protected Set<Annotation> stereotypes;
+    protected Boolean interceptor;
+    protected Set<Annotation> interceptorBindings;
+    protected Integer priority;
 
-    private Set<String> overridden = new HashSet<>();
+    public void overrideWith(MutableValueMetadata metadata) {
+        if (metadata.name != null) {
+            setName(metadata.name);
+        }
 
-    public MutableValueMetadata getParent() {
-        return parent;
-    }
+        if (metadata.scope != null) {
+            setScope(metadata.scope);
+        }
 
-    public void setParent(MutableValueMetadata parent) {
-        this.parent = parent;
+        if (metadata.profilesCondition != null) {
+            setProfilesCondition(metadata.profilesCondition);
+        }
+
+        if (metadata.isPrimary != null) {
+            setPrimary(metadata.isPrimary);
+        }
+
+        if (metadata.isDefault != null) {
+            setDefault(metadata.isDefault);
+        }
+
+        if (metadata.eager != null) {
+            setEager(metadata.eager);
+        }
+
+        if (metadata.initializationPhase != null) {
+            setInitializationPhase(metadata.initializationPhase);
+        }
+
+        if (metadata.qualifiers != null) {
+            setQualifiers(metadata.qualifiers);
+        }
+
+        if (metadata.stereotypes != null) {
+            setStereotypes(metadata.stereotypes);
+        }
+
+        if (metadata.interceptor != null) {
+            setInterceptor(metadata.interceptor);
+        }
+
+        if (metadata.interceptorBindings != null) {
+            setInterceptorBindings(metadata.interceptorBindings);
+        }
+
+        if (metadata.priority != null) {
+            setPriority(metadata.priority);
+        }
     }
 
     public String getName() {
-        if (parent != null && !isOverridden("name")) {
-            return parent.getName();
-        } else {
-            return name;
-        }
+        return name;
     }
 
     public void setName(String name) {
@@ -49,29 +83,19 @@ public class MutableValueMetadata implements ValueMetadata {
         }
 
         this.name = name;
-        setOverridden("name");
     }
 
     public ScopeIdentifier getScope() {
-        if (parent != null && !isOverridden("scope")) {
-            return parent.getScope();
-        } else {
-            return scope;
-        }
+        return scope != null ? scope : ScopeIdentifier.NOT_SCOPED;
     }
 
     public void setScope(ScopeIdentifier scope) {
         Objects.requireNonNull(scope);
         this.scope = scope;
-        setOverridden("scope");
     }
 
     public String getProfilesCondition() {
-        if (parent != null && !isOverridden("profilesCondition")) {
-            return parent.getProfilesCondition();
-        } else {
-            return profilesCondition;
-        }
+        return profilesCondition;
     }
 
     public void setProfilesCondition(String profilesCondition) {
@@ -83,93 +107,58 @@ public class MutableValueMetadata implements ValueMetadata {
         }
 
         this.profilesCondition = profilesCondition;
-        setOverridden("profilesCondition");
     }
 
     public int getInitializationPhase() {
-        if (parent != null && !isOverridden("initializationPhase")) {
-            return parent.getInitializationPhase();
-        } else {
-            return initializationPhase;
-        }
+        return initializationPhase != null ? initializationPhase : 0;
     }
 
     public void setInitializationPhase(int phase) {
         this.initializationPhase = phase;
-        setOverridden("initializationPhase");
     }
 
     public int getPriority() {
-        if (parent != null && !isOverridden("priority")) {
-            return parent.getPriority();
-        } else {
-            return priority;
-        }
+        return priority != null ? priority : 0;
     }
 
     public void setPriority(int priority) {
         this.priority = priority;
-        setOverridden("priority");
     }
 
     public boolean isPrimary() {
-        if (parent != null && !isOverridden("isPrimary")) {
-            return parent.isPrimary();
-        } else {
-            return isPrimary;
-        }
+        return isPrimary != null ? isPrimary : false;
     }
 
     public void setPrimary(boolean isPrimary) {
         this.isPrimary = isPrimary;
-        setOverridden("isPrimary");
     }
 
     public boolean isDefault() {
-        if (parent != null && !isOverridden("isDefault")) {
-            return parent.isDefault();
-        } else {
-            return isDefault;
-        }
+        return isDefault != null ? isDefault : false;
     }
 
     public void setDefault(boolean isDefault) {
         this.isDefault = isDefault;
-        setOverridden("isDefault");
     }
 
     public boolean isEager() {
-        if (parent != null && !isOverridden("eager")) {
-            return parent.isEager();
-        } else {
-            return eager;
-        }
+        return eager != null ? eager : false;
     }
 
     public void setEager(boolean eager) {
         this.eager = eager;
-        setOverridden("eager");
     }
 
     public boolean isInterceptor() {
-        if (parent != null && !isOverridden("interceptor")) {
-            return parent.isInterceptor();
-        } else {
-            return interceptor;
-        }
+        return interceptor != null ? interceptor : false;
     }
 
     public void setInterceptor(boolean interceptor) {
         this.interceptor = interceptor;
-        setOverridden("interceptor");
     }
 
     public Set<Annotation> getQualifiers() {
-        if (parent != null && !isOverridden("qualifiers")) {
-            return parent.getQualifiers();
-        } else {
-            return qualifiers;
-        }
+        return qualifiers != null ? qualifiers : Collections.emptySet();
     }
 
     public void setQualifiers(Annotation... qualifiers) {
@@ -177,50 +166,34 @@ public class MutableValueMetadata implements ValueMetadata {
     }
 
     public void setQualifiers(Set<Annotation> qualifiers) {
-        if (stereotypes == null) {
+        if (qualifiers == null) {
             throw new IllegalArgumentException("Qualifiers list can't be null");
         }
+
         this.qualifiers = qualifiers;
-        setOverridden("qualifiers");
     }
 
     public Set<Annotation> getStereotypes() {
-        if (parent != null && !isOverridden("stereotypes")) {
-            return parent.getStereotypes();
-        } else {
-            return stereotypes;
-        }
+        return stereotypes != null ? stereotypes : Collections.emptySet();
     }
 
     public void setStereotypes(Set<Annotation> stereotypes) {
         if (stereotypes == null) {
             throw new IllegalArgumentException("Stereotypes list can't be null");
         }
+
         this.stereotypes = stereotypes;
-        setOverridden("stereotypes");
     }
 
     public Set<Annotation> getInterceptorBindings() {
-        if (parent != null && !isOverridden("interceptorBindings")) {
-            return parent.getInterceptorBindings();
-        } else {
-            return interceptorBindings;
-        }
+        return interceptorBindings != null ? interceptorBindings : Collections.emptySet();
     }
 
     public void setInterceptorBindings(Set<Annotation> bindings) {
         if (bindings == null) {
             throw new IllegalArgumentException("Bindings list can't be null");
         }
+
         this.interceptorBindings = bindings;
-        setOverridden("interceptorBindings");
-    }
-
-    private void setOverridden(String property) {
-        this.overridden.add(property);
-    }
-
-    private boolean isOverridden(String property) {
-        return this.overridden.contains(property);
     }
 }

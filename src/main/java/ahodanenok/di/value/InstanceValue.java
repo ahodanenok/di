@@ -2,8 +2,6 @@ package ahodanenok.di.value;
 
 import ahodanenok.di.ValueSpecifier;
 import ahodanenok.di.scope.ScopeIdentifier;
-import ahodanenok.di.value.metadata.MutableValueMetadata;
-import ahodanenok.di.value.metadata.ValueMetadata;
 
 import javax.inject.Provider;
 

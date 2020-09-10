@@ -1,6 +1,5 @@
 package ahodanenok.di.interceptor;
 
-import ahodanenok.di.DIContainer;
 import ahodanenok.di.Later;
 import ahodanenok.di.ReflectionAssistant;
 import ahodanenok.di.exception.ConfigurationException;
@@ -20,12 +19,10 @@ import java.util.stream.Collectors;
 
 public class AnnotatedInterceptorMetadataResolution implements InterceptorMetadataResolution {
 
-    private DIContainer container;
-    private Provider<StereotypeResolution> stereotypeResolution;
+    private final Provider<StereotypeResolution> stereotypeResolution;
 
     @Inject
-    public AnnotatedInterceptorMetadataResolution(DIContainer container, @Later Provider<StereotypeResolution> stereotypeResolution) {
-        this.container = container;
+    public AnnotatedInterceptorMetadataResolution(@Later Provider<StereotypeResolution> stereotypeResolution) {
         this.stereotypeResolution = stereotypeResolution;
     }
 

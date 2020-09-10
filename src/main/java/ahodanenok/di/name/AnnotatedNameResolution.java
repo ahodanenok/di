@@ -1,6 +1,5 @@
 package ahodanenok.di.name;
 
-import ahodanenok.di.DIContainer;
 import ahodanenok.di.Later;
 import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.stereotype.StereotypeResolution;
@@ -20,13 +19,10 @@ import java.util.function.Supplier;
 
 public class AnnotatedNameResolution implements NameResolution {
 
-    // todo: make final
-    private DIContainer container;
-    private Provider<StereotypeResolution> stereotypeResolution;
+    private final Provider<StereotypeResolution> stereotypeResolution;
 
     @Inject
-    public AnnotatedNameResolution(DIContainer container, @Later Provider<StereotypeResolution> stereotypeResolution) {
-        this.container = container;
+    public AnnotatedNameResolution(@Later Provider<StereotypeResolution> stereotypeResolution) {
         this.stereotypeResolution = stereotypeResolution;
     }
 

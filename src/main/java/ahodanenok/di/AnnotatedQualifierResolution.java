@@ -42,7 +42,13 @@ public class AnnotatedQualifierResolution implements QualifierResolution {
             throw new IllegalArgumentException("executable is null");
         }
 
-        return qualifiers(ReflectionAssistant.parameterAnnotations(executable, paramNum, ReflectionAssistant.AnnotationPresence.INDIRECTLY));
+        if (paramNum < 0 || paramNum >= executable.getParameterCount()) {
+            throw new IllegalArgumentException(
+                    String.format("executable has %d parameter(s), given parameter index: %d", executable.getParameterCount(), paramNum));
+        }
+
+//        return qualifiers(ReflectionAssistant.parameterAnnotations(executable, paramNum, ReflectionAssistant.AnnotationPresence.INDIRECTLY));
+        return qualifiers(ReflectionAssistant.annotations(executable.getParameters()[paramNum], ReflectionAssistant.AnnotationPresence.INDIRECTLY));
     }
 
     private Set<Annotation> qualifiers(Stream<? extends Annotation> annotations) {

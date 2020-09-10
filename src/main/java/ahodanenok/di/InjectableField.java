@@ -32,6 +32,7 @@ public class InjectableField extends AbstractInjectable<Object> {
         }
 
         InjectionPoint injectionPoint = new InjectionPoint(field);
+        injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(field));
 
         if (onProvision != null) {
             onProvision.accept(new AroundProvision(injectionPoint, value -> {

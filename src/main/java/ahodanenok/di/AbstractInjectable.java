@@ -26,29 +26,20 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
     }
 
     protected Object resolveDependency(InjectionPoint injectionPoint) {
-
-        // todo: get rid of type checking
-        Set<Annotation> qualifiers;
-        if (injectionPoint.getTarget() instanceof Field) {
-            qualifiers = container.instance(QualifierResolution.class).resolve((Field) injectionPoint.getTarget());
-        } else {
-            qualifiers = container.instance(QualifierResolution.class).resolve((Executable) injectionPoint.getTarget(), injectionPoint.getParameterIndex());
-        }
-
         Object value;
         if (injectionPoint.getType() == Optional.class) {
-            value = resolveOptional(injectionPoint, qualifiers);
+            value = resolveOptional(injectionPoint);
         } else if (injectionPoint.getType() == Provider.class) {
-            value = resolveProvider(injectionPoint, qualifiers);
+            value = resolveProvider(injectionPoint);
         } else {
-            value = resolveObject(injectionPoint, qualifiers);
+            value = resolveObject(injectionPoint);
         }
 
         return value;
     }
 
-    private Object resolveObject(InjectionPoint injectionPoint, Set<Annotation> qualifiers) {
-        ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), qualifiers);
+    private Object resolveObject(InjectionPoint injectionPoint) {
+        ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         Object value = container.instance(specifier);
         if (value == null && !injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class)) {
             throw new UnsatisfiedDependencyException(this, specifier, "not found");
@@ -57,15 +48,15 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
         return value;
     }
 
-    private Object resolveOptional(InjectionPoint injectionPoint, Set<Annotation> qualifiers) {
+    private Object resolveOptional(InjectionPoint injectionPoint) {
         Class<?> lookupType = (Class<?>) injectionPoint.getParameterizedType().getActualTypeArguments()[0];
-        ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, qualifiers);
+        ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, injectionPoint.getQualifiers());
         return Optional.ofNullable(container.instance(specifier));
     }
 
-    private Object resolveProvider(InjectionPoint injectionPoint, Set<Annotation> qualifiers) {
+    private Object resolveProvider(InjectionPoint injectionPoint) {
         Class<?> lookupType = (Class<?>) injectionPoint.getParameterizedType().getActualTypeArguments()[0];
-        ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, qualifiers);
+        ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, injectionPoint.getQualifiers());
         boolean optional = injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class);
         if (injectionPoint.getAnnotatedTarget().isAnnotationPresent(Later.class)) {
             return (Provider<Object>) () -> {

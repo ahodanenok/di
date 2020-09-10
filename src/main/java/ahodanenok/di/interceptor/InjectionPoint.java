@@ -1,12 +1,16 @@
 package ahodanenok.di.interceptor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.Set;
 
 public class InjectionPoint {
 
     // todo: make fields final
     private Class<?> type;
     private ParameterizedType genericType;
+    private Set<Annotation> qualifiers;
     private Member target;
     private AnnotatedElement annotatedTarget;
     private int parameterIndex = -1;
@@ -36,6 +40,14 @@ public class InjectionPoint {
 
     public ParameterizedType getParameterizedType() {
         return genericType;
+    }
+
+    public Set<Annotation> getQualifiers() {
+        return Collections.unmodifiableSet(qualifiers);
+    }
+
+    public void setQualifiers(Set<Annotation> qualifiers) {
+        this.qualifiers = qualifiers;
     }
 
     /**

@@ -4,16 +4,12 @@ import ahodanenok.di.AnnotatedQualifierResolution;
 import ahodanenok.di.qualifier.classes.*;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Qualifier;
+import javax.inject.Inject;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 

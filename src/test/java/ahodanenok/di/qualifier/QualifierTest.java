@@ -162,6 +162,20 @@ public class QualifierTest {
         assertThrows(IllegalArgumentException.class, () -> resolution.resolve(method, 0));
     }
 
+    class A {
+        @Inject
+        A(@QualifierA int a) { }
+    }
+
+    @Test
+    public void testConstructorQualifiersForInnerClass() throws Exception {
+        Constructor<?> constructor = A.class.getDeclaredConstructor(QualifierTest.class, int.class);
+        AnnotatedQualifierResolution resolution = new AnnotatedQualifierResolution();
+        Set<Annotation> qualifiers = resolution.resolve(constructor, 1);
+        assertEquals(1, qualifiers.size());
+        assertEquals(constructor.getParameterAnnotations()[1][0], qualifiers.iterator().next());
+    }
+
     @Test
     public void testConstructorNoQualifiers() throws Exception {
         Constructor<ConstructorNoQualifiers> constructor = ConstructorNoQualifiers.class.getDeclaredConstructor();

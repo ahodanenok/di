@@ -190,7 +190,7 @@ public final class DIContainer implements AutoCloseable {
         return provider(value);
     }
 
-    private <T> Value<T> chooseValue(ValueSpecifier specifier, List<Value<T>> values) {
+    private <T> Value<T> chooseValue(ValueSpecifier<?> specifier, List<Value<T>> values) {
         if (values.isEmpty()) {
             return null;
         }

@@ -41,8 +41,7 @@ public final class DIContainer implements AutoCloseable {
 
     private final Map<ScopeIdentifier, Scope> scopes;
 
-    private final List<Value<?>> values;
-    private final List<ManagedValue> managedValues;
+    private final List<ManagedValue> values;
     private final ValueLookup valueLookup;
 
     private final List<Value<?>> interceptors;
@@ -59,7 +58,6 @@ public final class DIContainer implements AutoCloseable {
         this.valueLookup = new ValueLookup();
         this.interceptorLookup = new InterceptorLookup();
         this.values = new ArrayList<>();
-        this.managedValues = new ArrayList<>();
         this.interceptors = new ArrayList<>();
         this.scopes = new HashMap<>();
         this.injectionPoints = new LinkedList<>();
@@ -135,7 +133,6 @@ public final class DIContainer implements AutoCloseable {
         }
 
         values.add(managedValue);
-        managedValues.add(managedValue);
     }
 
     private void initEagerSingletons() {
@@ -378,7 +375,7 @@ public final class DIContainer implements AutoCloseable {
         // todo: static listeners
 
         List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
-        for (ManagedValue v : managedValues) {
+        for (ManagedValue v : values) {
             for (Method m : v.getEventListeners()) {
                 if (m.getParameterCount() != 1) {
                     throw new ConfigurationException(

@@ -19,7 +19,7 @@ public final class ValueLookup {
      *
      * @return matched dependencies or empty set if none found
      */
-    public <T> List<Value<T>> execute(List<Value<?>> values, ValueSpecifier<T> specifier) {
+    public <T> List<Value<T>> execute(List<? extends Value<?>> values, ValueSpecifier<T> specifier) {
         List<Value<T>> matching = new ArrayList<>();
         for (Value<?> v : values) {
             if (specifier.getName() != null && !specifier.getName().equals(v.metadata().getName())) {

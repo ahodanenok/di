@@ -1,10 +1,10 @@
 package ahodanenok.di.scope;
 
+import ahodanenok.di.ReflectionAssistant;
 import ahodanenok.di.value.ManagedValue;
 import ahodanenok.di.value.Value;
 
 import javax.inject.Singleton;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,21 +41,14 @@ public class SingletonScope implements Scope {
     public void destroy() {
         // todo: make copy of instances and assign to it empty map
         for (Map.Entry<Value<?>, Object> entry : instances.entrySet()) {
-            System.out.println(entry.getKey().getClass());
             if (entry.getKey() instanceof ManagedValue) {
                 Method preDestroyMethod = ((ManagedValue) entry.getKey()).getPreDestroyMethod();
                 if (preDestroyMethod != null) {
-                    boolean accessible = preDestroyMethod.isAccessible();
                     try {
-                        preDestroyMethod.setAccessible(true);
-                        preDestroyMethod.invoke(entry.getValue());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new IllegalStateException(e);
+                        ReflectionAssistant.invoke(preDestroyMethod, entry.getValue());
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                         // If the method throws an unchecked exception it is ignored.
-                    } finally {
-                        preDestroyMethod.setAccessible(accessible);
                     }
                 }
             }

@@ -403,15 +403,7 @@ public final class DIContainer implements AutoCloseable {
 
         // todo: sort event listeners according priority (and maybe some other conditions)
         for (Pair<Value<?>, Method> p : eventListeners) {
-            boolean accessible = p.getValue().isAccessible();
-            try {
-                p.getValue().setAccessible(true);
-                p.getValue().invoke(provider(p.getKey()).get(), event);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            } finally {
-                p.getValue().setAccessible(accessible);
-            }
+            ReflectionAssistant.invoke(p.getValue(), provider(p.getKey()).get(), event);
         }
     }
 
@@ -450,13 +442,7 @@ public final class DIContainer implements AutoCloseable {
                 Method aroundConstructMethod = instance(InterceptorMetadataResolution.class)
                         .resolveAroundConstruct(interceptor.realType());
                 if (aroundConstructMethod != null) {
-                    chain.add(ctx -> {
-                        try {
-                            return ReflectionAssistant.invoke(aroundConstructMethod, interceptor.provider().get(), ctx);
-                        } catch (InvocationTargetException e) {
-                            throw new IllegalStateException(e);
-                        }
-                    });
+                    chain.add(ctx -> ReflectionAssistant.invoke(aroundConstructMethod, interceptor.provider().get(), ctx));
                 }
             }
 
@@ -516,14 +502,10 @@ public final class DIContainer implements AutoCloseable {
                 Method postConstructMethod = getPostConstructMethod();
                 if (postConstructMethod != null) {
                     try {
-                        // todo: accessible
-                        postConstructMethod.invoke(obj);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new IllegalStateException(e);
+                        ReflectionAssistant.invoke(postConstructMethod, obj);
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                         // If the method throws an unchecked exception the class MUST NOT be put into service.
-                        // todo: throw exception?
                         return null;
                     }
                 }

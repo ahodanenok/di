@@ -248,15 +248,55 @@ public final class ReflectionAssistant {
         }
     }
 
-    public static Object invoke(Method m, Object instance, Object... args) throws InvocationTargetException {
+    public static <T> T invoke(Constructor<? extends T> constructor, Object... args) {
+        if (!isInstantiable(constructor.getDeclaringClass())) {
+            throw new IllegalArgumentException(String.format("Class '%s' is not instantiable", constructor.getDeclaringClass()));
+        }
+
+        boolean accessible = constructor.isAccessible();
+        try {
+            constructor.setAccessible(true);
+            return constructor.newInstance(args);
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            constructor.setAccessible(accessible);
+        }
+    }
+
+    public static Object invoke(Method m, Object instance, Object... args) {
         boolean accessible = m.isAccessible();
         try {
             m.setAccessible(true);
             return m.invoke(instance, args);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         } finally {
             m.setAccessible(accessible);
+        }
+    }
+
+    public static void fieldSet(Field field, Object instance, Object value) {
+        boolean accessible = field.isAccessible();
+        try {
+            field.setAccessible(true);
+            field.set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            field.setAccessible(accessible);
+        }
+    }
+
+    public static Object fieldGet(Field field, Object instance) {
+        boolean accessible = field.isAccessible();
+        try {
+            field.setAccessible(true);
+            return field.get(instance);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            field.setAccessible(accessible);
         }
     }
 

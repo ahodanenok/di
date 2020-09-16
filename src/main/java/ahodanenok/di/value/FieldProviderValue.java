@@ -34,18 +34,7 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
     public Provider<? extends T> provider() {
         // todo: suppress unchecked
         if (Modifier.isStatic(field.getModifiers())) {
-            return () -> {
-                // todo: code reuse
-                boolean accessible = field.isAccessible();
-                try {
-                    field.setAccessible(true);
-                    return (T) field.get(null);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
-                } finally {
-                    field.setAccessible(accessible);
-                }
-            };
+            return () -> (T) ReflectionAssistant.fieldGet(field, null);
         } else {
             return () -> {
                 ValueSpecifier<?> specifier = ValueSpecifier.of(field.getDeclaringClass());
@@ -56,17 +45,7 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
                                     "an instance of its declaring class '%s'", field, specifier));
                 }
 
-                try {
-                    boolean accessible = field.isAccessible();
-                    try {
-                        field.setAccessible(true);
-                        return (T) field.get(instance);
-                    } finally {
-                        field.setAccessible(accessible);
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
-                }
+                return (T) ReflectionAssistant.fieldGet(field, instance);
             };
         }
     }

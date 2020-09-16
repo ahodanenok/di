@@ -51,14 +51,10 @@ public class InjectableField extends AbstractInjectable<Object> {
     }
 
     private void doInject(Object instance, Object value) {
-        boolean accessible = field.isAccessible();
         try {
-            field.setAccessible(true);
-            field.set(instance, value);
-        } catch (IllegalAccessException e) {
+            ReflectionAssistant.fieldSet(field, instance, value);
+        } catch (Exception e) {
             throw new InjectionFailedException(field, e);
-        } finally {
-            field.setAccessible(accessible);
         }
     }
 

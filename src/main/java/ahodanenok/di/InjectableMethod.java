@@ -49,15 +49,11 @@ public class InjectableMethod extends AbstractInjectable<Object> {
             }
         }
 
-        boolean accessible = method.isAccessible();
         try {
-            method.setAccessible(true);
             // todo: expose invocation as an object, so clients could do something before and after invocation
-            return method.invoke(instance, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+            return ReflectionAssistant.invoke(method, instance, args);
+        } catch (Exception e) {
             throw new InjectionFailedException(method, e);
-        } finally {
-            method.setAccessible(accessible);
         }
     }
 

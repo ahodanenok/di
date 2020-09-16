@@ -66,14 +66,10 @@ public class InjectableConstructor<T> extends AbstractInjectable<T> {
     }
 
     private T doInject(Object[] args) {
-        boolean accessible = constructor.isAccessible();
         try {
-            constructor.setAccessible(true);
-            return constructor.newInstance(args);
+            return ReflectionAssistant.invoke(constructor, args);
         } catch (Exception e) {
             throw new InjectionFailedException(constructor, e);
-        } finally {
-            constructor.setAccessible(accessible);
         }
     }
 

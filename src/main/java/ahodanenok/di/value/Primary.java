@@ -1,4 +1,4 @@
-package ahodanenok.di;
+package ahodanenok.di.value;
 
 import java.lang.annotation.*;
 
@@ -6,4 +6,4 @@ import java.lang.annotation.*;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PrimaryValue { }
+public @interface Primary { }

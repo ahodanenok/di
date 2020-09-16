@@ -1,6 +1,5 @@
 package ahodanenok.di.value;
 
-import ahodanenok.di.ValueSpecifier;
 import ahodanenok.di.scope.ScopeIdentifier;
 
 import javax.inject.Provider;

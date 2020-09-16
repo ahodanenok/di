@@ -296,4 +296,24 @@ public final class ReflectionAssistant {
     private static boolean methodsEqual(Method a, Method b) {
         return a.getName().equals(b.getName()) && Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
+
+    public static boolean typesMatch(Class<?> a, Class<?> b) {
+        if (a == b) {
+            return true;
+        }
+
+        if (a.isPrimitive()) {
+            a = primitiveWrapperClass(a);
+        }
+
+        if (b.isPrimitive()) {
+            b = primitiveWrapperClass(b);
+        }
+
+        if (a == b) {
+            return true;
+        }
+
+        return false;
+    }
 }

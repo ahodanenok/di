@@ -1,6 +1,6 @@
 package ahodanenok.di.exception;
 
-import ahodanenok.di.ValueSpecifier;
+import ahodanenok.di.value.ValueSpecifier;
 import ahodanenok.di.Injectable;
 
 public class UnsatisfiedDependencyException extends DependencyInjectionException{

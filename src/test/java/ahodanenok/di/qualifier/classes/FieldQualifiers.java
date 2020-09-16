@@ -1,10 +1,10 @@
 package ahodanenok.di.qualifier.classes;
 
-import ahodanenok.di.DefaultValue;
+import ahodanenok.di.value.Default;
 
 public class FieldQualifiers {
 
-    @DefaultValue
+    @Default
     private String noQualifiers;
 
     @QualifierA

@@ -1,8 +1,8 @@
 package ahodanenok.di.valuelookup;
 
 import ahodanenok.di.Any;
-import ahodanenok.di.ValueSpecifier;
-import ahodanenok.di.DefaultValueLookup;
+import ahodanenok.di.value.ValueSpecifier;
+import ahodanenok.di.ValueLookup;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import ahodanenok.di.valuelookup.classes.QualifiedClass;
@@ -40,7 +40,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByClassAllFound() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>("1"));
@@ -58,7 +58,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByClassNoneFound() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
         values.add(new InstanceValue<>(1));
@@ -72,7 +72,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByClassAndQualifiersAllFound() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 
@@ -102,7 +102,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByClassAndQualifiersNoneFound() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 
@@ -133,7 +133,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByAnyQualifiers() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 
@@ -163,7 +163,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByQualifiers() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 
@@ -193,7 +193,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByNameAndType() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 
@@ -223,7 +223,7 @@ public class ValueLookupTest {
 
     @Test
     public void testExactLookupByNameAndTypeAndQualifiers() {
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         List<Value<?>> values = new ArrayList<>();
 

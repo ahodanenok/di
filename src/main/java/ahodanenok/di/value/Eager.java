@@ -1,4 +1,4 @@
-package ahodanenok.di;
+package ahodanenok.di.value;
 
 import java.lang.annotation.*;
 

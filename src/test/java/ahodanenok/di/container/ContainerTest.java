@@ -1,16 +1,12 @@
 package ahodanenok.di.container;
 
 import ahodanenok.di.DIContainer;
-import ahodanenok.di.DefaultValue;
-import ahodanenok.di.Eager;
 import ahodanenok.di.container.classes.*;
 import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.value.*;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import static org.junit.jupiter.api.Assertions.*;
 

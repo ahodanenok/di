@@ -1,6 +1,6 @@
 package ahodanenok.di.exception;
 
-import ahodanenok.di.ValueSpecifier;
+import ahodanenok.di.value.ValueSpecifier;
 
 public class DependencyInstantiatingException extends DependencyInjectionException {
 

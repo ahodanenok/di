@@ -1,6 +1,6 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.PrimaryValue;
+import ahodanenok.di.value.Primary;
 
-@PrimaryValue
+@Primary
 public class PrimaryClass { }

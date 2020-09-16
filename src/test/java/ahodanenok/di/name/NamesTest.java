@@ -3,7 +3,6 @@ package ahodanenok.di.name;
 import ahodanenok.di.DIContainer;
 import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.name.classes.*;
-import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import org.junit.jupiter.api.Test;
 
@@ -120,7 +119,7 @@ public class NamesTest {
     public void testFieldNamedStereotypeWithName() throws Exception {
         DIContainer container = DIContainer.builder().build();
         NameResolution resolution = container.instance(NameResolution.class);
-        StereotypeResolution stereotypeResolution = new AnnotatedStereotypeResolution();
+        StereotypeResolution stereotypeResolution = new StereotypeResolution();
 
         Field f = FieldNames.class.getDeclaredField("fieldWithDefaultNamedStereotype");
         assertEquals("fieldWithDefaultNamedStereotype", resolution.resolve(f));

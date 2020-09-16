@@ -8,11 +8,9 @@ import ahodanenok.di.event.Events;
 import ahodanenok.di.exception.ConfigurationException;
 import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.interceptor.*;
-import ahodanenok.di.name.AnnotatedNameResolution;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.profile.ProfileMatcher;
 import ahodanenok.di.scope.*;
-import ahodanenok.di.stereotype.AnnotatedStereotypeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.util.Pair;
 import ahodanenok.di.value.*;
@@ -46,7 +44,7 @@ public final class DIContainer implements AutoCloseable {
     private Map<ScopeIdentifier, Scope> scopes;
 
     private List<Value<?>> values;
-    private List<ManagedValueImpl> managedValues;
+    private List<ManagedValue> managedValues;
     private ValueLookup valueLookup;
 
     private List<Value<?>> interceptors;
@@ -57,12 +55,106 @@ public final class DIContainer implements AutoCloseable {
     private InjectionPoint currentInjectionPoint;
     private LinkedList<InjectionPoint> injectionPoints;
 
+    private Set<String> activeProfiles;
+
     private DIContainer() {
+        this.valueLookup = new ValueLookup();
+        this.interceptorLookup = new InterceptorLookup();
         this.values = new ArrayList<>();
         this.managedValues = new ArrayList<>();
         this.interceptors = new ArrayList<>();
         this.scopes = new HashMap<>();
         this.injectionPoints = new LinkedList<>();
+
+        registerScope(new DefaultScope());
+        registerScope(new SingletonScope());
+        registerInfrastructureValues();
+    }
+
+    private void registerInfrastructureValues() {
+        InstanceValue<DIContainer> containerValue = new InstanceValue<>(this);
+        registerValue(containerValue);
+
+        registerValue(new InstanceValue<>(Events.class, event -> handleEvent(event)));
+
+        InstantiatingValue<ValueMetadataResolution> valueMetadataResolution =
+                new InstantiatingValue<>(ValueMetadataResolution.class, ValueMetadataResolution.class);
+        valueMetadataResolution.setResolveMetadata(false);
+        valueMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        valueMetadataResolution.metadata().setDefault(true);
+        registerValue(valueMetadataResolution);
+
+        InstantiatingValue<ScopeResolution> scopeResolution =
+                new InstantiatingValue<>(ScopeResolution.class);
+        scopeResolution.setResolveMetadata(false);
+        scopeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        scopeResolution.metadata().setDefault(true);
+        registerValue(scopeResolution);
+
+        InstantiatingValue<QualifierResolution> qualifierResolution =
+                new InstantiatingValue<>(QualifierResolution.class, QualifierResolution.class);
+        qualifierResolution.setResolveMetadata(false);
+        qualifierResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        qualifierResolution.metadata().setDefault(true);
+        registerValue(qualifierResolution);
+
+        InstantiatingValue<NameResolution> nameResolution = new InstantiatingValue<>(NameResolution.class);
+        nameResolution.setResolveMetadata(false);
+        nameResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        nameResolution.metadata().setDefault(true);
+        registerValue(nameResolution);
+
+        InstantiatingValue<StereotypeResolution> stereotypeResolution =
+                new InstantiatingValue<>(StereotypeResolution.class);
+        stereotypeResolution.setResolveMetadata(false);
+        stereotypeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        stereotypeResolution.metadata().setDefault(true);
+        registerValue(stereotypeResolution);
+
+        InstantiatingValue<InterceptorMetadataResolution> interceptorMetadataResolution =
+                new InstantiatingValue<>(InterceptorMetadataResolution.class, InterceptorMetadataResolution.class);
+        interceptorMetadataResolution.setResolveMetadata(false);
+        interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
+        interceptorMetadataResolution.metadata().setDefault(true);
+        registerValue(interceptorMetadataResolution);
+
+        ProviderValue<InjectionPoint> injectionPoint =
+                new ProviderValue<>(InjectionPoint.class, new InjectionPointProvider());
+        registerValue(injectionPoint);
+    }
+
+    private void registerValue(Value<?> value) {
+        value.bind(this);
+        if (value.metadata().isInterceptor()) {
+            interceptors.add(value);
+        }
+
+        ManagedValue managedValue;
+        if (value instanceof ManagedValue) {
+            managedValue = (ManagedValue) value;
+        } else {
+            managedValue = new ManagedValueImpl(value);
+        }
+
+        values.add(managedValue);
+        managedValues.add(managedValue);
+    }
+
+    private void initEagerSingletons() {
+        values.stream()
+            .filter(v -> v.metadata().isEager())
+            .sorted(Comparator.comparing(v -> v.metadata().getInitializationPhase()))
+            .forEach(v -> {
+                if (ScopeIdentifier.SINGLETON.equals(v.metadata().getScope())) {
+                    provider(v).get();
+                } else {
+                    throw new IllegalStateException("Eager initialization is only applicable to singleton values");
+                }
+            });
+    }
+
+    private void registerScope(Scope scope) {
+        scopes.put(scope.id(), scope);
     }
 
     private Scope lookupScope(ScopeIdentifier id) {
@@ -72,6 +164,18 @@ public final class DIContainer implements AutoCloseable {
         } else {
             throw new UnknownScopeException(id);
         }
+    }
+
+    public Set<String> getActiveProfiles() {
+        return Collections.unmodifiableSet(activeProfiles);
+    }
+
+    private void setActiveProfiles(String... profiles) {
+        if (profiles == null) {
+            profiles = new String[0];
+        }
+
+        this.activeProfiles = new HashSet<>(Arrays.asList(profiles));
     }
 
     public Provider<?> provider(String name) {
@@ -200,6 +304,17 @@ public final class DIContainer implements AutoCloseable {
         return p.get();
     }
 
+    private void injectStatic(Set<Class<?>> classes) {
+        Set<Class<?>> injected = new HashSet<>();
+        for (Class<?> clazz : classes) {
+            for (Class<?> h : ReflectionAssistant.hierarchy(clazz)) {
+                if (injected.add(h)) {
+                    injectStatic(h);
+                }
+            }
+        }
+    }
+
     private void injectStatic(Class<?> clazz) {
         if (clazz == null) {
             throw new IllegalArgumentException("class is null");
@@ -256,7 +371,7 @@ public final class DIContainer implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        for (Scope scope :scopes.values()) {
+        for (Scope scope : scopes.values()) {
             scope.destroy();
         }
     }
@@ -271,7 +386,7 @@ public final class DIContainer implements AutoCloseable {
         // todo: static listeners
 
         List<Pair<Value<?>, Method>> eventListeners = new ArrayList<>();
-        for (ManagedValueImpl v : managedValues) {
+        for (ManagedValue v : managedValues) {
             for (Method m : v.getEventListeners()) {
                 if (m.getParameterCount() != 1) {
                     throw new ConfigurationException(
@@ -515,20 +630,6 @@ public final class DIContainer implements AutoCloseable {
             return this;
         }
 
-        /**
-         * Provide a custom implementation of dependencies lookup.
-         * Default implementation is {@link DefaultValueLookup}
-         */
-        public Builder withValuesLookup(ValueLookup valueLookup) {
-            DIContainer.this.valueLookup = valueLookup;
-            return this;
-        }
-
-        public Builder withInterceptorLookup(InterceptorLookup interceptorLookup) {
-            DIContainer.this.interceptorLookup = interceptorLookup;
-            return this;
-        }
-
         public Builder withActiveProfiles(String... profiles) {
             this.activeProfiles = profiles;
             return this;
@@ -536,136 +637,32 @@ public final class DIContainer implements AutoCloseable {
 
         public DIContainer build() {
             DIContainer container = DIContainer.this;
+            container.setActiveProfiles(activeProfiles);
 
-            // custom scopes with the same identifier override built-in scopes
-            Set<Scope> scopes = new HashSet<>();
-            scopes.add(new DefaultScope());
-            scopes.add(new SingletonScope());
-            if (this.scopes != null) {
-                scopes.addAll(this.scopes);
-            }
-            for (Scope scope : scopes) {
-                container.scopes.putIfAbsent(scope.id(), scope);
-            }
-
-            InstanceValue<DIContainer> containerValue = new InstanceValue<>(container);
-            container.values.add(containerValue);
-
-            if (container.valueLookup == null) {
-                container.valueLookup = new DefaultValueLookup();
-            }
-
-            if (container.interceptorLookup == null) {
-                container.interceptorLookup = new DefaultInterceptorLookup();
-            }
-
-            InstantiatingValue<ValueMetadataResolution> valueMetadataResolution =
-                    new InstantiatingValue<>(ValueMetadataResolution.class, DefaultValueMetadataResolution.class);
-            valueMetadataResolution.setResolveMetadata(false);
-            valueMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            valueMetadataResolution.metadata().setDefault(true);
-            container.values.add(new ManagedValueImpl(valueMetadataResolution));
-
-            InstantiatingValue<ScopeResolution> scopeResolution =
-                    new InstantiatingValue<>(ScopeResolution.class, AnnotatedScopeResolution.class);
-            scopeResolution.setResolveMetadata(false);
-            scopeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            scopeResolution.metadata().setDefault(true);
-            container.values.add(scopeResolution);
-
-            InstantiatingValue<QualifierResolution> qualifierResolution =
-                    new InstantiatingValue<>(QualifierResolution.class, AnnotatedQualifierResolution.class);
-            qualifierResolution.setResolveMetadata(false);
-            qualifierResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            qualifierResolution.metadata().setDefault(true);
-            container.values.add(qualifierResolution);
-
-            InstantiatingValue<NameResolution> nameResolution = new InstantiatingValue<>(NameResolution.class, AnnotatedNameResolution.class);
-            nameResolution.setResolveMetadata(false);
-            nameResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            nameResolution.metadata().setDefault(true);
-            container.values.add(nameResolution);
-
-            InstantiatingValue<StereotypeResolution> stereotypeResolution =
-                    new InstantiatingValue<>(StereotypeResolution.class, AnnotatedStereotypeResolution.class);
-            stereotypeResolution.setResolveMetadata(false);
-            stereotypeResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            stereotypeResolution.metadata().setDefault(true);
-            container.values.add(stereotypeResolution);
-
-            InstantiatingValue<InterceptorMetadataResolution> interceptorMetadataResolution =
-                    new InstantiatingValue<>(InterceptorMetadataResolution.class, AnnotatedInterceptorMetadataResolution.class);
-            interceptorMetadataResolution.setResolveMetadata(false);
-            interceptorMetadataResolution.metadata().setScope(ScopeIdentifier.SINGLETON);
-            interceptorMetadataResolution.metadata().setDefault(true);
-            container.values.add(interceptorMetadataResolution);
-
-            ProviderValue<InjectionPoint> injectionPoint =
-                    new ProviderValue<>(InjectionPoint.class, new InjectionPointProvider());
-            container.values.add(injectionPoint);
-
-            container.values.add(new InstanceValue<>(Events.class, new Events() {
-                @Override
-                public void fire(Event event) {
-                    container.handleEvent(event);
+            if (scopes != null) {
+                // custom scopes with the same identifier override built-in scopes
+                for (Scope scope : scopes) {
+                    container.registerScope(scope);
                 }
-            }));
-
-            if (activeProfiles == null) {
-                activeProfiles = new String[0];
-            }
-
-            // todo: collect all values and do bind (order by priority)
-            for (Value<?> value : container.values) {
-                value.bind(container);
             }
 
             if (values != null) {
-                ProfileMatcher profileMatcher = new ProfileMatcher(new HashSet<>(Arrays.asList(activeProfiles)));
-                Set<ManagedValueImpl> managedValues = new HashSet<>();
+                ProfileMatcher profileMatcher = new ProfileMatcher(container.getActiveProfiles());
                 for (Value<?> value : values) {
                     String valueProfiles = value.metadata().getProfilesCondition();
                     if (valueProfiles != null && !profileMatcher.matches(valueProfiles.trim())) {
                         continue;
                     }
 
-                    value.bind(container);
-                    if (value.metadata().isInterceptor()) {
-                        container.interceptors.add(value);
-                    }
-
-                    if (value instanceof ManagedValue) {
-                        managedValues.add((ManagedValueImpl) value);
-                    } else {
-                        managedValues.add(new ManagedValueImpl(value));
-                    }
+                    container.registerValue(value);
                 }
-
-                container.values.addAll(managedValues);
-                container.managedValues.addAll(managedValues);
             }
 
             if (injectStatic != null) {
-                Set<Class<?>> injected = new HashSet<>();
-                for (Class<?> clazz : injectStatic) {
-                    for (Class<?> h : ReflectionAssistant.hierarchy(clazz)) {
-                        if (injected.add(h)) {
-                            injectStatic(h);
-                        }
-                    }
-                }
+                container.injectStatic(injectStatic);
             }
 
-            container.values.stream()
-                    .filter(v -> v.metadata().isEager())
-                    .sorted(Comparator.comparing(v -> v.metadata().getInitializationPhase()))
-                    .forEach(v -> {
-                        if (ScopeIdentifier.SINGLETON.equals(v.metadata().getScope())) {
-                            provider(v).get();
-                        } else {
-                            throw new IllegalStateException("Eager initialization is only applicable to singleton values");
-                        }
-                    });
+            container.initEagerSingletons();
 
             return container;
         }

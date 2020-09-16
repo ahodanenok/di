@@ -1,7 +1,7 @@
 package ahodanenok.di.valuelookup;
 
-import ahodanenok.di.ValueSpecifier;
-import ahodanenok.di.DefaultValueLookup;
+import ahodanenok.di.value.ValueSpecifier;
+import ahodanenok.di.ValueLookup;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ public class PrimitivesLookupTest {
         values.add(new InstanceValue<>(true));
         values.add(new InstanceValue<>('z'));
 
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         // byte
         List<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));
@@ -112,7 +112,7 @@ public class PrimitivesLookupTest {
         values.add(new InstanceValue<>(boolean.class, true));
         values.add(new InstanceValue<>(char.class, 'z'));
 
-        DefaultValueLookup lookup = new DefaultValueLookup();
+        ValueLookup lookup = new ValueLookup();
 
         // byte
         List<Value<Byte>> byteResult = lookup.execute(values, ValueSpecifier.of(byte.class));

@@ -1,6 +1,6 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.Eager;
+import ahodanenok.di.value.Eager;
 
 import javax.annotation.Priority;
 

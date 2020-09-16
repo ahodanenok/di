@@ -1,8 +1,6 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.Eager;
-
-import javax.inject.Singleton;
+import ahodanenok.di.value.Eager;
 
 @Eager
 public class EagerClass { }

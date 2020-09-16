@@ -1,17 +1,17 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.DefaultValue;
-import ahodanenok.di.Eager;
-import ahodanenok.di.PrimaryValue;
+import ahodanenok.di.value.Default;
+import ahodanenok.di.value.Eager;
+import ahodanenok.di.value.Primary;
 
 public class FieldMetadata {
 
     String defaultMetadata;
 
-    @PrimaryValue
+    @Primary
     String primaryValue;
 
-    @DefaultValue
+    @Default
     String defaultValue;
 
     @QualifierA

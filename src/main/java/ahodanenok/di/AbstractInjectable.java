@@ -3,13 +3,10 @@ package ahodanenok.di;
 import ahodanenok.di.exception.UnsatisfiedDependencyException;
 import ahodanenok.di.interceptor.AroundProvision;
 import ahodanenok.di.interceptor.InjectionPoint;
+import ahodanenok.di.value.ValueSpecifier;
 
 import javax.inject.Provider;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public abstract class AbstractInjectable<T> implements Injectable<T> {

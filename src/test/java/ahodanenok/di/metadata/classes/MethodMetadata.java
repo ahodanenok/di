@@ -1,11 +1,8 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.DefaultValue;
-import ahodanenok.di.Eager;
-import ahodanenok.di.PrimaryValue;
-
-import javax.annotation.Priority;
-import javax.interceptor.Interceptor;
+import ahodanenok.di.value.Default;
+import ahodanenok.di.value.Eager;
+import ahodanenok.di.value.Primary;
 
 public class MethodMetadata {
 
@@ -23,12 +20,12 @@ public class MethodMetadata {
         return "eagerPhased";
     }
 
-    @PrimaryValue
+    @Primary
     public String primaryValue() {
         return "pv";
     }
 
-    @DefaultValue
+    @Default
     public String defaultValue() {
         return "dv";
     }

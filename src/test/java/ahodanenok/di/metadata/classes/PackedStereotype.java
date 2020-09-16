@@ -1,6 +1,6 @@
 package ahodanenok.di.metadata.classes;
 
-import ahodanenok.di.DefaultValue;
+import ahodanenok.di.value.Default;
 import ahodanenok.di.stereotype.Stereotype;
 
 import javax.inject.Named;
@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Stereotype
-@DefaultValue
+@Default
 @Named
 @Singleton
 @Retention(RetentionPolicy.RUNTIME)

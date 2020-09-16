@@ -1,6 +1,6 @@
 package ahodanenok.di.container.classes;
 
-import ahodanenok.di.DefaultValue;
+import ahodanenok.di.value.Default;
 
-@DefaultValue
+@Default
 public class DefaultChildA extends DefaultParent { }

@@ -1,6 +1,6 @@
 package ahodanenok.di.container.classes;
 
-import ahodanenok.di.Eager;
+import ahodanenok.di.value.Eager;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;

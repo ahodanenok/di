@@ -2,7 +2,6 @@ package ahodanenok.di.scope;
 
 import ahodanenok.di.DIContainer;
 import ahodanenok.di.exception.ConfigurationException;
-import ahodanenok.di.exception.ScopeResolutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

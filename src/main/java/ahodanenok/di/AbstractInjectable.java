@@ -38,7 +38,9 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
         ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         Object value = container.instance(specifier);
         if (value == null && !injectionPoint.getAnnotatedTarget().isAnnotationPresent(Optional.class)) {
-            throw new UnsatisfiedDependencyException(this, specifier, "not found");
+            throw new UnsatisfiedDependencyException(
+                    String.format("Value with specifier %s hasn't been found in the container for injection point '%s'",
+                            specifier, injectionPoint.getTarget()));
         }
 
         return value;
@@ -57,7 +59,7 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
         if (injectionPoint.getAnnotatedTarget().isAnnotationPresent(Later.class)) {
             return (Provider<Object>) () -> {
                 // todo: cache provider in a field
-                Provider<?> p = resolveProviderInstance(specifier, optional);
+                Provider<?> p = resolveProviderInstance(injectionPoint, specifier, optional);
                 if (p != null) {
                     return p.get();
                 } else {
@@ -65,14 +67,16 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
                 }
             };
         } else {
-            return resolveProviderInstance(specifier, optional);
+            return resolveProviderInstance(injectionPoint, specifier, optional);
         }
     }
 
-    private Provider<?> resolveProviderInstance(ValueSpecifier<?> specifier, boolean optional) {
+    private Provider<?> resolveProviderInstance(InjectionPoint injectionPoint, ValueSpecifier<?> specifier, boolean optional) {
         Provider<?> provider = container.provider(specifier);
         if (provider == null && !optional) {
-            throw new UnsatisfiedDependencyException(this, specifier, "not found");
+            throw new UnsatisfiedDependencyException(
+                    String.format("Value provider with specifier '%s' hasn't been found in the container for injection point '%s'",
+                            specifier, injectionPoint.getTarget()));
         }
 
         return provider;

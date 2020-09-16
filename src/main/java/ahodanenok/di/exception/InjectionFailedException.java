@@ -3,7 +3,7 @@ package ahodanenok.di.exception;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 
-public class InjectionFailedException extends DependencyInjectionException {
+public class InjectionFailedException extends RuntimeException {
 
     public InjectionFailedException(Executable executable, Throwable cause) {
         super("Injection failed on " + executable.toGenericString(), cause);

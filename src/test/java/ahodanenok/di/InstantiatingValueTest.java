@@ -1,8 +1,6 @@
 package ahodanenok.di;
 
 import ahodanenok.di.exception.ConfigurationException;
-import ahodanenok.di.exception.DependencyInjectionException;
-import ahodanenok.di.exception.DependencyInstantiatingException;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.InstantiatingValue;

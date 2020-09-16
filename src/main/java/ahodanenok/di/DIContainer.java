@@ -403,11 +403,14 @@ public final class DIContainer implements AutoCloseable {
 
         // todo: sort event listeners according priority (and maybe some other conditions)
         for (Pair<Value<?>, Method> p : eventListeners) {
+            boolean accessible = p.getValue().isAccessible();
             try {
+                p.getValue().setAccessible(true);
                 p.getValue().invoke(provider(p.getKey()).get(), event);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                // todo: error, msg
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
+            } finally {
+                p.getValue().setAccessible(accessible);
             }
         }
     }
@@ -451,8 +454,7 @@ public final class DIContainer implements AutoCloseable {
                         try {
                             return ReflectionAssistant.invoke(aroundConstructMethod, interceptor.provider().get(), ctx);
                         } catch (InvocationTargetException e) {
-                            // todo: error, message
-                            throw new RuntimeException(e);
+                            throw new IllegalStateException(e);
                         }
                     });
                 }
@@ -464,7 +466,6 @@ public final class DIContainer implements AutoCloseable {
         try {
             chain.proceed();
         } catch (Exception e) {
-            // todo: error
             throw new RuntimeException(e);
         }
     }
@@ -473,8 +474,6 @@ public final class DIContainer implements AutoCloseable {
         @Override
         public InjectionPoint get() {
             // todo: check not null and throw exception
-
-            System.out.println("injectionPoints: " + injectionPoints);
 
             return injectionPoints.peek();
         }
@@ -520,7 +519,6 @@ public final class DIContainer implements AutoCloseable {
                         // todo: accessible
                         postConstructMethod.invoke(obj);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        // todo: error, message
                         throw new IllegalStateException(e);
                     } catch (RuntimeException e) {
                         e.printStackTrace();

@@ -254,7 +254,6 @@ public final class ReflectionAssistant {
             m.setAccessible(true);
             return m.invoke(instance, args);
         } catch (IllegalAccessException e) {
-            // todo: could be fired if accessible is true?
             throw new IllegalStateException(e);
         } finally {
             m.setAccessible(accessible);

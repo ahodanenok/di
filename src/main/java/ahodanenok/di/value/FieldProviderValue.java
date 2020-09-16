@@ -32,7 +32,6 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
 
     @Override
     public Provider<? extends T> provider() {
-        // todo: errors
         // todo: suppress unchecked
         if (Modifier.isStatic(field.getModifiers())) {
             return () -> {
@@ -42,17 +41,19 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
                     field.setAccessible(true);
                     return (T) field.get(null);
                 } catch (IllegalAccessException e) {
-                    // todo: error, msg
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 } finally {
                     field.setAccessible(accessible);
                 }
             };
         } else {
             return () -> {
-                Object instance = container.instance(field.getDeclaringClass());
+                ValueSpecifier<?> specifier = ValueSpecifier.of(field.getDeclaringClass());
+                Object instance = container.instance(specifier);
                 if (instance == null) {
-                    throw new UnsatisfiedDependencyException(ValueSpecifier.of(field.getDeclaringClass()), "not found");
+                    throw new UnsatisfiedDependencyException(
+                            String.format("Couldn't get value of the field '%s' because container doesn't have " +
+                                    "an instance of its declaring class '%s'", field, specifier));
                 }
 
                 try {
@@ -64,8 +65,7 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
                         field.setAccessible(accessible);
                     }
                 } catch (IllegalAccessException e) {
-                    // todo: error, msg
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             };
         }

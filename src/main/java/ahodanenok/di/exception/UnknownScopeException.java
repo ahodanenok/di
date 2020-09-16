@@ -2,9 +2,9 @@ package ahodanenok.di.exception;
 
 import ahodanenok.di.scope.ScopeIdentifier;
 
-public class UnknownScopeException extends DependencyInjectionException {
+public class UnknownScopeException extends DIBaseException {
 
     public UnknownScopeException(ScopeIdentifier scope) {
-        super("Unknown scope " + scope);
+        super(String.format("Scope '%s' is not found in the container", scope));
     }
 }

@@ -45,15 +45,17 @@ public class SingletonScope implements Scope {
             if (entry.getKey() instanceof ManagedValue) {
                 Method preDestroyMethod = ((ManagedValue) entry.getKey()).getPreDestroyMethod();
                 if (preDestroyMethod != null) {
+                    boolean accessible = preDestroyMethod.isAccessible();
                     try {
-                        // todo: accessible
+                        preDestroyMethod.setAccessible(true);
                         preDestroyMethod.invoke(entry.getValue());
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        // todo: error, message
                         throw new IllegalStateException(e);
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                         // If the method throws an unchecked exception it is ignored.
+                    } finally {
+                        preDestroyMethod.setAccessible(accessible);
                     }
                 }
             }

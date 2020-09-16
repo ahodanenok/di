@@ -73,7 +73,7 @@ public final class DIContainer implements AutoCloseable {
         InstanceValue<DIContainer> containerValue = new InstanceValue<>(this);
         registerValue(containerValue);
 
-        registerValue(new InstanceValue<>(Events.class, event -> handleEvent(event)));
+        registerValue(new InstanceValue<>(Events.class, this::handleEvent));
 
         InstantiatingValue<ValueMetadataResolution> valueMetadataResolution =
                 new InstantiatingValue<>(ValueMetadataResolution.class, ValueMetadataResolution.class);

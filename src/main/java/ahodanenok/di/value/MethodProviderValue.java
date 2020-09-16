@@ -20,7 +20,6 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
         this(type, null, method);
     }
 
-    // todo: pass metadata
     // todo: don't need explicit id for declaring class, id can be created from it
     public MethodProviderValue(Class<T> type, ValueSpecifier<?> methodInstanceId, Method method) {
         super(type);
@@ -50,7 +49,7 @@ public class MethodProviderValue<T> extends AbstractValue<T> {
 
     @Override
     public Provider<? extends T> provider() {
-        // todo: if like in ahodanenok.di.value.DependencyFieldProviderValue.provider
+        // todo: if like in ahodanenok.di.value.FieldProviderValue.provider
         return () -> {
             // todo: allow specifying provider method in supeclass or interface, concrete implementation will provide it
             // todo: check for conflicts on annotations on provider method from interface and its implementation

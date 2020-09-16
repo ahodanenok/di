@@ -16,6 +16,5 @@ public interface Scope {
 
     <T> T get(Value<T> id);
 
-    // todo: when scope is over, destroy it and its bindings
     default void destroy() { }
 }

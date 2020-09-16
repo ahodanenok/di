@@ -27,14 +27,11 @@ import java.util.stream.Collectors;
 
 // todo: implement interceptors (https://jcp.org/en/jsr/detail?id=318) (https://docs.oracle.com/javaee/6/api/javax/interceptor/package-summary.html)
 // todo: implement decorators
-// todo: @Resource
 // todo: logging
-// todo: rethink exceptions' names
 // todo: documentation
 // todo: generics
 // todo: yaml config
 // todo: @Priority
-// todo: overriding meta-annotations attributes in annotated annotation
 
 /**
  * Container is a coordinator between providers
@@ -335,14 +332,8 @@ public final class DIContainer implements AutoCloseable {
     }
 
     // todo: cache
-    // todo: Fields and methods in superclasses are injected before those in subclasses.
     // todo: check circular references
     private void inject(Value<?> value, Object instance) {
-
-        // todo: conform to spec
-        // A method annotated with @Inject that overrides another method annotated with @Inject will only be injected once per injection request per instance.
-        // A method with no @Inject annotation that overrides a method annotated with @Inject will not be injected.
-
         if (instance == null) {
             throw new IllegalArgumentException("instance is null");
         }
@@ -415,7 +406,6 @@ public final class DIContainer implements AutoCloseable {
             throw new IllegalStateException("value is null for non-static injection target");
         }
 
-        // todo: @AroundInject interceptor?
         try {
             currentInjectionPoint = injectionPoint;
             aroundProvision.proceed();

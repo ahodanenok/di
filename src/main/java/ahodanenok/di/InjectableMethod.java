@@ -5,31 +5,28 @@ import ahodanenok.di.interceptor.AroundProvision;
 import ahodanenok.di.interceptor.InjectionPoint;
 import ahodanenok.di.qualifier.QualifierResolution;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class InjectableMethod extends AbstractInjectable<Object> {
 
-    private Method method;
+    private final Method method;
 
     public InjectableMethod(DIContainer container, Method method) {
         super(container);
+
+        if (Modifier.isAbstract(method.getModifiers())) {
+            throw new IllegalArgumentException("Method is abstract");
+        }
+
+        // todo: do not declare type parameters of their own.
+
         this.method = method;
     }
 
     @Override
     public Object inject(Object instance) {
-
-        // todo: common code here and in InjectableConstructor
-
-        // todo: conform to spec
-        // Injectable methods:
-        // are annotated with @Inject.
-        // are not abstract.
-        // do not declare type parameters of their own.
-        // may return a result
-        // may have any otherwise valid name.
-        // accept zero or more dependencies as arguments.
+        // todo: handle generics
 
         Object[] args = new Object[method.getParameterCount()];
         for (int i = 0; i < method.getParameterCount(); i++) {
@@ -50,7 +47,6 @@ public class InjectableMethod extends AbstractInjectable<Object> {
         }
 
         try {
-            // todo: expose invocation as an object, so clients could do something before and after invocation
             return ReflectionAssistant.invoke(method, instance, args);
         } catch (Exception e) {
             throw new InjectionFailedException(method, e);

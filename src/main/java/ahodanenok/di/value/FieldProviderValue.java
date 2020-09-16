@@ -12,8 +12,6 @@ public class FieldProviderValue<T> extends AbstractValue<T> {
 
     private final Field field;
 
-    // todo: check field's type is assignable to type
-
     public FieldProviderValue(Class<T> type, Field field) {
         super(type);
         this.field = field;

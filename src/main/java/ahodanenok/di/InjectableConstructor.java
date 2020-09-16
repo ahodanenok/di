@@ -28,7 +28,6 @@ public class InjectableConstructor<T> extends AbstractInjectable<T> {
 
         // todo: handle parameter annotations
         // todo: handle generic types
-        // todo: common code here and in InjectableMethod
 
         Object[] args = new Object[constructor.getParameterCount()];
 

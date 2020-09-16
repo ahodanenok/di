@@ -10,27 +10,21 @@ import java.lang.reflect.Modifier;
 
 public class InjectableField extends AbstractInjectable<Object> {
 
-    private Field field;
+    private final Field field;
 
     public InjectableField(DIContainer container, Field field) {
         super(container);
+
+        if (Modifier.isFinal(field.getModifiers())) {
+            throw new InjectionFailedException(field, "field is final");
+        }
+
         this.field = field;
     }
 
     @Override
     public Object inject(Object instance) {
         // todo: handle generics
-        // todo: set accessible
-
-        // todo: conform to spec
-        // Injectable fields:
-        // are annotated with @Inject.
-        // are not final.
-        // may have any otherwise valid name.
-
-        if (Modifier.isFinal(field.getModifiers())) {
-            throw new InjectionFailedException(field, "field is final");
-        }
 
         InjectionPoint injectionPoint = new InjectionPoint(field);
         injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(field));

@@ -62,7 +62,7 @@ public final class InvocationContextImpl implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
-        // todo: error if called twice?
+        // method is idempotent
         if (aroundConstruct != null) {
             return aroundConstruct.proceed();
         }

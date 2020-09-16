@@ -35,12 +35,13 @@ public final class AroundConstruct<T> {
         this.args = Arrays.copyOf(args, args.length);
     }
 
+    // instance is null before proceed is called
     public T getInstance() {
         return instance;
     }
 
     public T proceed() {
-        // todo: throw exception if called twice?
+        // operation is idempotent
         if (instance != null) {
             return instance;
         }

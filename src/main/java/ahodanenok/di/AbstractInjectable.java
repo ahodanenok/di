@@ -6,7 +6,6 @@ import ahodanenok.di.interceptor.InjectionPoint;
 import ahodanenok.di.value.ValueSpecifier;
 
 import javax.inject.Provider;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class AbstractInjectable<T> implements Injectable<T> {
@@ -24,7 +23,7 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
 
     protected Object resolveDependency(InjectionPoint injectionPoint) {
         Object value;
-        if (injectionPoint.getType() == Optional.class) {
+        if (injectionPoint.getType() == java.util.Optional.class) {
             value = resolveOptional(injectionPoint);
         } else if (injectionPoint.getType() == Provider.class) {
             value = resolveProvider(injectionPoint);
@@ -38,7 +37,7 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
     private Object resolveObject(InjectionPoint injectionPoint) {
         ValueSpecifier<?> specifier = ValueSpecifier.of(injectionPoint.getType(), injectionPoint.getQualifiers());
         Object value = container.instance(specifier);
-        if (value == null && !injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class)) {
+        if (value == null && !injectionPoint.getAnnotatedTarget().isAnnotationPresent(Optional.class)) {
             throw new UnsatisfiedDependencyException(this, specifier, "not found");
         }
 
@@ -48,13 +47,13 @@ public abstract class AbstractInjectable<T> implements Injectable<T> {
     private Object resolveOptional(InjectionPoint injectionPoint) {
         Class<?> lookupType = (Class<?>) injectionPoint.getParameterizedType().getActualTypeArguments()[0];
         ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, injectionPoint.getQualifiers());
-        return Optional.ofNullable(container.instance(specifier));
+        return java.util.Optional.ofNullable(container.instance(specifier));
     }
 
     private Object resolveProvider(InjectionPoint injectionPoint) {
         Class<?> lookupType = (Class<?>) injectionPoint.getParameterizedType().getActualTypeArguments()[0];
         ValueSpecifier<?> specifier = ValueSpecifier.of(lookupType, injectionPoint.getQualifiers());
-        boolean optional = injectionPoint.getAnnotatedTarget().isAnnotationPresent(OptionalDependency.class);
+        boolean optional = injectionPoint.getAnnotatedTarget().isAnnotationPresent(Optional.class);
         if (injectionPoint.getAnnotatedTarget().isAnnotationPresent(Later.class)) {
             return (Provider<Object>) () -> {
                 // todo: cache provider in a field

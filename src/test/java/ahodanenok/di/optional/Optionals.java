@@ -1,50 +1,50 @@
 package ahodanenok.di.optional;
 
-import ahodanenok.di.Optional;
+import java.util.Optional;
 
 public class Optionals {
 
     public Integer checkInt = 1;
     public String checkStr = "1";
-    public java.util.Optional checkOptional;
+    public Optional<Integer> checkOptional;
 
-    @Optional
+    @ahodanenok.di.Optional
     public int optionalPrimitive;
 
-    @Optional
+    @ahodanenok.di.Optional
     public Integer optional = 10;
 
-    public java.util.Optional javaOptional;
+    public Optional<Integer> javaOptional;
 
     public Optionals() { }
 
-    Optionals(@Optional int n) { }
+    Optionals(@ahodanenok.di.Optional int n) { }
 
-    Optionals(@Optional Integer n) {
+    Optionals(@ahodanenok.di.Optional Integer n) {
         this.checkInt = n;
     }
 
-    Optionals(java.util.Optional opt) {
+    Optionals(Optional<Integer> opt) {
         this.checkOptional = opt;
     }
 
-    Optionals(String s, @Optional Integer n) {
+    Optionals(String s, @ahodanenok.di.Optional Integer n) {
         this.checkStr = s;
         this.checkInt = n;
     }
 
-    void methodWithOptionalPrimitiveParameter(@Optional int n) { }
+    void methodWithOptionalPrimitiveParameter(@ahodanenok.di.Optional int n) { }
 
-    void methodWithOptionalParameter(@Optional Integer n) {
+    void methodWithOptionalParameter(@ahodanenok.di.Optional Integer n) {
         this.checkInt = n;
     }
 
-    void methodWithOneOptionalAndNonOptionalParameters(String s, @Optional Integer n) {
+    void methodWithOneOptionalAndNonOptionalParameters(String s, @ahodanenok.di.Optional Integer n) {
         this.checkStr = s;
         this.checkInt = n;
     }
 
-    void methodWithJavaOptional(java.util.Optional opt) {
+    void methodWithJavaOptional(Optional<Integer> opt) {
         this.checkOptional = opt;
     }
 }

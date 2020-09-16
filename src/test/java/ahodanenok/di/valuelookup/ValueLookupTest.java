@@ -1,8 +1,8 @@
 package ahodanenok.di.valuelookup;
 
-import ahodanenok.di.Any;
+import ahodanenok.di.qualifier.Any;
 import ahodanenok.di.value.ValueSpecifier;
-import ahodanenok.di.ValueLookup;
+import ahodanenok.di.value.ValueLookup;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import ahodanenok.di.valuelookup.classes.QualifiedClass;

@@ -1,7 +1,7 @@
-package ahodanenok.di;
+package ahodanenok.di.value;
 
-import ahodanenok.di.value.Value;
-import ahodanenok.di.value.ValueSpecifier;
+import ahodanenok.di.qualifier.Any;
+import ahodanenok.di.ReflectionAssistant;
 
 import java.util.ArrayList;
 import java.util.List;

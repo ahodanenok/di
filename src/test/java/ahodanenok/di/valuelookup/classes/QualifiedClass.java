@@ -1,6 +1,6 @@
 package ahodanenok.di.valuelookup.classes;
 
-import ahodanenok.di.Any;
+import ahodanenok.di.qualifier.Any;
 
 @Any
 @QualifierA

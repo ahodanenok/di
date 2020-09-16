@@ -3,6 +3,7 @@ package ahodanenok.di;
 import ahodanenok.di.exception.InjectionFailedException;
 import ahodanenok.di.interceptor.AroundProvision;
 import ahodanenok.di.interceptor.InjectionPoint;
+import ahodanenok.di.qualifier.QualifierResolution;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

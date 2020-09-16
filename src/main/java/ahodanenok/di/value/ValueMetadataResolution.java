@@ -3,6 +3,7 @@ package ahodanenok.di.value;
 import ahodanenok.di.*;
 import ahodanenok.di.interceptor.InterceptorMetadataResolution;
 import ahodanenok.di.name.NameResolution;
+import ahodanenok.di.qualifier.QualifierResolution;
 import ahodanenok.di.scope.ScopeIdentifier;
 import ahodanenok.di.scope.ScopeResolution;
 import ahodanenok.di.stereotype.StereotypeResolution;

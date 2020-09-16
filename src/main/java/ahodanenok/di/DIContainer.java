@@ -10,6 +10,7 @@ import ahodanenok.di.exception.UnknownScopeException;
 import ahodanenok.di.interceptor.*;
 import ahodanenok.di.name.NameResolution;
 import ahodanenok.di.profile.ProfileMatcher;
+import ahodanenok.di.qualifier.QualifierResolution;
 import ahodanenok.di.scope.*;
 import ahodanenok.di.stereotype.StereotypeResolution;
 import ahodanenok.di.util.Pair;

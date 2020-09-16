@@ -1,6 +1,5 @@
 package ahodanenok.di.qualifier;
 
-import ahodanenok.di.QualifierResolution;
 import ahodanenok.di.qualifier.classes.*;
 import org.junit.jupiter.api.Test;
 

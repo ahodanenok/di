@@ -1,7 +1,7 @@
 package ahodanenok.di.valuelookup;
 
 import ahodanenok.di.value.ValueSpecifier;
-import ahodanenok.di.ValueLookup;
+import ahodanenok.di.value.ValueLookup;
 import ahodanenok.di.value.InstanceValue;
 import ahodanenok.di.value.Value;
 import org.junit.jupiter.api.Test;

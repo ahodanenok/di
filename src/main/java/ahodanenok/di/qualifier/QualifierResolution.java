@@ -1,4 +1,6 @@
-package ahodanenok.di;
+package ahodanenok.di.qualifier;
+
+import ahodanenok.di.ReflectionAssistant;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;

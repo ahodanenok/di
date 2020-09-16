@@ -11,7 +11,7 @@ import java.util.List;
  * Primitives and corresponding wrappers are considered identical.
  * Arrays are considered identical if element types are identical.
  */
-public class ValueLookup {
+public final class ValueLookup {
 
     /**
      * Collect all dependencies matching given id.

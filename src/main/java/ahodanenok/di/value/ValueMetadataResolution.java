@@ -15,7 +15,7 @@ import javax.inject.Provider;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class ValueMetadataResolution {
+public final class ValueMetadataResolution {
 
     private Provider<NameResolution> nameResolution;
     private Provider<StereotypeResolution> stereotypeResolution;

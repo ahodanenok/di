@@ -1,6 +1,6 @@
 package ahodanenok.di.util;
 
-public class Pair<K, V> { //implements Map.Entry<K, V> {
+public final class Pair<K, V> { //implements Map.Entry<K, V> {
 
     private final K key;
     private final V value;

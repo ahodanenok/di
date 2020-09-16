@@ -8,7 +8,7 @@ import ahodanenok.di.qualifier.QualifierResolution;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public class InjectableMethod extends AbstractInjectable<Object> {
+public final class InjectableMethod extends AbstractInjectable<Object> {
 
     private final Method method;
 

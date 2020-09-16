@@ -1,22 +1,15 @@
 package ahodanenok.di.profile;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 // todo: implement profiles expression evaluation
-public class ProfileMatcher {
+public final class ProfileMatcher {
 
-    public static final ProfileMatcher ALL = new ProfileMatcher(Collections.emptySet()) {
-        @Override
-        public boolean matches(String profilesCondition) {
-            return true;
-        }
-    };
-
-    private Set<String> profiles;
+    private final Set<String> profiles;
 
     public ProfileMatcher(Set<String> profiles) {
-        this.profiles = profiles;
+        this.profiles = new HashSet<>(profiles);
     }
 
     public boolean matches(String profilesCondition) {

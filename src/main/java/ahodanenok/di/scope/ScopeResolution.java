@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Resolves element scope by inspecting its annotations.
  * Annotation marked with meta-annotation {@link Scope} is the scope of an element.
  */
-public class ScopeResolution {
+public final class ScopeResolution {
 
     private final Provider<StereotypeResolution> stereotypeResolution;
 

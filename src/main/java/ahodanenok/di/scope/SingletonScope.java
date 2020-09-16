@@ -12,9 +12,9 @@ import java.util.Map;
 /**
  * @see Singleton
  */
-public class SingletonScope implements Scope {
+public final class SingletonScope implements Scope {
 
-    private Map<Value<?>, Object> instances;
+    private final Map<Value<?>, Object> instances;
 
     public SingletonScope() {
         this.instances = new HashMap<>();

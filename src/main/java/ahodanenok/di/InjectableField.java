@@ -8,7 +8,7 @@ import ahodanenok.di.qualifier.QualifierResolution;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class InjectableField extends AbstractInjectable<Object> {
+public final class InjectableField extends AbstractInjectable<Object> {
 
     private final Field field;
 

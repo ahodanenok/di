@@ -9,8 +9,7 @@ import java.util.Map;
 // todo: support for PostConstruct, PreDestroy
 public final class InvocationContextImpl implements InvocationContext {
 
-    // todo: final
-    private AroundConstruct<?> aroundConstruct;
+    private final AroundConstruct<?> aroundConstruct;
 
     public InvocationContextImpl(AroundConstruct<?> aroundConstruct) {
         this.aroundConstruct = aroundConstruct;

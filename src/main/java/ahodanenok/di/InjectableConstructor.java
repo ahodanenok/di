@@ -9,9 +9,9 @@ import ahodanenok.di.qualifier.QualifierResolution;
 import java.lang.reflect.Constructor;
 import java.util.function.Consumer;
 
-public class InjectableConstructor<T> extends AbstractInjectable<T> {
+public final class InjectableConstructor<T> extends AbstractInjectable<T> {
 
-    private Constructor<? extends T> constructor;
+    private final Constructor<? extends T> constructor;
     private Consumer<AroundConstruct<T>> onConstruct;
 
     public InjectableConstructor(DIContainer container, Constructor<? extends T> constructor) {

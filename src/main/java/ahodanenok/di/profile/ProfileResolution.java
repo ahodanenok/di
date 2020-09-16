@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.StringJoiner;
 
 // todo: profiles from stereotypes
-public class ProfileResolution {
+public final class ProfileResolution {
 
     public String resolve(Class<?> clazz) {
         return resolveFromElement(clazz);

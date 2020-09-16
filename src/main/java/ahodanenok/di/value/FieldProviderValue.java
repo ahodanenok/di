@@ -8,7 +8,7 @@ import javax.inject.Provider;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class FieldProviderValue<T> extends AbstractValue<T> {
+public final class FieldProviderValue<T> extends AbstractValue<T> {
 
     private final Field field;
 

@@ -9,10 +9,10 @@ import javax.inject.Provider;
 import java.lang.reflect.Method;
 
 // todo: @Disposes method for created instance
-public class MethodProviderValue<T> extends AbstractValue<T> {
+public final class MethodProviderValue<T> extends AbstractValue<T> {
 
-    private ValueSpecifier<?> methodInstanceId;
-    private Method method;
+    private final ValueSpecifier<?> methodInstanceId;
+    private final Method method;
 
     private Events events;
 

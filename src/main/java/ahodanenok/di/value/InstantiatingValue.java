@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InstantiatingValue<T> extends AbstractValue<T> {
+public final class InstantiatingValue<T> extends AbstractValue<T> {
 
     private final Class<? extends T> instanceClass;
     private InjectableConstructor<? extends T> targetConstructor;

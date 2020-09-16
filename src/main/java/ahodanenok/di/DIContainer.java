@@ -39,19 +39,19 @@ import java.util.stream.Collectors;
  */
 public final class DIContainer implements AutoCloseable {
 
-    private Map<ScopeIdentifier, Scope> scopes;
+    private final Map<ScopeIdentifier, Scope> scopes;
 
-    private List<Value<?>> values;
-    private List<ManagedValue> managedValues;
-    private ValueLookup valueLookup;
+    private final List<Value<?>> values;
+    private final List<ManagedValue> managedValues;
+    private final ValueLookup valueLookup;
 
-    private List<Value<?>> interceptors;
-    private InterceptorLookup interceptorLookup;
+    private final List<Value<?>> interceptors;
+    private final InterceptorLookup interceptorLookup;
 
     private Map<Member, InterceptorChain> resolvedInterceptorChains;
 
     private InjectionPoint currentInjectionPoint;
-    private LinkedList<InjectionPoint> injectionPoints;
+    private final LinkedList<InjectionPoint> injectionPoints;
 
     private Set<String> activeProfiles;
 

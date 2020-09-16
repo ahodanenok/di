@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 // todo: think about collapsing resolveBindings for member elements to resolveBindings(Member)
-public class InterceptorMetadataResolution {
+public final class InterceptorMetadataResolution {
 
     private final Provider<StereotypeResolution> stereotypeResolution;
 

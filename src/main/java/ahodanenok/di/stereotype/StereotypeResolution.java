@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
-public class StereotypeResolution {
+public final class StereotypeResolution {
 
     /**
      * Returns stereotypes declared for a class

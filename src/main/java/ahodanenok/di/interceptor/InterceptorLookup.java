@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 // todo: check if container could be injected, so there is no need to pass it as argument to lookup
-public class InterceptorLookup {
+public final class InterceptorLookup {
 
     public List<Value<?>> lookup(DIContainer container, Value<?> interceptedValue, List<Value<?>> interceptors) {
         // todo: later provider for metadata resolution

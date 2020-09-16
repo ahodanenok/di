@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class InterceptorChain {
+public final class InterceptorChain {
 
-    private InvocationContext context;
-    private List<Function<InvocationContext, Object>> interceptors;
+    private final InvocationContext context;
+    private final List<Function<InvocationContext, Object>> interceptors;
 
     public InterceptorChain(InvocationContext context) {
         this.context = context;

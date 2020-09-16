@@ -5,7 +5,7 @@ import ahodanenok.di.value.Value;
 /**
  * @see NotScoped
  */
-public class DefaultScope implements Scope {
+public final class DefaultScope implements Scope {
 
     @Override
     public ScopeIdentifier id() {

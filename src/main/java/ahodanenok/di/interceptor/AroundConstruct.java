@@ -6,11 +6,11 @@ import java.util.function.Function;
 
 public final class AroundConstruct<T> {
 
-    private Constructor<? extends T> constructor;
+    private final Constructor<? extends T> constructor;
     private Object[] args;
     private T instance;
 
-    private Function<Object[], T> proceedFunction;
+    private final Function<Object[], T> proceedFunction;
 
     public AroundConstruct(Constructor<? extends T> constructor, Object[] args, Function<Object[], T> proceedFunction) {
         this.constructor = constructor;

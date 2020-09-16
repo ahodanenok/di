@@ -14,10 +14,10 @@ import javax.inject.Provider;
  *
  * @param <T> type of the value
  */
-public class InstanceValue<T> extends AbstractValue<T> {
+public final class InstanceValue<T> extends AbstractValue<T> {
 
-    private Class<? extends T> instanceClass;
-    private Provider<? extends T> provider;
+    private final Class<? extends T> instanceClass;
+    private final Provider<? extends T> provider;
 
     @SuppressWarnings("unchecked") // instance is a subclass of T
     public <V extends T> InstanceValue(V instance) {

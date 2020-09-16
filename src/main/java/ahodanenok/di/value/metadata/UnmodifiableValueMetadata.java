@@ -6,9 +6,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Set;
 
-public class UnmodifiableValueMetadata extends MutableValueMetadata {
+public final class UnmodifiableValueMetadata extends MutableValueMetadata {
 
-    private MutableValueMetadata metadata;
+    private final MutableValueMetadata metadata;
 
     public UnmodifiableValueMetadata(MutableValueMetadata metadata) {
         this.metadata = metadata;

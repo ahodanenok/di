@@ -6,7 +6,7 @@ import ahodanenok.di.value.metadata.MutableValueMetadata;
 
 import javax.inject.Provider;
 
-public class ProviderValue<T> extends AbstractValue<T> {
+public final class ProviderValue<T> extends AbstractValue<T> {
 
     private final Value<? extends Provider<? extends T>> providerValue;
 

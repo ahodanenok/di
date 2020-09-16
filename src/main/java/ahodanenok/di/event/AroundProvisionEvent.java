@@ -3,7 +3,7 @@ package ahodanenok.di.event;
 import ahodanenok.di.interceptor.AroundProvision;
 import ahodanenok.di.value.Value;
 
-public class AroundProvisionEvent implements Event {
+public final class AroundProvisionEvent implements Event {
 
     private final AroundProvision aroundProvision;
     private final Value<?> applicant;

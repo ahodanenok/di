@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 // todo: move default name generation to a separate strategy
-public class NameResolution {
+public final class NameResolution {
 
     private final Provider<StereotypeResolution> stereotypeResolution;
 

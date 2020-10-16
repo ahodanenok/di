@@ -26,7 +26,6 @@ public final class InjectableConstructor<T> extends AbstractInjectable<T> {
     @Override
     public T inject(T instance) {
 
-        // todo: handle parameter annotations
         // todo: handle generic types
 
         Object[] args = new Object[constructor.getParameterCount()];
@@ -38,7 +37,6 @@ public final class InjectableConstructor<T> extends AbstractInjectable<T> {
         int paramCount = constructor.getParameterCount();
         while (i < paramCount) {
             InjectionPoint injectionPoint = new InjectionPoint(constructor, i);
-//            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(constructor, i));
             injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(constructor.getParameters()[i]));
             if (onProvision != null) {
                 int idx = i;

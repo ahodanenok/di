@@ -9,8 +9,7 @@ import javax.inject.Provider;
 import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,15 +28,19 @@ public final class ScopeResolution {
         this.stereotypeResolution = stereotypeResolution;
     }
 
-    public ScopeIdentifier resolve(Class<?> clazz) {
-        return resolve(clazz, ScopeIdentifier.NOT_SCOPED);
+    public ScopeIdentifier resolve(AnnotatedElement element, ScopeIdentifier defaultScope) {
+        if (element instanceof Class) {
+            return resolveForClass((Class<?>) element, defaultScope);
+        } else {
+            return resolveForElement(element, defaultScope);
+        }
     }
 
     /**
      * Determine scope of the instances of given class.
      * @param defaultScope returned if scope wasn't resolved
      */
-    public ScopeIdentifier resolve(Class<?> clazz, ScopeIdentifier defaultScope) {
+    private ScopeIdentifier resolveForClass(Class<?> clazz, ScopeIdentifier defaultScope) {
 
         ScopeIdentifier scope = null;
         Class<?> currentClass = clazz;
@@ -79,58 +82,18 @@ public final class ScopeResolution {
         }
     }
 
-    public ScopeIdentifier resolve(Method method) {
-        return resolve(method, ScopeIdentifier.NOT_SCOPED);
-    }
-
-    /**
-     * Determine scope of the instances created by given method
-     * @param defaultScope returned if scope wasn't resolved
-     */
-    public ScopeIdentifier resolve(Method method, ScopeIdentifier defaultScope) {
-        Set<Annotation> scopes = collect(method.getDeclaredAnnotations());
+    private ScopeIdentifier resolveForElement(AnnotatedElement element, ScopeIdentifier defaultScope) {
+        Set<Annotation> scopes = collect(element.getDeclaredAnnotations());
         if (scopes.size() > 1) {
-            throw new ConfigurationException("Multiple scopes are declared for the method " + method + ": " + scopes);
+            throw new ConfigurationException("Multiple scopes are declared for the element " + element + ": " + scopes);
         }
 
         if (scopes.size() == 1) {
             return ScopeIdentifier.of(scopes.iterator().next());
         } else {
-            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(method));
+            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(element));
             if (s.size() > 1) {
-                throw new ConfigurationException("Multiple scopes are declared on stereotypes for the class " + method + ": " + s);
-            }
-
-            if (s.size() == 1) {
-                return s.iterator().next();
-            }
-
-
-            return defaultScope;
-        }
-    }
-
-    public ScopeIdentifier resolve(Field field) {
-        return resolve(field, ScopeIdentifier.NOT_SCOPED);
-    }
-
-    /**
-     * Determine scope of the instances in the given field
-     * todo: why do i need resolve scope for instances in fields, don't they singletons?
-     * @param defaultScope returned if scope wasn't resolved
-     */
-    public ScopeIdentifier resolve(Field field, ScopeIdentifier defaultScope) {
-        Set<Annotation> scopes = collect(field.getDeclaredAnnotations());
-        if (scopes.size() > 1) {
-            throw new ConfigurationException("Multiple scopes are declared for the field " + field + ": " + scopes);
-        }
-
-        if (scopes.size() == 1) {
-            return ScopeIdentifier.of(scopes.iterator().next());
-        } else {
-            Set<ScopeIdentifier> s = scopesFromStereotypes(stereotypeResolution.get().resolve(field));
-            if (s.size() > 1) {
-                throw new ConfigurationException("Multiple scopes are declared on stereotypes for the class " + field + ": " + s);
+                throw new ConfigurationException("Multiple scopes are declared on stereotypes for the class " + element + ": " + s);
             }
 
             if (s.size() == 1) {

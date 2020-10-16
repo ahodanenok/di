@@ -38,7 +38,8 @@ public final class InjectableConstructor<T> extends AbstractInjectable<T> {
         int paramCount = constructor.getParameterCount();
         while (i < paramCount) {
             InjectionPoint injectionPoint = new InjectionPoint(constructor, i);
-            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(constructor, i));
+//            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(constructor, i));
+            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(constructor.getParameters()[i]));
             if (onProvision != null) {
                 int idx = i;
                 onProvision.accept(new AroundProvision(injectionPoint, arg -> {

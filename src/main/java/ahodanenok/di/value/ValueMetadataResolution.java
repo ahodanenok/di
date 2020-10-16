@@ -12,8 +12,7 @@ import ahodanenok.di.value.metadata.MutableValueMetadata;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 
 public final class ValueMetadataResolution {
 
@@ -48,80 +47,32 @@ public final class ValueMetadataResolution {
         this.interceptorMetadataResolution = interceptorMetadataResolution;
     }
 
-    public MutableValueMetadata resolve(Class<?> clazz) {
-
+    public MutableValueMetadata resolve(AnnotatedElement element) {
         MutableValueMetadata metadata = new MutableValueMetadata();
-        metadata.setName(nameResolution.get().resolve(clazz));
-        metadata.setQualifiers(qualifierResolution.get().resolve(clazz));
-        metadata.setScope(scopeResolution.get().resolve(clazz, ScopeIdentifier.NOT_SCOPED));
-        metadata.setStereotypes(stereotypeResolution.get().resolve(clazz));
-        metadata.setPrimary(clazz.isAnnotationPresent(Primary.class)
+        metadata.setName(nameResolution.get().resolve(element));
+        metadata.setQualifiers(qualifierResolution.get().resolve(element));
+        metadata.setScope(scopeResolution.get().resolve(element, ScopeIdentifier.NOT_SCOPED));
+        metadata.setStereotypes(stereotypeResolution.get().resolve(element));
+        metadata.setPrimary(element.isAnnotationPresent(Primary.class)
                 || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Primary.class)));
-        metadata.setDefault(clazz.isAnnotationPresent(Default.class)
+        metadata.setDefault(element.isAnnotationPresent(Default.class)
                 || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Default.class)));
 
-        Eager eagerAnnotation = clazz.getAnnotation(Eager.class);
+        Eager eagerAnnotation = element.getAnnotation(Eager.class);
         if (eagerAnnotation != null) {
             metadata.setEager(true);
             metadata.setInitializationPhase(eagerAnnotation.phase());
         }
 
-        Priority p = clazz.getAnnotation(Priority.class);
+        Priority p = element.getAnnotation(Priority.class);
         if (p != null) {
             metadata.setPriority(p.value());
         }
 
-        metadata.setInterceptor(interceptorMetadataResolution.get().isInterceptor(clazz));
-        metadata.setInterceptorBindings(interceptorMetadataResolution.get().resolveBindings(clazz));
-
-        return metadata;
-    }
-
-    public MutableValueMetadata resolve(Method method) {
-        MutableValueMetadata metadata = new MutableValueMetadata();
-        metadata.setName(nameResolution.get().resolve(method));
-        metadata.setQualifiers(qualifierResolution.get().resolve(method));
-        metadata.setScope(scopeResolution.get().resolve(method, ScopeIdentifier.NOT_SCOPED));
-        metadata.setStereotypes(stereotypeResolution.get().resolve(method));
-        metadata.setPrimary(method.isAnnotationPresent(Primary.class)
-                || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Primary.class)));
-        metadata.setDefault(method.isAnnotationPresent(Default.class)
-                || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Default.class)));
-
-        Eager eagerAnnotation = method.getAnnotation(Eager.class);
-        if (eagerAnnotation != null) {
-            metadata.setEager(true);
-            metadata.setInitializationPhase(eagerAnnotation.phase());
+        if (element instanceof Class) {
+            metadata.setInterceptor(interceptorMetadataResolution.get().isInterceptor((Class<?>) element));
         }
-
-        Priority p = method.getAnnotation(Priority.class);
-        if (p != null) {
-            metadata.setPriority(p.value());
-        }
-
-        metadata.setInterceptorBindings(interceptorMetadataResolution.get().resolveBindings(method));
-
-        return metadata;
-    }
-
-    public MutableValueMetadata resolve(Field field) {
-        MutableValueMetadata metadata = new MutableValueMetadata();
-        metadata.setName(nameResolution.get().resolve(field));
-        metadata.setQualifiers(qualifierResolution.get().resolve(field));
-        metadata.setScope(scopeResolution.get().resolve(field, ScopeIdentifier.NOT_SCOPED));
-        metadata.setStereotypes(stereotypeResolution.get().resolve(field));
-        metadata.setPrimary(field.isAnnotationPresent(Primary.class)
-                || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Primary.class)));
-        metadata.setDefault(field.isAnnotationPresent(Default.class)
-                || metadata.getStereotypes().stream().anyMatch(s -> s.annotationType().isAnnotationPresent(Default.class)));
-
-        Eager eagerAnnotation = field.getAnnotation(Eager.class);
-        if (eagerAnnotation != null) {
-            metadata.setEager(true);
-            metadata.setInitializationPhase(eagerAnnotation.phase());
-        }
-
-        metadata.setInterceptorBindings(interceptorMetadataResolution.get().resolveBindings(field));
+        metadata.setInterceptorBindings(interceptorMetadataResolution.get().resolveBindings(element));
 
         return metadata;
     }

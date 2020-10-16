@@ -6,35 +6,7 @@ import java.util.*;
 
 public final class StereotypeResolution {
 
-    /**
-     * Returns stereotypes declared for a class
-     */
-    public Set<Annotation> resolve(Class<?> clazz) {
-        return resolveInternal(clazz);
-    }
-
-    /**
-     * Returns stereotypes declared for a field
-     */
-    public Set<Annotation> resolve(Field field) {
-        return resolveInternal(field);
-    }
-
-    /**
-     * Returns stereotypes declared for a method
-     */
-    public Set<Annotation> resolve(Method method) {
-        return resolveInternal(method);
-    }
-
-    /**
-     * Returns stereotypes declared for a constructor
-     */
-    public Set<Annotation> resolve(Constructor<?> constructor) {
-        return resolveInternal(constructor);
-    }
-
-    private Set<Annotation> resolveInternal(AnnotatedElement element) {
+    public Set<Annotation> resolve(AnnotatedElement element) {
         Set<Annotation> result = new HashSet<>();
         LinkedList<Annotation> queue = Arrays.stream(element.getAnnotations())
                 .filter(a -> a.annotationType().isAnnotationPresent(Stereotype.class))

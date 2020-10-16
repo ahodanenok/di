@@ -27,7 +27,19 @@ public final class NameResolution {
         this.stereotypeResolution = stereotypeResolution;
     }
 
-    public String resolve(Class<?> clazz) {
+    public String resolve(AnnotatedElement element) {
+        if (element instanceof Class) {
+            return resolve((Class<?>) element);
+        } else if (element instanceof Field) {
+            return resolve((Field) element);
+        } else if (element instanceof Method) {
+            return resolve((Method) element);
+        } else {
+            throw new IllegalStateException("Name resolution for " + element + " isn't supported");
+        }
+    }
+
+    private String resolve(Class<?> clazz) {
         return named(clazz, () -> stereotypeResolution.get().resolve(clazz), () -> {
             String name = clazz.getSimpleName();
             // todo: check how to use code points
@@ -35,11 +47,11 @@ public final class NameResolution {
         });
     }
 
-    public String resolve(Field field) {
+    private String resolve(Field field) {
         return named(field, () -> stereotypeResolution.get().resolve(field), field::getName);
     }
 
-    public String resolve(Method method) {
+    private String resolve(Method method) {
         return named(method, () -> stereotypeResolution.get().resolve(method), () -> {
             String name = method.getName();
             if (name.length() > 2

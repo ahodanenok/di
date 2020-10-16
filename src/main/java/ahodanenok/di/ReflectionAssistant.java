@@ -102,16 +102,22 @@ public final class ReflectionAssistant {
     }
 
     @SafeVarargs
-    public static Stream<? extends Annotation> annotations(AnnotatedElement annotatedElement, AnnotationPresence presence, Class<? extends Annotation>... annotationTypes) {
+    public static Stream<? extends Annotation> annotations(AnnotatedElement element, AnnotationPresence presence, Class<? extends Annotation>... annotationTypes) {
+
+        if (element instanceof Parameter) {
+            Parameter p = (Parameter) element;
+            return parameterAnnotations(p.getDeclaringExecutable(), getParameterIndex(p), presence);
+        }
+
         Stream<Annotation> stream = Stream.empty();
         if (presence == AnnotationPresence.DIRECTLY) {
-            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotations()));
+            stream = Stream.concat(stream, Arrays.stream(element.getDeclaredAnnotations()));
             if (annotationTypes.length > 0) {
                 List<Class<?>> types = Arrays.asList(annotationTypes);
                 stream = stream.filter(a -> types.contains(a.annotationType()));
             }
         } else if (presence == AnnotationPresence.PRESENT) {
-            stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotations()));
+            stream = Stream.concat(stream, Arrays.stream(element.getAnnotations()));
             if (annotationTypes.length > 0) {
                 List<Class<?>> types = Arrays.asList(annotationTypes);
                 stream = stream.filter(a -> types.contains(a.annotationType()));
@@ -121,22 +127,22 @@ public final class ReflectionAssistant {
             if (annotationTypes.length > 0) {
                 types = new HashSet<>(Arrays.asList(annotationTypes));
             } else {
-                types = annotationTypes(annotatedElement.getDeclaredAnnotations());
+                types = annotationTypes(element.getDeclaredAnnotations());
             }
 
             for (Class<? extends Annotation> type : types) {
-                stream = Stream.concat(stream, Arrays.stream(annotatedElement.getDeclaredAnnotationsByType(type)));
+                stream = Stream.concat(stream, Arrays.stream(element.getDeclaredAnnotationsByType(type)));
             }
         } else if (presence == AnnotationPresence.ASSOCIATED) {
             Set<Class<? extends Annotation>> types;
             if (annotationTypes.length > 0) {
                 types = new HashSet<>(Arrays.asList(annotationTypes));
             } else {
-                types = annotationTypes(annotatedElement.getAnnotations());
+                types = annotationTypes(element.getAnnotations());
             }
 
             for (Class<? extends Annotation> type : types) {
-                stream = Stream.concat(stream, Arrays.stream(annotatedElement.getAnnotationsByType(type)));
+                stream = Stream.concat(stream, Arrays.stream(element.getAnnotationsByType(type)));
             }
         } else {
             throw new IllegalArgumentException("unknown presence: " + presence);
@@ -354,5 +360,18 @@ public final class ReflectionAssistant {
         }
 
         return false;
+    }
+
+    private static int getParameterIndex(Parameter p) {
+        try {
+            Field f = p.getClass().getDeclaredField("index");
+            if (!f.isAccessible()) {
+                f.setAccessible(true);
+            }
+
+            return (Integer) f.get(p);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new IllegalStateException("Can't get index from parameter", e);
+        }
     }
 }

@@ -45,7 +45,7 @@ public class ScopeTest {
     public void testNotScopedReturnsNewInstanceEveryTime() {
         class Test { }
 
-        ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
+        ProviderValue<Test> v = new ProviderValue<>(Test.class, () -> new Test());
 
         DefaultScope scope = new DefaultScope();
         Test a = scope.get(v);
@@ -63,7 +63,7 @@ public class ScopeTest {
     public void testSingletonReturnsSameInstanceEveryTime() {
         class Test { }
 
-        ProviderValue<Test> v = new ProviderValue<>(Test.class, Test::new);
+        ProviderValue<Test> v = new ProviderValue<>(Test.class, () -> new Test());
 
         SingletonScope scope = new SingletonScope();
         Test a = scope.get(v);
@@ -75,7 +75,7 @@ public class ScopeTest {
     public void testClassScopeResolutionNoScopeDeclared() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedClass.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedClass.class, ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
                 resolution.resolve(NotScopedClass.class, ScopeIdentifier.of(NotScoped.class)));
     }
@@ -84,7 +84,7 @@ public class ScopeTest {
     public void testClassScopeResolutionNotScoped() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedByAnnotation.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedByAnnotation.class, ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
                 resolution.resolve(NotScopedByAnnotation.class, ScopeIdentifier.of(Singleton.class)));
     }
@@ -93,7 +93,7 @@ public class ScopeTest {
     public void testClassScopeResolutionSingleton() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonClass.class));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonClass.class, ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(Singleton.class),
                 resolution.resolve(SingletonClass.class, ScopeIdentifier.of(NotScoped.class)));
     }
@@ -102,7 +102,7 @@ public class ScopeTest {
     public void testMethodScopeResolutionSingleton() throws Exception {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonMethod.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(Singleton.class), resolution.resolve(SingletonMethod.class.getDeclaredMethod("method"), ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(Singleton.class),
                 resolution.resolve(
                         SingletonMethod.class.getDeclaredMethod("method"),
@@ -113,7 +113,7 @@ public class ScopeTest {
     public void testMethodScopeResolutionNotScoped() throws Exception {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedMethod.class.getDeclaredMethod("method")));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(NotScopedMethod.class.getDeclaredMethod("method"), ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(NotScoped.class),
                 resolution.resolve(
                         NotScopedMethod.class.getDeclaredMethod("method"),
@@ -132,7 +132,7 @@ public class ScopeTest {
     public void testClassScopeResolutionInherited() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ClassWithInheritedScope.class));
+        assertEquals(ScopeIdentifier.of(S1.class), resolution.resolve(ClassWithInheritedScope.class, ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(S1.class),
                 resolution.resolve(ClassWithInheritedScope.class, ScopeIdentifier.of(NotScoped.class)));
     }
@@ -141,14 +141,14 @@ public class ScopeTest {
     public void testClassScopeResolutionErrorIfMultipleScopesDeclared() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertThrows(ConfigurationException.class, () -> resolution.resolve(ClassWithMultipleInheritedScopes.class));
+        assertThrows(ConfigurationException.class, () -> resolution.resolve(ClassWithMultipleInheritedScopes.class, ScopeIdentifier.NOT_SCOPED));
     }
 
     @Test
     public void testClassScopeResolutionIgnoringNotInheritedScope() {
         DIContainer container = DIContainer.builder().build();
         ScopeResolution resolution = container.instance(ScopeResolution.class);
-        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(ClassIgnoringNotInheritedScope.class));
+        assertEquals(ScopeIdentifier.of(NotScoped.class), resolution.resolve(ClassIgnoringNotInheritedScope.class, ScopeIdentifier.NOT_SCOPED));
         assertEquals(ScopeIdentifier.of(Singleton.class),
                 resolution.resolve(ClassIgnoringNotInheritedScope.class, ScopeIdentifier.of(Singleton.class)));
     }

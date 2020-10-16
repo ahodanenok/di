@@ -31,7 +31,7 @@ public final class InjectableMethod extends AbstractInjectable<Object> {
         Object[] args = new Object[method.getParameterCount()];
         for (int i = 0; i < method.getParameterCount(); i++) {
             InjectionPoint injectionPoint = new InjectionPoint(method, i);
-            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(method, i));
+            injectionPoint.setQualifiers(container.instance(QualifierResolution.class).resolve(method.getParameters()[i]));
             if (onProvision != null) {
                 int idx = i;
                 onProvision.accept(new AroundProvision(injectionPoint, arg -> {

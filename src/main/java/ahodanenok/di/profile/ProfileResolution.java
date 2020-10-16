@@ -2,29 +2,14 @@ package ahodanenok.di.profile;
 
 import ahodanenok.di.exception.ConfigurationException;
 
-import java.awt.font.TextHitInfo;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.util.StringJoiner;
 
 // todo: profiles from stereotypes
 public final class ProfileResolution {
 
-    public String resolve(Class<?> clazz) {
-        return resolveFromElement(clazz);
-    }
-
-    public String resolve(Field field) {
-        return resolveFromElement(field);
-    }
-
-    public String resolve(Method method) {
-        return resolveFromElement(method);
-    }
-
-    private String resolveFromElement(AnnotatedElement annotatedElement) {
+    public String resolve(AnnotatedElement annotatedElement) {
         Profile profile = annotatedElement.getAnnotation(Profile.class);
         if (profile == null) {
             return null;

@@ -31,24 +31,13 @@ public final class InterceptorMetadataResolution {
         return clazz.isAnnotationPresent(Interceptor.class);
     }
 
-    public Set<Annotation> resolveBindings(Constructor<?> constructor) {
-        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(constructor)), () -> stereotypeResolution.get().resolve(constructor));
-        bindings.addAll(resolveBindings(constructor.getDeclaringClass()));
+    public Set<Annotation> resolveBindings(AnnotatedElement element) {
+        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(element)), () -> stereotypeResolution.get().resolve(element));
+        if (element instanceof Executable) {
+            bindings.addAll(resolveBindings(((Executable) element).getDeclaringClass()));
+        }
+
         return bindings;
-    }
-
-    public Set<Annotation> resolveBindings(Method method) {
-        Set<Annotation> bindings = resolveBindingsFromQueue(new LinkedList<>(bindings(method)), () -> stereotypeResolution.get().resolve(method));
-        bindings.addAll(resolveBindings(method.getDeclaringClass()));
-        return bindings;
-    }
-
-    public Set<Annotation> resolveBindings(Field field) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(field)), () -> stereotypeResolution.get().resolve(field));
-    }
-
-    public Set<Annotation> resolveBindings(Class<?> clazz) {
-        return resolveBindingsFromQueue(new LinkedList<>(bindings(clazz)), () -> stereotypeResolution.get().resolve(clazz));
     }
 
     private Set<Annotation> resolveBindingsFromQueue(LinkedList<Annotation> queue, Supplier<Set<Annotation>> stereotypes) {

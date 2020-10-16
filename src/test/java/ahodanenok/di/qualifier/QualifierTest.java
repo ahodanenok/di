@@ -1,7 +1,9 @@
 package ahodanenok.di.qualifier;
 
+import ahodanenok.di.ReflectionAssistant;
 import ahodanenok.di.qualifier.classes.*;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
@@ -128,14 +130,14 @@ public class QualifierTest {
     public void testMethodParameterWithNoQualifiers() throws Exception {
         Method method = MethodQualifiers.class.getDeclaredMethod("noParameterQualifiers", String.class);
         QualifierResolution resolution = new QualifierResolution();
-        assertTrue(resolution.resolve(method, 0).isEmpty());
+        assertTrue(resolution.resolve(method.getParameters()[0]).isEmpty());
     }
 
     @Test
     public void testMethodParameterWithSingleQualifier() throws Exception {
         Method method = MethodQualifiers.class.getDeclaredMethod("singleParameterQualifier", String.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(method, 0);
+        Set<Annotation> qualifiers = resolution.resolve(method.getParameters()[0]);
         assertEquals(1, qualifiers.size());
         assertEquals(method.getParameterAnnotations()[0][0], qualifiers.iterator().next());
     }
@@ -143,19 +145,19 @@ public class QualifierTest {
     public void testMethodParameterWithMultipleQualifiers() throws Exception {
         Method method = MethodQualifiers.class.getDeclaredMethod("multipleParameterQualifiers", String.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(method, 0);
+        Set<Annotation> qualifiers = resolution.resolve(method.getParameters()[0]);
         assertEquals(2, qualifiers.size());
         assertTrue(qualifiers.containsAll(Arrays.asList(
                 method.getParameterAnnotations()[0][0],
                 method.getParameterAnnotations()[0][1])));
     }
 
-    @Test
-    public void testNotExistingMethodParameterQualifiers() throws Exception {
-        Method method = MethodQualifiers.class.getDeclaredMethod("noQualifiers");
-        QualifierResolution resolution = new QualifierResolution();
-        assertThrows(IllegalArgumentException.class, () -> resolution.resolve(method, 0));
-    }
+//    @Test
+//    public void testNotExistingMethodParameterQualifiers() throws Exception {
+//        Method method = MethodQualifiers.class.getDeclaredMethod("noQualifiers");
+//        QualifierResolution resolution = new QualifierResolution();
+//        assertThrows(IllegalArgumentException.class, () -> resolution.resolve(method, 0));
+//    }
 
     class A {
         @Inject
@@ -166,9 +168,12 @@ public class QualifierTest {
     public void testConstructorQualifiersForInnerClass() throws Exception {
         Constructor<?> constructor = A.class.getDeclaredConstructor(QualifierTest.class, int.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(constructor, 1);
+        Set<Annotation> qualifiers = resolution.resolve(constructor.getParameters()[1]);
         assertEquals(1, qualifiers.size());
-        assertEquals(constructor.getParameterAnnotations()[1][0], qualifiers.iterator().next());
+//        assertEquals(constructor.getParameterAnnotations()[1][0], qualifiers.iterator().next());
+        assertEquals(
+                ReflectionAssistant.parameterAnnotations(constructor, 1, ReflectionAssistant.AnnotationPresence.DIRECTLY).findFirst().orElse(null),
+                qualifiers.iterator().next());
     }
 
     @Test
@@ -211,14 +216,14 @@ public class QualifierTest {
     public void testConstructorParameterNoQualifiers() throws Exception {
         Constructor<?> constructor = ConstructorNoQualifiers.class.getDeclaredConstructor(int.class);
         QualifierResolution resolution = new QualifierResolution();
-        assertTrue(resolution.resolve(constructor, 0).isEmpty());
+        assertTrue(resolution.resolve(constructor.getParameters()[0]).isEmpty());
     }
 
     @Test
     public void testConstructorParameterSingleQualifiers() throws Exception {
         Constructor<?> constructor = ConstructorSingleQualifier.class.getDeclaredConstructor(int.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(constructor, 0);
+        Set<Annotation> qualifiers = resolution.resolve(constructor.getParameters()[0]);
         assertEquals(1, qualifiers.size());
         assertEquals(constructor.getParameterAnnotations()[0][0], qualifiers.iterator().next());
     }
@@ -227,7 +232,7 @@ public class QualifierTest {
     public void testConstructorParameterMultipleQualifiers() throws Exception {
         Constructor<?> constructor = ConstructorMultipleQualifiers.class.getDeclaredConstructor(int.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(constructor, 0);
+        Set<Annotation> qualifiers = resolution.resolve(constructor.getParameters()[0]);
         assertEquals(2, qualifiers.size());
         assertTrue(qualifiers.contains(constructor.getParameterAnnotations()[0][0]));
         assertTrue(qualifiers.contains(constructor.getParameterAnnotations()[0][1]));
@@ -237,16 +242,16 @@ public class QualifierTest {
     public void testConstructorParameterRepeatableQualifier() throws Exception {
         Constructor<?> constructor = ConstructorRepeatableQualifier.class.getDeclaredConstructor(int.class);
         QualifierResolution resolution = new QualifierResolution();
-        Set<Annotation> qualifiers = resolution.resolve(constructor, 0);
+        Set<Annotation> qualifiers = resolution.resolve(constructor.getParameters()[0]);
         assertEquals(2, qualifiers.size());
         assertTrue(qualifiers.containsAll(Arrays.asList(constructor.getParameters()[0].getAnnotationsByType(R.class))));
     }
 
-    @Test
-    public void testNotExistingQualifierParameterQualifiers() throws Exception {
-        Constructor<?> constructor = ConstructorSingleQualifier.class.getDeclaredConstructor(int.class);
-
-        QualifierResolution resolution = new QualifierResolution();
-        assertThrows(IllegalArgumentException.class, () -> resolution.resolve(constructor, 1));
-    }
+//    @Test
+//    public void testNotExistingQualifierParameterQualifiers() throws Exception {
+//        Constructor<?> constructor = ConstructorSingleQualifier.class.getDeclaredConstructor(int.class);
+//
+//        QualifierResolution resolution = new QualifierResolution();
+//        assertThrows(IllegalArgumentException.class, () -> resolution.resolve(constructor, 1));
+//    }
 }

@@ -31,7 +31,7 @@ public class MethodMetadata {
     }
 
     @InterceptStuff
-    public Object intercepted() {
+    public String intercepted() {
         return null;
     }
 
